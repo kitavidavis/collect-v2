@@ -30,9 +30,9 @@ import { ThemeProvider } from 'theme-ui';
 import Router from 'next/dist/next-server/server/router';
 import theme from 'theme';
 import SEO from 'components/seo';
-import { useUser } from 'pages/lib/hooks';
+import { useUser } from 'lib/hooks';
 import * as d3 from 'd3';
-import LoadingView from 'pages/shared/loading';
+import LoadingView from 'shared/loading';
 const useStyles = createStyles((theme) => ({
   header: {
     paddingLeft: theme.spacing.md,

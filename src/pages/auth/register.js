@@ -7,7 +7,7 @@ import Footer from 'components/footer/footer';
 import Support from 'sections/support';
 import Header from 'components/header/header';
 import { Register } from 'sections/register';
-import { useUser } from 'pages/lib/hooks';
+import { useUser } from 'lib/hooks';
 
 export default function IndexPage(){
   useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});

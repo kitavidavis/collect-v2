@@ -1,5 +1,5 @@
-import { createUser } from "pages/lib/user";
-const User = require('../models/users');
+import { createUser } from "lib/user";
+const User = require('../../models/users');
 
 export default async function signup(req, res) {
    const response = await createUser(req.body);

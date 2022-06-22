@@ -21,8 +21,8 @@ import { BsArrowRight } from 'react-icons/bs';
 import InternetBar from 'components/internet';
 import { signIn } from "next-auth/react";
 import { Router } from 'react-router-dom';
-import { useUser } from 'pages/lib/hooks';
-import { setLoginSession } from 'pages/lib/auth';
+import { useUser } from 'lib/hooks';
+import { setLoginSession } from 'lib/auth';
 
 const axios = require('axios');
 

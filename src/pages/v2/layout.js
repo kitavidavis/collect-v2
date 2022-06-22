@@ -14,10 +14,9 @@ import {
   Tab,
   Tabs
 } from '@mantine/core';
-import { HeaderComponent } from './header';
 import { ChevronDown, Man } from 'tabler-icons-react';
-import { MantineLogo } from 'pages/shared/logo';
-import { useUser } from 'pages/lib/hooks';
+import { MantineLogo } from 'shared/logo';
+import { useUser } from 'lib/hooks';
 
 const useStyles = createStyles((theme) => ({
     header: {

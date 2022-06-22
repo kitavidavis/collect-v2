@@ -8,7 +8,7 @@ import Footer from 'components/footer/footer';
 import Support from 'sections/support';
 import Header from 'components/header/header';
 import { Login } from 'sections/login';
-import { useUser } from 'pages/lib/hooks';
+import { useUser } from 'lib/hooks';
 import { useViewportSize, useScrollLock } from '@mantine/hooks';
 
 export default function IndexPage(){

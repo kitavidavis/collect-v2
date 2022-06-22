@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuthenticatedUser } from './common';
-import { APP_ROUTES } from '../../utils/constants';
+import { APP_ROUTES } from '../utils/constants';
 import Router from 'next/router';
 
 export function useUser() {
