@@ -31,7 +31,7 @@ import Router from 'next/dist/next-server/server/router';
 import theme from 'theme';
 import SEO from 'components/seo';
 import { useUser } from 'lib/hooks';
-import * as d3 from 'd3';
+import * as d3 from "d3";
 import LoadingView from 'shared/loading';
 const useStyles = createStyles((theme) => ({
   header: {
@@ -222,6 +222,7 @@ export default function Dashboard(){
       ));
 
       const createReadWriteGraph = async () => {
+        d3.select("svg").remove();
         let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
         let parseTime = d3.timeParse("%Y-%m-%d");
         data.forEach((d) => {
@@ -233,7 +234,7 @@ export default function Dashboard(){
         width =  w - margin.left - margin.right,
         height = 150 - margin.top - margin.bottom;
 
-        var svg = d3.select("#read-write-graph").append("svg").attr("width", width + margin.left + margin.right)
+        var svg1 = d3.select("#read-write-graph").append("svg").attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -242,16 +243,14 @@ export default function Dashboard(){
         var y = d3.scaleLinear().range([height, 0]);
         x.domain(d3.extent(data, (d) => { return d.date; }));
         y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg.append("g")
+        svg1.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x));
-        svg.append("g")
-        .call(d3.axisLeft(y));
 
         var valueLine = d3.line()
         .x((d) => { return x(d.date); })
         .y((d) => { return y(d.value); });
-        svg.append("path")
+        svg1.append("path")
         .data([data])
         .attr("class", "line")
         .attr("fill", "none")
@@ -261,6 +260,7 @@ export default function Dashboard(){
       }
 
       const createConnectionsGraph = async () => {
+        d3.select("svg").remove();
         let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
         let parseTime = d3.timeParse("%Y-%m-%d");
         data.forEach((d) => {
@@ -272,7 +272,7 @@ export default function Dashboard(){
         width =  w - margin.left - margin.right,
         height = 150 - margin.top - margin.bottom;
 
-        var svg = d3.select("#connections").append("svg").attr("width", width + margin.left + margin.right)
+        var svg2 = d3.select("#connections").append("svg").attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -281,16 +281,14 @@ export default function Dashboard(){
         var y = d3.scaleLinear().range([height, 0]);
         x.domain(d3.extent(data, (d) => { return d.date; }));
         y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg.append("g")
+        svg2.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x));
-        svg.append("g")
-        .call(d3.axisLeft(y));
 
         var valueLine = d3.line()
         .x((d) => { return x(d.date); })
         .y((d) => { return y(d.value); });
-        svg.append("path")
+        svg2.append("path")
         .data([data])
         .attr("class", "line")
         .attr("fill", "none")
@@ -300,6 +298,7 @@ export default function Dashboard(){
       }
 
       const createInOutGraph = async () => {
+        d3.select("svg").remove();
         let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
         let parseTime = d3.timeParse("%Y-%m-%d");
         data.forEach((d) => {
@@ -311,7 +310,7 @@ export default function Dashboard(){
         width =  w - margin.left - margin.right,
         height = 150 - margin.top - margin.bottom;
 
-        var svg = d3.select("#in-out").append("svg").attr("width", width + margin.left + margin.right)
+        var svg3 = d3.select("#in-out").append("svg").attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -320,16 +319,14 @@ export default function Dashboard(){
         var y = d3.scaleLinear().range([height, 0]);
         x.domain(d3.extent(data, (d) => { return d.date; }));
         y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg.append("g")
+        svg3.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x));
-        svg.append("g")
-        .call(d3.axisLeft(y));
 
         var valueLine = d3.line()
         .x((d) => { return x(d.date); })
         .y((d) => { return y(d.value); });
-        svg.append("path")
+        svg3.append("path")
         .data([data])
         .attr("class", "line")
         .attr("fill", "none")
@@ -339,6 +336,7 @@ export default function Dashboard(){
       }
 
       const createSizeGraph = async () => {
+        d3.select("svg").remove();
         let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
         let parseTime = d3.timeParse("%Y-%m-%d");
         data.forEach((d) => {
@@ -351,7 +349,7 @@ export default function Dashboard(){
         width =  w - margin.left - margin.right,
         height = 150 - margin.top - margin.bottom;
 
-        var svg = d3.select("#size").append("svg").attr("width", width + margin.left + margin.right)
+        var svg4 = d3.select("#size").append("svg").attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
@@ -360,16 +358,14 @@ export default function Dashboard(){
         var y = d3.scaleLinear().range([height, 0]);
         x.domain(d3.extent(data, (d) => { return d.date; }));
         y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg.append("g")
+        svg4.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x));
-        svg.append("g")
-        .call(d3.axisLeft(y));
 
         var valueLine = d3.line()
         .x((d) => { return x(d.date); })
         .y((d) => { return y(d.value); });
-        svg.append("path")
+        svg4.append("path")
         .data([data])
         .attr("class", "line")
         .attr("fill", "none")
