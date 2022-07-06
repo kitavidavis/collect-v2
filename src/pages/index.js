@@ -7,6 +7,8 @@ import Banner from 'sections/banner';
 import Header from 'components/header/header';
 import TopBar from 'components/topbar';
 import { useUser } from 'lib/hooks';
+import UltimateFeatures from 'sections/ultimate-feature';
+
 
 export default function IndexPage() {
   useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
@@ -20,6 +22,7 @@ export default function IndexPage() {
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
         <Banner />
+        <UltimateFeatures />
       </Layout>
     </ThemeProvider>
   );

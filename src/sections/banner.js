@@ -18,7 +18,7 @@ import { useRouter } from 'next/router'
 import { rgba } from 'polished';
 import Image from 'components/image';
 import Header from 'components/header/header';
-import serverRack from 'assets/images/server.png';
+import serverRack from 'assets/illustrations/444-white.png';
 import { useNavigate, Navigate } from 'react-router-dom';
 
 const Banner = () => {
@@ -66,7 +66,7 @@ const Banner = () => {
                 placeholder="Your Email Address"
               />
             </Flex>
-            <Button disabled={state.domainName === '' ? true : false}  type="submit" variant="primary" sx={styles.submit}>
+            <Button disabled={state.domainName === '' ? true : false}  type="submit" sx={styles.submit}>
               Start for free
             </Button>
             <Text as="p" sx={styles.note}>
@@ -86,7 +86,7 @@ export default Banner;
 
 const styles = {
   section: {
-    backgroundColor: 'primary',
+    backgroundColor: '#3929CB',
     pt: [17, null, null, 20, null],
     pb: [1, null, null, 7, 9],
   },
@@ -169,6 +169,7 @@ const styles = {
     mt: [4],
     minHeight: [45, null, null, 60],
     width: '100%',
+    backgroundColor: '#3929CB',
   },
   note: {
     fontStyle: 'italic',

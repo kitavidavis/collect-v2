@@ -14,20 +14,13 @@ export const menuItems = [
       },
       {
         path: '#!',
-        label: 'Customer Support',
-      },
-      {
-        path: '#!',
         label: 'About Us',
       },
       {
         path: '#!',
         label: 'Copyright',
       },
-      {
-        path: '#!',
-        label: 'Popular Products',
-      },
+
     ],
   },
   {
@@ -46,86 +39,19 @@ export const menuItems = [
         path: '#!',
         label: 'Terms & Conditions',
       },
-      {
-        path: '#!',
-        label: 'Site Map',
-      },
-      {
-        path: '#!',
-        label: 'Open Hours',
-      },
     ],
   },
-  {
-    id: 4,
-    title: 'My Account',
-    items: [
-      {
-        path: '#!',
-        label: 'Press inquiries',
-      },
-      {
-        path: '#!',
-        label: 'Social media ',
-      },
-      {
-        path: '#!',
-        label: 'directories',
-      },
-      {
-        path: '#!',
-        label: 'Images & B-roll',
-      },
-      {
-        path: '#!',
-        label: 'Permissions',
-      },
-    ],
-  },
-  {
-    id: 5,
-    title: 'Connect',
-    items: [
-      {
-        path: '#!',
-        icon: facebook,
-        label: 'Facebook',
-      },
-      {
-        path: '#!',
-        icon: twitter,
-        label: 'Twitter',
-      },
-      {
-        path: '#!',
-        icon: github,
-        label: 'Github',
-      },
-      {
-        path: '#!',
-        icon: dribbble,
-        label: 'Dribbble',
-      },
-    ],
-  },
+
 ];
 
 export const footerNav = [
   {
-    path: '#!',
+    path: '/',
     label: 'Home',
   },
   {
-    path: '#!',
-    label: 'Advertise',
-  },
-  {
-    path: '#!',
-    label: 'Supports',
-  },
-  {
-    path: '#!',
-    label: 'Marketing',
+    path: 'https://geopsyresearch.org',
+    label: 'GeoPsy Research',
   },
   {
     path: '#!',

@@ -8,16 +8,20 @@ import CallToAction from 'sections/call-to-action';
 import Widget from './widget';
 import { menuItems } from './footer.data';
 import { Fragment } from 'react';
+import serverRack from 'assets/images/blue-logo.png';
+import Image  from 'components/image';
+import { Group } from '@mantine/core';
 
 export default function Footer() {
   return (
     <Fragment>
       <Box as="footer" sx={styles.footer}>
         <Container>
-          <Box sx={styles.footerTopInner}>
+        <Group position='center'>
+        <Box sx={styles.footerTopInner}>
             <Box sx={styles.about}>
               <Box sx={styles.logo}>
-                <Logo />
+              <Image style={{height: 60}} src={serverRack} loading="lazy" alt="sever-rack" />
               </Box>
               <Box sx={styles.terms}>
                 <Link path="#!">Terms of use</Link>
@@ -28,10 +32,8 @@ export default function Footer() {
                 Copyright by {new Date().getFullYear()} GeoPsy Research, Inc
               </Text>
             </Box>
-            {menuItems.map(({ id, title, items }) => (
-              <Widget key={id} title={title} items={items} />
-            ))}
           </Box>
+        </Group>
         </Container>
       </Box>
     </Fragment>
@@ -46,7 +48,8 @@ const styles = {
   },
   footerTopInner: {
     gap: [30, null, 50, '20px 50px', 17, 50],
-    display: ['grid'],
+    display: ['flex'],
+    alignItems: 'center',
     gridTemplateColumns: [
       'repeat(2, 1fr)',
       null,

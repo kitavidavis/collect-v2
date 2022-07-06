@@ -10,7 +10,7 @@ const TopBar = () => {
     <Box as="section" sx={styles.topbar}>
       <Box sx={styles.content}>
         <Text as="span" className="caption">
-          Hi there, we are excited to announce that we are releasing a beta version of GeoPsy Collect.
+          GeoPsy Collect's plugin for QGIS is launching soon. Join the waitlist now.
         </Text>
         <Link  path="#">
           <span style={{color: 'black'}} >See more</span> <RightArrow style={{color: 'black'}}  color="black" />

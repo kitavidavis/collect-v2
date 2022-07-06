@@ -23,6 +23,7 @@ import { signIn } from "next-auth/react";
 import { Router } from 'react-router-dom';
 import { useUser } from 'lib/hooks';
 import { setLoginSession } from 'lib/auth';
+import { LogoBlue } from 'components/logo';
 const axios = require('axios');
 
 const useStyles = createStyles((theme) => ({
@@ -194,10 +195,9 @@ export function Login() {
             <Grid columns={12}>
         <Grid.Col span={4}>
         <Paper className={classes.form} radius={0} p={50}>
-        <Title order={2} className={classes.title} align="center" mt="md" mb={50}>
-          Login to your account
-        </Title>
-
+        <Group position='center' mb={25} mt={25}>
+        <LogoBlue />
+        </Group>
         <Group grow direction='column' mb="md" mt="md">
         <GoogleButton onClick={() => signIn("google")} radius="xl">Google</GoogleButton>
       </Group>

@@ -24,7 +24,6 @@ export function removeTokenCookie(res){
     })
 
     res.setHeader('Set-Cookie', cookie)
-    res.writeHead(302, { Location: '/v2/dashboard' })
 }
 
 export function parseCookies(req){

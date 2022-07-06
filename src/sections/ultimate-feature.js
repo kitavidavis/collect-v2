@@ -4,49 +4,50 @@ import { jsx, Box, Container } from 'theme-ui';
 import SectionHeading from 'components/section-heading';
 import Feature from 'components/cards/feature';
 
-import icon1 from 'assets/images/services/1.png';
-import icon2 from 'assets/images/services/2.png';
-import icon3 from 'assets/images/services/3.png';
-import icon4 from 'assets/images/services/4.png';
-import icon5 from 'assets/images/services/5.png';
-import icon6 from 'assets/images/services/6.png';
+import Wifi from 'assets/illustrations/34.png';
+import Location from 'assets/illustrations/51.png';
+import Charts from 'assets/illustrations/72.png';
+import Smart from 'assets/illustrations/443.png';
+import Integratable from 'assets/illustrations/78.png';
+import Dashboards from 'assets/illustrations/478.png';
+import { Group } from '@mantine/core';
 
 const data = [
   {
     id: 1,
-    icon: icon1,
-    title: 'ultimate Email  subscription',
-    description: `Get your info tests delivered at home collect a sample from the your task.`,
+    icon: Wifi,
+    title: 'Offline-First App',
+    description: `Retrieve data at any point without worrying about server synchronization.`,
   },
   {
     id: 2,
-    icon: icon2,
-    title: 'Bolt Performance',
-    description: `Get your info tests delivered at home collect a sample from the your task.`,
+    icon: Location,
+    title: 'Location Fused Service Providers',
+    description: `Achieve high accuracy by utilizing wifi networks and telecommunication service providers`,
   },
   {
     id: 3,
-    icon: icon3,
-    title: 'Secure Transaction',
-    description: `Get your info tests delivered at home collect a sample from the your task.`,
+    icon: Smart,
+    title: 'Smart Data Collection',
+    description: `Integrate smart devices such as smart total station and stream data to your forms..`,
   },
   {
     id: 4,
-    icon: icon4,
-    title: 'Multiple Options',
-    description: `Get your info tests delivered at home collect a sample from the your task.`,
+    icon: Charts,
+    title: 'Embeddable Charts',
+    description: `Derive patterns and insights from your form response using intuitive charts.`,
   },
   {
     id: 5,
-    icon: icon5,
-    title: '5 Star Rating service',
-    description: `Get your info tests delivered at home collect a sample from the your task.`,
+    icon: Integratable,
+    title: 'Declarative & Extensive',
+    description: `Tap into GeoPsy Collect APIs and embed forms onto your applications.`,
   },
   {
     id: 6,
-    icon: icon6,
-    title: 'Integrated with Shopify',
-    description: `Get your info tests delivered at home collect a sample from the your task.`,
+    icon: Dashboards,
+    title: 'Share Insights',
+    description: `Create custom dashboards using your form response and let the world discover meanings out of of your research.`,
   },
 ];
 
@@ -54,11 +55,13 @@ const UltimateFeatures = () => {
   return (
     <Box as="section" id="features" sx={styles.section}>
       <Container>
+        <Group position='center'>
         <SectionHeading
           sx={styles.heading}
-          slogan="Product features"
-          title="Ultimate features that works"
+          slogan="Core Features"
+          title="Ultimate features of GeoPsy Collect"
         />
+        </Group>
         <Box sx={styles.features}>
           {data?.map((item) => (
             <Feature className="feature-item" key={item.id} data={item} />
@@ -82,7 +85,6 @@ const styles = {
     marginBottom: [50, 50, 80],
     p: {
       maxWidth: 490,
-      margin: ['10px auto 0'],
     },
   },
   features: {

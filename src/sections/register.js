@@ -23,6 +23,7 @@ import countries from './countries';
 import { PasswordRequirement } from 'components/password-requirements';
 import { getStrength } from 'components/password-requirements';
 import { useRouter } from 'next/router';
+import { LogoBlue } from 'components/logo';
 const KenyaCounties = require('kenyacounties');
 
 const useStyles = createStyles((theme) => ({
@@ -181,10 +182,9 @@ const handleSubmit = async (e) => {
         </Grid.Col>
         <Grid.Col span={8}>
         <Paper className={classes.form} radius={0} p={10}>
-        <Title order={2} className={classes.title} mt="md" mb={30}>
-          Create your account
-        </Title>
-
+        <Group position='center' mb={25} mt={25}>
+        <LogoBlue />
+        </Group>
         
         <Group grow direction='column' mb="md" mt="md">
         <GoogleButton radius="xl">Google</GoogleButton>
