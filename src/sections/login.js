@@ -23,7 +23,6 @@ import { signIn } from "next-auth/react";
 import { Router } from 'react-router-dom';
 import { useUser } from 'lib/hooks';
 import { setLoginSession } from 'lib/auth';
-
 const axios = require('axios');
 
 const useStyles = createStyles((theme) => ({
@@ -165,7 +164,7 @@ export function Login() {
       password: password,
     }
 
-    try {
+  try {
       await fetch("/api/login", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json'},
@@ -173,7 +172,7 @@ export function Login() {
       }).then(function(res){
         setLoading(false);
         if(res.status === 200){
-          window.location.reload(false);
+          window.location = '/v2/dashboard'
         } else {
           setInvalid({
             invalid: true,
@@ -185,7 +184,7 @@ export function Login() {
       })
     } catch(error){
       setErrorMsg(error.message);
-    }
+    } 
   }
 
   return (

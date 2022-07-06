@@ -7,6 +7,7 @@ import Banner from 'sections/banner';
 import Header from 'components/header/header';
 import TopBar from 'components/topbar';
 import { useUser } from 'lib/hooks';
+
 export default function IndexPage() {
   useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
   return (
@@ -22,4 +23,4 @@ export default function IndexPage() {
       </Layout>
     </ThemeProvider>
   );
-}
+} 

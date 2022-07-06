@@ -27,7 +27,5 @@ export function useUser({redirectTo, redirectIfFound } = {}){
         }
     }, [redirectTo, redirectIfFound, finished, hasUser])
 
-    console.log(user);
-
     return error ? null : user
 }

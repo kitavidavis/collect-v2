@@ -2,11 +2,13 @@
 import { jsx } from 'theme-ui';
 import { Link } from 'components/link';
 import LogoSvg from 'components/icons/logo';
+import serverRack from 'assets/images/white-logo.png';
+import Image  from 'components/image';
 
 export default function Logo({ isSticky, footer, ...props }) {
   return (
     <Link path="/" sx={styles.logo} {...props}>
-      <h3 style={{color: 'white'}} >GeoPsy Collect</h3>
+      <Image style={{height: 60}} src={serverRack} loading="lazy" alt="sever-rack" />
     </Link>
   );
 }
