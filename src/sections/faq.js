@@ -1,3 +1,4 @@
+/** @jsxRuntime classic /
 /** @jsx jsx */
 import { jsx, Box, Container } from 'theme-ui';
 import Masonry from 'react-masonry-component';

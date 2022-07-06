@@ -1,3 +1,4 @@
+/** @jsxRuntime classic /
 /** @jsx jsx */
 import NextLink from 'next/link';
 import { jsx, Link as A } from 'theme-ui';
