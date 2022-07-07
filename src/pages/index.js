@@ -8,6 +8,7 @@ import Header from 'components/header/header';
 import TopBar from 'components/topbar';
 import { useUser } from 'lib/hooks';
 import UltimateFeatures from 'sections/ultimate-feature';
+import Footer from 'components/footer/footer';
 
 
 export default function IndexPage() {
@@ -23,6 +24,7 @@ export default function IndexPage() {
         />
         <Banner />
         <UltimateFeatures />
+        <Footer />
       </Layout>
     </ThemeProvider>
   );
