@@ -44,7 +44,7 @@ import {
   Drawer,
   Divider,
 } from '@mantine/core';
-import { useViewportSize, useHash, useWindowScroll, useScrollIntoView } from '@mantine/hooks';
+import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
 import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
@@ -350,7 +350,7 @@ function Dashboard(){
             setFirstname(user2.user.firstname);
             setLastName(user2.user.lastname)
             setEmail(user2.user.username)
-            setUserForms(data.forms);
+            setUserForms(data.forms.reverse());
             setDone(true);
           } 
         }).catch(function(error) {
@@ -512,6 +512,12 @@ function Dashboard(){
         .attr("d", valueLine)
       }
 
+      const clipboard = useClipboard({timeout: 2000});
+
+      const copyFormId = (id) => {
+        clipboard.copy("https://collect-v2.vercel.app/"+id);
+      }
+
       React.useEffect(() => {
         createReadWriteGraph();
         createConnectionsGraph();
@@ -630,17 +636,18 @@ function Dashboard(){
                                     <Anchor onClick={() => {handleCluster('Turkana')}} size='xs'  href='#'>
                                       {userforms[0].title}
                                     </Anchor>
-                                    <Button size='xs'  radius={20}  variant='outline'>
-                                      Connect
+                                    <Button onClick={() => {copyFormId(userforms[0].form_id)}} size='xs'  radius={20}  variant='outline'>
+                                      {clipboard.copied ? "Copied" : "Copy URL"}
                                     </Button>
                                     <Button size='xs'  onClick={() => {handleCluster('Turkana')}} radius={20} variant='outline'>
                                       Browse Response
                                     </Button>
                                     <Button size='xs'  radius={20} variant='outline'>
                                       <Menu control={<ActionIcon><Dots /></ActionIcon>} >
+                                        <Menu.Item component='a' href={`/${userforms[0].form_id}`} target="_blank" >Open Form</Menu.Item>
                                         <Menu.Item >Edit Configuration </Menu.Item>
                                         <Menu.Item>Load Sample Dataset</Menu.Item>
-                                        <Menu.Item>Terminate Cluster</Menu.Item>
+                                        <Menu.Item>Terminate Form</Menu.Item>
                                       </Menu>
                                     </Button>
                                     </Group>

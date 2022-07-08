@@ -669,8 +669,42 @@ export default function AppShellDemo() {
       radioOptions: null,
       checkboxOptions: null,
       dropdownOptions: null,
-      gridMultipleChoice: null,
-      gridCheckbox: null,
+      uploadSize: '10',
+      uploadSpecifics: {
+        document: false,
+        spreadshit: false,
+        pdf: false,
+        video: false,
+        presentation: false,
+        drawing: false,
+        image: false,
+        audio: false
+      },
+      linearFrom: 0,
+      linearTo: 5,
+      linearLabel1: '',
+      linearLabel2: '',
+      gridRadioRow: null,
+      gridRadioColumn: null,
+      gridCheckboxRow: null,
+      gridCheckboxColumn: null,
+      pointSource: 'gps',
+      pointBackgroundCheck: true,
+      pointLaskKnownLocation: false,
+      pointCustomTile: true,
+      polylineSource: 'gps',
+      polylineMinPairs: '2',
+      polylineMaxResponse: '1',
+      polylineBackgroundCheck: true,
+      polylineLastKnownLocation: false,
+      polylineCustomTile: true,
+      polygonSource: 'gps',
+      polygonMinPairs: '3',
+      polygonMaxResponse: '1',
+      polygonBackgroundCheck: true,
+      polygonLastKnownLocation: false,
+      polygonCustomTile: true
+
     }, position: forms.length+1, type: 1};
     setForms(prevForms => [...prevForms, chunk]);
   }
@@ -1362,6 +1396,33 @@ export default function AppShellDemo() {
 
   const fileUploadDetails = (id) => {
     const [specific, setSpecific] = useState(false);
+    const [specifics, setSpecifics] = useState({
+      document: false,
+      spreadshit: false,
+      pdf: false,
+      video: false,
+      presentation: false,
+      drawing: false,
+      image: false,
+      audio: false
+    });
+
+    const [maxSize, setMaxSize] = useState('10');
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.uploadSize = maxSize;
+    }, [maxSize]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.uploadSpecifics = specifics;
+    }, [specifics]);
+
 
     return (
       <Group direction='column' style={{width: '100%'}}>
@@ -1372,33 +1433,23 @@ export default function AppShellDemo() {
         {specific ? (
           <Group>
             <SimpleGrid cols={2}>
-              <MantineCheckbox label="Document" />
-              <MantineCheckbox label="Spreadshit" />
-              <MantineCheckbox label="PDF" />
-              <MantineCheckbox label="Video" />
-              <MantineCheckbox label="Presentation" />
-              <MantineCheckbox label="Drawing" />
-              <MantineCheckbox label="Image" />
-              <MantineCheckbox label="Audio" />
+              <MantineCheckbox checked={specifics.document} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, document: e.currentTarget.checked}))}} label="Document" />
+              <MantineCheckbox checked={specifics.spreadshit} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, spreadshit: e.currentTarget.checked}))}}  label="Spreadshit" />
+              <MantineCheckbox checked={specifics.pdf} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, pdf: e.currentTarget.checked}))}}  label="PDF" />
+              <MantineCheckbox checked={specifics.video} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, video: e.currentTarget.checked}))}}  label="Video" />
+              <MantineCheckbox checked={specifics.presentation} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, presentation: e.currentTarget.checked}))}}  label="Presentation" />
+              <MantineCheckbox checked={specifics.drawing} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, drawing: e.currentTarget.checked}))}}  label="Drawing" />
+              <MantineCheckbox checked={specifics.image} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, image: e.currentTarget.checked}))}}  label="Image" />
+              <MantineCheckbox checked={specifics.audio} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, audio: e.currentTarget.checked}))}}  label="Audio" />
             </SimpleGrid>
           </Group>
         ) : null}
 
-        <Group position='apart'>
-          <Text>Maximum number of files</Text>
-          <Select data={[
-            {label: '1', value: '1'},
-            {label: '5', value: '5'},
-            {label: '10', value: '10'}
-          ]} />
-        </Group>
-
         <Group position='apart' >
           <Text>Maximum file size</Text>
-          <Select data={[
+          <Select value={maxSize} onChange={(val) => {setMaxSize(val)}} data={[
             {label: '1MB', value: '1'},
             {label: '10MB', value: '10'},
-            {label: '100MB', value: '100'}
           ]} />
         </Group>
         <Text size='xs' color='gray'>
@@ -1412,17 +1463,54 @@ export default function AppShellDemo() {
   const linearScaleDetails = (id) => {
     const [from, setFrom] = useState('0');
     const [to, setTo] = useState("5")
+
+    const [label1, setLabel1] = useState('label(optional)');
+    const [label2, setLabel2] = useState('label(optional)')
+
+    const handleBlur1 = (str) => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.linearLabel1 = str;
+      setLabel1(str);
+    }
+
+    const handleBlur2 = (str) => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.linearLabel2 = str;
+      setLabel2(str);
+    }
+
+    const handleFrom = (val) => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.linearFrom = parseInt(val);
+
+      setFrom(val);
+    }
+
+    const handleTo = (val) => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.linearTo = parseInt(val);
+
+      setTo(val);
+    }
     return (
       <>
       <Group grow>
-        <Select value={from} onChange={(val) => {setFrom(val)}} variant='filled' rightSection={<ChevronDown size={14} />} data={[
+        <Select  value={from} onChange={(val) => {handleFrom(val)}} rightSection={<ChevronDown size={14} />} data={[
           {label: "0", value: "0"},
           {label: '1', value: "1"}
         ]} />
         <Group position='center'>
         <Text>To</Text>
         </Group>
-        <Select value={to} onChange={(val) => {setTo(val)}} variant='filled' rightSection={<ChevronDown size={14} />} data={[
+        <Select value={to} onChange={(val) => {handleTo(val)}} rightSection={<ChevronDown size={14} />} data={[
           {label: "2", value: "2"},
           {label: '3', value: "3"},
           {label: "4", value: "4"},
@@ -1436,21 +1524,50 @@ export default function AppShellDemo() {
       </Group>
               <Group position='left'>
               <Text size='xs' color='gray'>{from}</Text>
-              <TextInput variant='filled' placeholder='Label(optional)' />
+              <Text contentEditable onBlur={(e) => {handleBlur1(e.target.textContent)}} >{label1}</Text>
             </Group>
             <Group position='left'>
               <Text size='xs' color='gray' >{to}</Text>
-              <TextInput variant='filled' placeholder='Label(optional)' />
+              <Text contentEditable onBlur={(e) => {handleBlur2(e.target.textContent)}} >{label2}</Text>
             </Group>
             </>
     )
   }
 
+  const retrieveRadioRows = (id) => {
+    let q = forms[forms.findIndex((obj => obj.id == id))];
+    if(q.question.gridRadioRow == null){
+      return [];
+    } 
+
+    return q.question.gridRadioRow
+  }
+
+  const retrieveGridCols = (id) => {
+    let q = forms[forms.findIndex((obj => obj.id == id))];
+    if(q.question.gridRadioColumn == null){
+      return [];
+    }
+
+    return q.question.gridRadioColumn;
+  }
+
   const multipleChoiceGridDetails = (id) => {
     const [option, setOptions] = useState([]);
     const [opened, setOpened] = useState(false);
+    const [opened2, setOpened2] = useState(false);
     const [radioerror, setRadioError] = useState(false);
     const [cols, setCols] = useState([]);
+
+    React.useEffect(() => {
+      let r = retrieveRadioRows(id);
+      setOptions(r);
+    }, []);
+
+    React.useEffect(() => {
+      let c = retrieveGridCols(id);
+      setCols(c);
+    }, []);
 
     const incrementCols = () => {
       let chunk = {label: 'Column', id: uuid()};
@@ -1472,10 +1589,12 @@ export default function AppShellDemo() {
       const [text, setText] = useState('');
 
       const createOptions = () => {
+        let tempArr = [];
         if(!text.includes(',')){
           var regExp = /[a-zA-Z]/g;
           if(regExp.test(text)){
             let chunk = {label: text, value: arr[i], id: uuid()};
+            tempArr.push(chunk)
             setOptions(prevOptions => [...prevOptions, chunk]);
           } 
         } else {
@@ -1486,12 +1605,18 @@ export default function AppShellDemo() {
             if(regExp.test(arr[i])){
               arr2.push(arr[i].replace(/\s/g, ''));
               let chunk = {label: arr[i], value: arr[i], id: uuid()};
+              tempArr.push(chunk)
               setOptions(prevArr => [...prevArr, chunk]);
             }
           }
 
           setRadioError(!checkUniqueArray(arr2));
         }
+
+        let idx = forms.findIndex((obj => obj.id == id));
+        let q = forms[idx];
+
+        q.question.gridRadioRow = [...new Set(tempArr)];
 
         setOpened(false)
       }
@@ -1521,12 +1646,83 @@ export default function AppShellDemo() {
       );
     }
 
+    const ColumnsForm = () => {
+      const isMobile = useMediaQuery('(max-width: 755px');
+      const [text, setText] = useState('');
+
+      const createOptions = () => {
+        let tempArr = [];
+        if(!text.includes(',')){
+          var regExp = /[a-zA-Z]/g;
+          if(regExp.test(text)){
+            let chunk = {label: text, value: arr[i], id: uuid()};
+            tempArr.push(chunk)
+            setCols(prevOptions => [...prevOptions, chunk]);
+          } 
+        } else {
+          let arr = text.split(',');
+          let arr2 = [];
+          for(let i=0; i<arr.length; i++){
+            var regExp = /[a-zA-Z]/g;
+            if(regExp.test(arr[i])){
+              arr2.push(arr[i].replace(/\s/g, ''));
+              let chunk = {label: arr[i], value: arr[i], id: uuid()};
+              tempArr.push(chunk)
+              setCols(prevArr => [...prevArr, chunk]);
+            }
+          }
+
+          setRadioError(!checkUniqueArray(arr2));
+        }
+
+        let idx = forms.findIndex((obj => obj.id == id));
+        let q = forms[idx];
+
+        q.question.gridRadioColumn = [... new Set(tempArr)];
+
+        setOpened2(false)
+      }
+
+      return (
+        <form>
+          <TextInput
+            required
+            label="Column"
+            description="Separate column labels using a comma"
+            style={{ minWidth: isMobile ? 220 : 300 }}
+            variant="default"
+            value={text}
+            onChange={(e) => {setText(e.currentTarget.value)}}
+          />
+  
+    
+          <Group position="apart" style={{ marginTop: 15 }}>
+            <Anchor onClick={() => {setOpened2(false)}} component="button" color="gray" size="sm">
+              Cancel
+            </Anchor>
+            <Button onClick={() => {createOptions()}} type="button" size="sm">
+              Save
+            </Button>
+          </Group>
+        </form>
+      );
+    }
+
     const handleOpenPopover = () => {
       if(!opened) {
         setOptions([]);
         setOpened(true)
       } else {
         setOpened(false)
+      }
+    }
+
+    const handleOpenPopover2 = () => {
+      if(!opened2) {
+        setCols([]);
+        setOpened2(true)
+      } else {
+        setOpened2(false)
       }
     }
 
@@ -1540,6 +1736,23 @@ export default function AppShellDemo() {
     
           <div>
             {option.length > 0 ? (<Text>Edit Rows</Text>) : (<Text>Add Rows</Text>)}
+            <Text size="xs" color="gray">
+              Separated by comma
+            </Text>
+          </div>
+        </div>
+      );
+    }
+
+    const  AddButton2 = () => {
+      return (
+        <div onClick={() => {handleOpenPopover2()}} style={{ display: 'flex', cursor: 'pointer' }}>
+          <ActionIcon>
+            {option.length > 0 ? ( <Edit size={13} />) : (<Plus size={13} />)}
+          </ActionIcon>
+    
+          <div>
+            {option.length > 0 ? (<Text>Edit Columns</Text>) : (<Text>Add Columns</Text>)}
             <Text size="xs" color="gray">
               Separated by comma
             </Text>
@@ -1574,12 +1787,9 @@ export default function AppShellDemo() {
         <RadioGroup error={radioerror ? "Value options should be unique!" : null} orientation='vertical'>
         {option.map((item, index) => {
           return (
-               <Radio key={index} value={item.label} label={item.label} />
+               <Radio disabled key={index} value={item.label} label={item.label} />
               )
         })}
-        <ActionIcon onClick={() => {handleEditOption(item.label, item.id)}} >
-          <Edit />
-        </ActionIcon>
         </RadioGroup>
         </Group>
         <Group>
@@ -1608,11 +1818,28 @@ export default function AppShellDemo() {
             <RadioGroup>
             {cols.map((item, index) => {
               return (
-                <Radio value={index} label={item.label + (index+1)} />
+                <Radio disabled value={index} label={item.label + (index+1)} />
               )
             })}
             </RadioGroup>
-            <AddColumns />
+            <Group>
+        <Popover
+        opened={opened2}
+        onClose={() => setOpened2(false)}
+        position="top"
+        placement="end"
+        withCloseButton
+        title="Add options"
+        transition="pop-top-right"
+        target={
+            <AddButton2 />
+        }
+      >
+      <ColumnsForm />
+
+        </Popover>
+
+        </Group>
           </Group>
         </Group>
       </Group>
@@ -1620,16 +1847,45 @@ export default function AppShellDemo() {
 
   }
 
+  const retrieveGridCheckboxRows = (id) => {
+    let idx = forms.findIndex((obj => obj.id == id));
+    let q = forms[idx];
+
+    if(q.question.gridCheckboxRow == null){
+      return [];
+    }
+
+    return q.question.gridCheckboxRow
+  }
+
+  const retrieveGridCheckboxColumns = (id) => {
+    let idx = forms.findIndex((obj => obj.id == id));
+    let q = forms[idx];
+
+    if(q.question.gridCheckboxColumn == null){
+      return [];
+    } 
+
+    return q.question.gridCheckboxColumn;
+  }
+
   const checkboxGridDetails = (id) => {
     const [option, setOptions] = useState([]);
     const [opened, setOpened] = useState(false);
+    const [opened2, setOpened2] = useState(false);
     const [radioerror, setRadioError] = useState(false);
     const [cols, setCols] = useState([]);
 
-    const incrementCols = () => {
-      let chunk = {label: 'Column', id: uuid()};
-      setCols(prevCols => [...prevCols, chunk])
-    }
+    React.useEffect(() => {
+      let c = retrieveGridCheckboxColumns(id);
+      setCols(c);
+    }, []);
+
+    React.useEffect(() => {
+      let r = retrieveGridCheckboxRows(id);
+      setOptions(r);
+    }, []);
+
     const checkUniqueArray = (arr) => {
       let n = arr.length;
       let s = new Set();
@@ -1646,10 +1902,12 @@ export default function AppShellDemo() {
       const [text, setText] = useState('');
 
       const createOptions = () => {
+        let tempArr = [];
         if(!text.includes(',')){
           var regExp = /[a-zA-Z]/g;
           if(regExp.test(text)){
             let chunk = {label: text, value: arr[i], id: uuid()};
+            tempArr.push(chunk);
             setOptions(prevOptions => [...prevOptions, chunk]);
           } 
         } else {
@@ -1660,12 +1918,18 @@ export default function AppShellDemo() {
             if(regExp.test(arr[i])){
               arr2.push(arr[i].replace(/\s/g, ''));
               let chunk = {label: arr[i], value: arr[i], id: uuid()};
+              tempArr.push(chunk);
               setOptions(prevArr => [...prevArr, chunk]);
             }
           }
 
           setRadioError(!checkUniqueArray(arr2));
         }
+
+        let idx = forms.findIndex((obj => obj.id == id));
+        let q = forms[idx];
+
+        q.question.gridCheckboxRow = [...new Set(tempArr)];
 
         setOpened(false)
       }
@@ -1674,8 +1938,8 @@ export default function AppShellDemo() {
         <form>
           <TextInput
             required
-            label="Options"
-            description="Separate option values using a comma"
+            label="Row Labels"
+            description="Separate row labels using a comma"
             style={{ minWidth: isMobile ? 220 : 300 }}
             variant="default"
             value={text}
@@ -1695,12 +1959,83 @@ export default function AppShellDemo() {
       );
     }
 
+    const ColumnsForm = () => {
+      const isMobile = useMediaQuery('(max-width: 755px');
+      const [text, setText] = useState('');
+
+      const createOptions = () => {
+        let tempArr = [];
+        if(!text.includes(',')){
+          var regExp = /[a-zA-Z]/g;
+          if(regExp.test(text)){
+            let chunk = {label: text, value: arr[i], id: uuid()};
+            tempArr.push(chunk);
+            setCols(prevOptions => [...prevOptions, chunk]);
+          } 
+        } else {
+          let arr = text.split(',');
+          let arr2 = [];
+          for(let i=0; i<arr.length; i++){
+            var regExp = /[a-zA-Z]/g;
+            if(regExp.test(arr[i])){
+              arr2.push(arr[i].replace(/\s/g, ''));
+              let chunk = {label: arr[i], value: arr[i], id: uuid()};
+              tempArr.push(chunk);
+              setCols(prevArr => [...prevArr, chunk]);
+            }
+          }
+
+          setRadioError(!checkUniqueArray(arr2));
+        }
+
+        let idx = forms.findIndex((obj => obj.id == id));
+        let q = forms[idx];
+
+        q.question.gridCheckboxColumn = [...new Set(tempArr)];
+
+        setOpened2(false)
+      }
+
+      return (
+        <form>
+          <TextInput
+            required
+            label="Column labels"
+            description="Separate column labels using a comma"
+            style={{ minWidth: isMobile ? 220 : 300 }}
+            variant="default"
+            value={text}
+            onChange={(e) => {setText(e.currentTarget.value)}}
+          />
+  
+    
+          <Group position="apart" style={{ marginTop: 15 }}>
+            <Anchor onClick={() => {setOpened2(false)}} component="button" color="gray" size="sm">
+              Cancel
+            </Anchor>
+            <Button onClick={() => {createOptions()}} type="button" size="sm">
+              Save
+            </Button>
+          </Group>
+        </form>
+      );
+    }
+
     const handleOpenPopover = () => {
       if(!opened) {
         setOptions([]);
         setOpened(true)
       } else {
         setOpened(false)
+      }
+    }
+
+    const handleOpenPopover2 = () => {
+      if(!opened2) {
+        setCols([]);
+        setOpened2(true)
+      } else {
+        setOpened2(false)
       }
     }
 
@@ -1724,9 +2059,9 @@ export default function AppShellDemo() {
 
     const  AddColumns = () => {
       return (
-        <div onClick={() => {incrementCols()}} style={{ display: 'flex', cursor: 'pointer' }}>
+        <div onClick={() => {handleOpenPopover2()}} style={{ display: 'flex', cursor: 'pointer' }}>
           <ActionIcon>
-            {option.length > 0 ? ( <Plus size={13} />) : (<Plus size={13} />)}
+            {cols.length > 0 ? ( <Plus size={13} />) : (<Plus size={13} />)}
           </ActionIcon>
     
           <div>
@@ -1748,7 +2083,7 @@ export default function AppShellDemo() {
         <CheckboxGroup error={radioerror ? "Value options should be unique!" : null} orientation='vertical'>
         {option.map((item, index) => {
           return (
-               <MantineCheckbox key={index} value={item.label} label={item.label} />
+               <MantineCheckbox disabled key={index} value={item.label} label={item.label} />
               )
         })}
         </CheckboxGroup>
@@ -1779,11 +2114,28 @@ export default function AppShellDemo() {
             <CheckboxGroup>
             {cols.map((item, index) => {
               return (
-                <MantineCheckbox value={item.label + (index+1)} key={index} label={item.label + (index+1)} />
+                <MantineCheckbox disabled value={item.label} key={index} label={item.label} />
               )
             })}
             </CheckboxGroup>
+            <Group>
+        <Popover
+        opened={opened2}
+        onClose={() => setOpened2(false)}
+        position="top"
+        placement="end"
+        withCloseButton
+        title="Add options"
+        transition="pop-top-right"
+        target={
             <AddColumns />
+        }
+      >
+      <ColumnsForm />
+
+        </Popover>
+
+        </Group>
           </Group>
         </Group>
       </Group>
@@ -1807,6 +2159,37 @@ export default function AppShellDemo() {
 
   const pointDetails = (id) => {
     const [source, setSource] = useState('gps');
+    const [bgCheck, setBGCheck] = useState(true);
+    const [lkl, setLKL] = useState(false);
+    const [tile, setTile] = useState(true);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonSource = source;
+    }, [source]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonBackgroundCheck = bgCheck;
+    }, [bgCheck]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonLastKnownLocation = lkl;
+    }, [lkl]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonCustomTile = tile;
+    }, [tile]);
     return (
       <Group direction='column' style={{width: '100%'}}>
 
@@ -1819,32 +2202,22 @@ export default function AppShellDemo() {
         ]} />
       </Group>
 
-
-      <Group position='apart' >
-        <Text>Maximum number of point coordinates</Text>
-        <Select data={[
-          {label: '1', value: '1'},
-          {label: '5', value: '5'},
-          {label: '10', value: '10'},
-          {label: 'More than 10', value: '>10'}
-        ]} />
-      </Group>
       {source === 'gps' ? (
         <>
             <Group position='apart'>
               <Text>Perform a background location check</Text>
-              <Switch />
+              <Switch checked={bgCheck} onChange={(e) => {setBGCheck(e.currentTarget.checked)}}  />
             </Group>
             <Group position='apart'>
             <Text>Retrieve last known location</Text>
-            <Switch />
+            <Switch checked={lkl} onChange={(e) => {setLKL(e.currentTarget.checked)}} />
           </Group>
 
           </>
       ) : null}
                     <Group position='apart'>
               <Text>Allow use of custom map tile</Text>
-              <Switch />
+              <Switch checked={tile} onChange={(e) => {setTile(e.currentTarget.checked)}} />
             </Group>
       <Text size='xs' color='gray'>
         GeoPsy Collect uses Android's Fused Location Provider to provide high-accuracy gps coordinates
@@ -1856,6 +2229,53 @@ export default function AppShellDemo() {
 
   const polylineDetails = (id) => {
     const [source, setSource] = useState('gps');
+    const [min, setMin] = useState('3');
+    const [max, setMax] = useState('1');
+    const [bgCheck, setBGCheck] = useState(true);
+    const [lkl, setLKL] = useState(false);
+    const [tile, setTile] = useState(true);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonSource = source;
+    }, [source]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonMinPairs = min;
+    }, [min]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonMaxResponse = max;
+    }, [max]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonBackgroundCheck = bgCheck;
+    }, [bgCheck]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonLastKnownLocation = lkl;
+    }, [lkl]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonCustomTile = tile;
+    }, [tile]);
     return (
       <Group direction='column' style={{width: '100%'}}>
 
@@ -1870,7 +2290,7 @@ export default function AppShellDemo() {
 
       <Group position='apart' >
         <Text>Minimum number of a pair of coordinates to create a polyline</Text>
-        <Select data={[
+        <Select value={min} onChange={(val) => {setMin(val)}} data={[
           {label: '2', value: '2'},
           {label: '3', value: '3'},
           {label: '4', value: '4'},
@@ -1884,32 +2304,23 @@ export default function AppShellDemo() {
         ]} />
       </Group>
 
-      <Group position='apart' >
-        <Text>Maximum number of line coordinates response</Text>
-        <Select data={[
-          {label: '1', value: '1'},
-          {label: '5', value: '5'},
-          {label: '10', value: '10'},
-          {label: 'More than 10', value: '>10'}
-        ]} />
-      </Group>
       {source === 'gps' ? (
         <>
         
               <Group position='apart'>
               <Text>Perform a background location check</Text>
-              <Switch />
+              <Switch checked={bgCheck} onChange={(e) => {setBGCheck(e.currentTarget.checked)}} />
             </Group>
             <Group position='apart'>
             <Text>Retrieve last known location</Text>
-            <Switch />
+            <Switch checked={lkl} onChange={(e) => {setLKL(e.currentTarget.checked)}} />
           </Group>
 
           </>
       ) : null}
                     <Group position='apart'>
               <Text>Allow use of custom map tile</Text>
-              <Switch />
+              <Switch checked={tile} onChange={(e) => {setTile(e.currentTarget.checked)}} />
             </Group>
       <Text size='xs' color='gray'>
         GeoPsy Collect uses Android's Fused Location Provider to provide high-accuracy gps coordinates
@@ -1921,6 +2332,54 @@ export default function AppShellDemo() {
 
   const polygonDetails = (id) => {
     const [source, setSource] = useState('gps');
+    const [min, setMin] = useState('3');
+    const [max, setMax] = useState('1');
+    const [bgCheck, setBGCheck] = useState(true);
+    const [lkl, setLKL] = useState(false);
+    const [tile, setTile] = useState(true);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonSource = source;
+    }, [source]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonMinPairs = min;
+    }, [min]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonMaxResponse = max;
+    }, [max]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonBackgroundCheck = bgCheck;
+    }, [bgCheck]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonLastKnownLocation = lkl;
+    }, [lkl]);
+
+    React.useEffect(() => {
+      let idx = forms.findIndex((obj => obj.id == id));
+      let q = forms[idx];
+
+      q.question.polygonCustomTile = tile;
+    }, [tile]);
+
     return (
       <Group direction='column' style={{width: '100%'}}>
 
@@ -1935,8 +2394,7 @@ export default function AppShellDemo() {
 
       <Group position='apart' >
         <Text>Minimum number of a pair of coordinates to create a polygon</Text>
-        <Select data={[
-          {label: '2', value: '2'},
+        <Select value={min} onChange={(val) => {setMin(val)}} data={[
           {label: '3', value: '3'},
           {label: '4', value: '4'},
           {label: '5', value: '5'},
@@ -1949,31 +2407,22 @@ export default function AppShellDemo() {
         ]} />
       </Group>
 
-      <Group position='apart' >
-        <Text>Maximum number of polygon coordinates response</Text>
-        <Select data={[
-          {label: '1', value: '1'},
-          {label: '5', value: '5'},
-          {label: '10', value: '10'},
-          {label: 'More than 10', value: '>10'}
-        ]} />
-      </Group>
       {source === 'gps' ? (
         <>
               <Group position='apart'>
               <Text>Perform a background location check</Text>
-              <Switch />
+              <Switch checked={bgCheck} onChange={(e) => {setBGCheck(e.currentTarget.checked)}} />
             </Group>
             <Group position='apart'>
             <Text>Retrieve last known location</Text>
-            <Switch />
+            <Switch checked={lkl} onChange={(e) => {setLKL(e.currentTarget.checked)}} />
           </Group>
 
           </>
       ) : null}
                     <Group position='apart'>
               <Text>Allow use of custom map tile</Text>
-              <Switch />
+              <Switch checked={tile} onChange={(e) => {setTile(e.currentTarget.checked)}} />
             </Group>
       <Text size='xs' color='gray'>
         GeoPsy Collect uses Android's Fused Location Provider to provide high-accuracy gps coordinates

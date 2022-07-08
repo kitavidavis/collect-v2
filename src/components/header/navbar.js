@@ -13,8 +13,8 @@ const Navbar = ({ isSticky, isMobile, handleCloseMenu }) => {
         isSticky ? ' is-sticky' : ''
       }`}
     >
-      {menuItems.map(({ path, label }, i) => (
-        <NavLink key={i} path={path} label={label} onClick={handleCloseMenu} />
+      {menuItems.map(({ path, label, target }, i) => (
+        <a target={target}  key={i} href={path} >{label} </a>
       ))}
     </Box>
   );
@@ -57,7 +57,7 @@ const styles = {
       a: {
         fontWeight: 500,
         lineHeight: 1,
-        color: 'textSecondary',
+        color: 'white',
         display: 'block',
         padding: 3,
         '+ a': {
@@ -68,10 +68,10 @@ const styles = {
     '&.is-sticky': {
       top: 60,
       a: {
-        color: 'text',
+        color: 'white',
       },
       '.active': {
-        color: 'primary',
+        color: 'white',
       },
     },
   },
