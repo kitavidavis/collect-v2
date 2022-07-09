@@ -43,7 +43,7 @@ import {
   Image,
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
-import { useBooleanToggle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
+import { useBooleanToggle, useDocumentTitle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
 import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
@@ -57,6 +57,7 @@ import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
 import { showNotification } from '@mantine/notifications'
 import ReactMapboxGl, { Layer, Feature } from 'react-mapbox-gl';
+import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpreadshit, UploadPDF, UploadImage, UploadAny } from './upload';
 import 'mapbox-gl/dist/mapbox-gl.css';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 const Map = ReactMapboxGl({
@@ -183,6 +184,8 @@ export default function AppShellDemo() {
   const [done, setDone] = useState(false);
   const [answers, setAnswers] = useState([]);
 
+  useDocumentTitle(obj === null ? 'Loading...' : obj.title + ' | '+ obj.description)
+
   const [lat, setLat] = useState('');
   const [lng, setLng] = useState('');
   const [accuracy, setAccuracy] = useState('');
@@ -252,56 +255,60 @@ export default function AppShellDemo() {
 
 
 const handleShortAnswer = (id) => {
+  const [text, setText] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (text) => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = text;
-    } else {
-      let chunk = {id: id, response: text};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
-  }
+    React.useEffect(() => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = text;
+      } else {
+        let chunk = {id: id, response: text};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+    }, [text]);
   return (
-    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+          <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
 
-    <TextInput onBlur={(e) => {handleBlur(e.target.textContent)}} />
+<TextInput value={text} onChange={(e) => {setText(e.currentTarget.value)}} />
 
-    </InputWrapper>
+</InputWrapper>
+    
   )
 }
 
 const handleParagraph = (id) => {
+  const [text, setText] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (text) => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = text;
-    } else {
-      let chunk = {id: id, response: text};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
+React.useEffect(() => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let chunk = answers[idx];
+    chunk.response = text;
+  } else {
+    let chunk = {id: id, response: text};
+    setAnswers(prevAns => [...prevAns, chunk]);
   }
+}, [text])
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
 
-    <Textarea onBlur={(e) => {handleBlur(e.target.textContent)}} />
+    <Textarea value={text} onChange={(e) => {setText(e.currentTarget.value)}}  />
 
     </InputWrapper>
   )
 }
 
 const handleMultipleChoice = (id) => {
+  const [str, setStr] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (str) => {
+  React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
       let chunk = answers[idx];
@@ -310,9 +317,9 @@ const handleMultipleChoice = (id) => {
       let chunk = {id: id, response: str};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
-  }
+  }, [str]);
   return (
-    <RadioGroup onChange={(val) => {handleBlur(val)}} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+    <RadioGroup onChange={(val) => {setStr(val)}} value={str} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         {item.question.radioOptions.length > 0 && item.question.radioOptions.map((radio) => {
           return (
             <Radio value={radio.label} label={radio.label} key={radio.id} />
@@ -323,10 +330,11 @@ const handleMultipleChoice = (id) => {
 }
 
 const handleCheckbox = (id) => {
+  const [str, setStr] = useState([]);
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (str) => {
+  React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
       let chunk = answers[idx];
@@ -335,10 +343,10 @@ const handleCheckbox = (id) => {
       let chunk = {id: id, response: str};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
+  }, [str]);
 
-  }
   return (
-    <CheckboxGroup onChange={(val) => {handleBlur(val)}} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+    <CheckboxGroup onChange={setStr} value={str} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
     {item.question.checkboxOptions.length > 0 && item.question.checkboxOptions.map((check) => {
       return (
         <MantineCheckbox key={check.id} value={check.label} label={check.label} />
@@ -349,10 +357,11 @@ const handleCheckbox = (id) => {
 }
 
 const handleDropdown = (id) => {
+  const [str, setStr] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (str) => {
+  React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
       let chunk = answers[idx];
@@ -361,91 +370,116 @@ const handleDropdown = (id) => {
       let chunk = {id: id, response: str};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
+  }, [str]);
 
-  }
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <Select onChange={(val) => {handleBlur(val)}} data={item.question.dropdownOptions} />
+      <Select onChange={(val) => {setStr(val)}} data={item.question.dropdownOptions} />
     </InputWrapper>
   )
 }
 
 const handleFileUpload = (id) => {
+  let idx = forms.findIndex((obj => obj.id == id));
+  let q = forms[idx];
+  
   return (
-    <Button variant='unstyled' size='xs'>Upload File</Button>
+    q.question.uploadSpecifics.document ? (
+      <UploadDocument />
+    ) : q.question.uploadSpecifics.spreadshit ? (
+      <UploadSpreadshit />
+    ) : q.question.uploadSpecifics.pdf ? (
+      <UploadPDF />
+    ) : q.question.uploadSpecifics.video ? (
+      <UploadVideo />
+    ) : q.question.uploadSpecifics.audio ? (
+      <UploadAudio />
+    ) : q.question.uploadSpecifics.presentation ? (
+      <UploadPresentation />
+    ) : q.question.uploadSpecifics.image ? (
+      <UploadImage />
+    ) : (
+      <UploadAny />
+    )
   )
 }
 
 const handleLinearScale = (id) => {
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+  const [value, setValue] = useState(item.question.linearFrom)
 
-  const handleBlur = (v) => {
+  React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
       let chunk = answers[idx];
-      chunk.response = v;
+      chunk.response = value;
     } else {
-      let chunk = {id: id, response: v};
+      let chunk = {id: id, response: value};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
-  }
+  }, [value]);
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
 
-<Slider min={item.question.linearFrom} max={item.question.linearTo} onChange={(val) => {handleBlur(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
+<Slider min={item.question.linearFrom} max={item.question.linearTo} value={value} onChange={(val) => {setValue(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
 
     </InputWrapper>
   )
 }
 
 const handleDate = (id) => {
+  const [date, setDate] = useState(new Date());
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (v) => {
+  React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
       let chunk = answers[idx];
-      chunk.response = v;
+      chunk.response = date;
     } else {
-      let chunk = {id: id, response: v};
+      let chunk = {id: id, response: date};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
-
-  }
+  }, [date]);
 
   return (
   <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <DatePicker onChange={(val) => {handleBlur(val)}} />
+    <DatePicker value={date} onChange={(val) => {setDate(val)}} />
   </InputWrapper>
   )
 }
 
 const handleTime = (id) => {
+  const [time, setTime] = useState(new Date());
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
-  const handleBlur = (v) => {
+  React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
       let chunk = answers[idx];
-      chunk.response = v;
+      chunk.response = time;
     } else {
-      let chunk = {id: id, response: v};
+      let chunk = {id: id, response: time};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
-
-  }
+  }, []);
 
   return (
   <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <TimeInput onChange={(val) => {handleBlur(val)}} />
+    <TimeInput value={time} onChange={(val) => {setTime(val)}} />
   </InputWrapper>
   )
 }
 
 const handlePoint = (id) => {
+  const [lat1, setLat1] = useState(null);
+  const [lng1, setLng1] = useState(null);
+  const [acc1, setAcc1] = useState(null);
+  const [alt1, setAlt1] = useState(null);
+
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
@@ -453,10 +487,10 @@ const handlePoint = (id) => {
   const handleGPS = () => {
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition((position) => {
-        document.getElementById('lat-'+id).value = position.coords.latitude;
-        document.getElementById('lng-'+id).value = position.coords.longitude;
-        document.getElementById('acc-'+id).value =  position.coords.accuracy;
-        document.getElementById('alt-'+id).value = position.coords.altitude;
+        setLat1(parseFloat(position.coords.latitude));
+        setLng1(parseFloat(position.coords.longitude));
+        setAcc1(parseFloat(position.coords.accuracy));
+        setAlt1(parseFloat(position.coords.altitude));
 
       }, (error) => {showNotification({
         title: 'Check your location settings',
@@ -471,23 +505,31 @@ const handlePoint = (id) => {
     }
   }
 
+  const deletePoint = () => {
+    setLat1(null);
+    setLng1(null);
+    setAcc1(null);
+    setAlt1(null);
+  }
+
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
     <Group position='right'>
       <ActionIcon onClick={() => {handleGPS()}} title='Capture Point'>
         <Gps />
       </ActionIcon>
-      <ActionIcon title='Delete Point' >
+      <ActionIcon onClick={() => {deletePoint()}} title='Delete Point' >
         <Trash />
       </ActionIcon>
     </Group>
+    <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
       <Grid.Col span={3}>
         <Group direction='column'>
-          <TextInput id={'lat-'+id} size='sm' label='Latitude' />
-          <TextInput id={'lng-'+id} size='sm' label='Longitude' />
-          <TextInput id={'alt-'+id}  size='sm' label="Altitude" />
-          <TextInput id={'acc-'+id}  size='sm' label="Accuracy" />
+          <TextInput value={lat1} size='sm' label='Latitude' />
+          <TextInput  value={lng1} size='sm' label='Longitude' />
+          <TextInput value={alt1}  size='sm' label="Altitude" />
+          <TextInput value={acc1}  size='sm' label="Accuracy" />
         </Group>
       </Grid.Col>
 
@@ -500,13 +542,23 @@ const handlePoint = (id) => {
   }}
   center={center}
 >
-{lat !== '' ? (
+{lat !== null ? (
     <Layer type="symbol" id="marker" layout={{ 'icon-image': 'marker-15' }}>
-    <Feature coordinates={[parseFloat(lng), parseFloat(lat)]} />
+    <Feature coordinates={[lng, lat]} />
   </Layer>
 ) : null}
 </Map>      </Grid.Col>
     </Grid>
+    </MediaQuery>
+
+    <MediaQuery largerThan='md' styles={{display: 'none'}}>
+    <Group direction='column'>
+          <TextInput value={lat1} size='sm' label='Latitude' />
+          <TextInput  value={lng} size='sm' label='Longitude' />
+          <TextInput value={alt1}  size='sm' label="Altitude" />
+          <TextInput value={acc1}  size='sm' label="Accuracy" />
+        </Group>
+    </MediaQuery>
   </InputWrapper>
   )
 }
@@ -548,6 +600,7 @@ const handlePolyline = (id) => {
         <Trash />
       </ActionIcon>
     </Group>
+    <MediaQuery smallerThan={'lg'} styles={{display: 'none'}}>
     <Grid columns={12}>
       <Grid.Col span={3}>
         <Group direction='column'>
@@ -574,6 +627,18 @@ const handlePolyline = (id) => {
 ) : null}
 </Map>      </Grid.Col>
     </Grid>
+    </MediaQuery>
+
+    <MediaQuery largerThan='md' styles={{display: 'none'}}>
+      <Group direction='column' mb={20}>
+      <Group direction='column'>
+          <TextInput id={'lat-'+id} size='sm' label='Latitude' />
+          <TextInput id={'lat-'+id} size='sm' label='Longitude' />
+          <TextInput id={'lat-'+id} size='sm' label="Altitude" />
+          <TextInput id={'lat-'+id} size='sm' label="Accuracy" />
+        </Group>
+      </Group>
+    </MediaQuery> 
   </InputWrapper>
   )
 }
@@ -717,6 +782,42 @@ const handleQuestion = (q, id) => {
       console.log('undefined');
   }
 }
+
+const RenderQuestions = () => {
+  const items = forms.map((item, index) => (
+    <Card key={item.id} shadow='md' className={classes.maincard}>
+      {item.type == 1 ? (
+        <Card>
+            {handleQuestion(item.question.questionType, item.id)}
+        </Card>
+      ) : item.type == 2 ? (
+        <Card mt={20} style={{borderLeftWidth: 5, borderLeftColor: obj.Color}} >
+                  <Text mb={10}>{item.question.title}</Text>
+                  <Text size='xs' color='gray'>{item.question.description}</Text>
+        </Card>
+      ) : item.type == 3 ? (
+        <Card mt={20} shadow={'sm'} >
+                <Image style={{marginLeft: '1%', marginRight: '1%'}} height={200} src={item.image} />
+        </Card>
+      ) : item.type == 4 ? (
+        <Card mt={20} shadow='sm'>
+  
+        </Card>
+      ) : (
+        <Card mt={20} shadow='sm'>
+            <Text size="xl" weight={500} mt="md" ml="md" >{item.title}</Text>
+            <Text color='gray' ml='md' mt='md' mb={20}>{item.description}</Text>
+        </Card>
+      )}
+    </Card>
+  ));
+
+  return (
+    <>
+      {items}
+    </>
+  )
+}
     
   return (
       <MantineProvider
@@ -744,45 +845,38 @@ const handleQuestion = (q, id) => {
 
           <>
           {done ? (
+            <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
             <div style={{marginRight: 300, marginLeft: 300}}>
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
-            <Text size="xl" weight={500}  mt="md" ml="md" >{obj.title}</Text>
+            <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
             <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
             
           </Box>
-            {forms.length > 0 ?  forms.map((item) => {
-            return (
-              item.type === 1 ? (
-                <Card key={item.id} mt={20}>
-                  {handleQuestion(item.question.questionType, item.id)}
-                </Card>
-                             ) : item.type === 2 ? (
-                  <Card mt={20} style={{borderLeftWidth: 5, borderLeftColor: obj.Color}} >
-                  <Text mb={10}>{item.question.title}</Text>
-                  <Text size='xs' color='gray'>{item.question.description}</Text>
-                </Card>
-              ): item.type === 3 ? (
-                <Card mt={20} shadow={'sm'} >
-                <Image style={{marginLeft: '10%', marginRight: '10%'}} height={200} src={item.image} />
-              </Card>
-              ) : item.type === 4 ? (
-                <Card mt={20} shadow='sm'>
-  
-                </Card>
-              ) : (
-                <Card mt={20} shadow='sm'>
-            <Text size="xl" weight={500} mt="md" ml="md" >{item.title}</Text>
-            <Text color='gray' ml='md' mt='md' mb={20}>{item.description}</Text>
-                </Card>
-              )
-            )
-          }) : null}
+            {forms.length > 0 ? (
+              <RenderQuestions />
+            ) : null}
           <Group mt={20} position='apart'>
-            <Button color={obj.color}>Submit</Button>
+            <Button onClick={() => {console.log(answers)}} color={obj.color}>Submit</Button>
           </Group>
           </div>
             </MediaQuery>
+            <MediaQuery largerThan='md' styles={{display: 'none'}}>
+            <div style={{marginRight: '1%', marginLeft: '1%'}}>
+          <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
+            <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
+            <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
+            
+          </Box>
+            {forms.length > 0 ? (
+              <RenderQuestions />
+            ) : null}
+          <Group mt={20} position='apart'>
+            <Button onClick={() => {console.log(answers)}} color={obj.color}>Submit</Button>
+          </Group>
+          </div>
+            </MediaQuery>
+              </>
           ) : null}
 
          
