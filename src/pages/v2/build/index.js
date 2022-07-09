@@ -44,13 +44,13 @@ import {
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
 import { useBooleanToggle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
-import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack } from 'tabler-icons-react';
+import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Minus, CircleMinus } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
 import { uuid } from 'uuidv4';
 import { useUser } from 'lib/hooks';
-import { SliderIcon, TextAlignLeftIcon } from '@modulz/radix-icons';
+import { PlusCircledIcon, SliderIcon, TextAlignLeftIcon } from '@modulz/radix-icons';
 import { IoMdArrowDropdownCircle } from 'react-icons/io';
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
@@ -593,10 +593,28 @@ export default function AppShellDemo() {
   }
 
   const linkQuestion = (id) => {
-    setLinkCtx({
-      state: true,
-      id: id,
-    });
+    let idx = forms.findIndex((obj => obj.id == id));
+
+    let q = forms[idx];
+
+    q.linked = true;
+    setForms([...forms]);
+  }
+
+  const unlinkQuestion = (id) => {
+    let idx = forms.findIndex((obj => obj.id == id));
+    let q = forms[idx];
+
+    let linked_pos = q.linked_position;
+
+    let idx2 = forms.findIndex((obj => obj.position == linked_pos)); // finding the index of the linked question.
+    forms.splice(idx2, 1); // delete the linked question
+
+    q.linked = false;
+    q.linked_question = null;
+    q.linked_parameters = null;
+    q.linked_position = null;
+    setForms([...forms]);
   }
 
 
@@ -655,8 +673,10 @@ export default function AppShellDemo() {
     }
   }, [forms]);
   
-  const createNewQuestion = () => {
+  const createNewQuestion = (link_id, params) => {
     let id = uuid();
+    let pos = forms.length+1;
+
     let chunk = {id: id,  question: {
       questionType: 'Short Answer',
       defaultValue: 'Question',
@@ -705,8 +725,79 @@ export default function AppShellDemo() {
       polygonLastKnownLocation: false,
       polygonCustomTile: true
 
-    }, position: forms.length+1, type: 1};
+    }, position: pos, linked:false, parent:link_id == null ? false : true, parentID: link_id, linked_parameters: null, linked_question: null, linked_position: null, type: 1};
+
+    if(link_id !== null && link_id !== undefined){
+      let idx = forms.findIndex((obj => obj.id == link_id));
+      let q = forms[idx];
+      
+      q.linked_question = id;
+      q.linked_parameters = params;
+      q.linked_position = pos;
+    }
+    
     setForms(prevForms => [...prevForms, chunk]);
+  }
+
+  const linkedRadioOptions = (id) => {
+    let idx = forms.findIndex((obj => obj.id == id));
+    let q = forms[idx];
+
+    if(q.question.radioOptions == null){
+      return [];
+    } else {
+      return q.question.radioOptions
+    }
+  }
+
+  const linkControls = (id) => {
+    let option = linkedRadioOptions(id);
+    const [count, setCount] = useState([1]);
+    const [selected, setSelected] = useState([]);
+    const [remaining, setRemaining] = useState([]);
+
+    const handleItem = (val) => {
+      setSelected(oldArr => [...oldArr, val]);
+    }
+    React.useEffect(() => {
+      let arr2;
+      option.forEach(element => {
+        if(!selected.includes(element.value)){
+          setRemaining(prevArr => [...prevArr, element]);
+        }
+      });
+    }, [selected]);
+
+    const incrementCount = () => {
+      setCount(oldCount => [...oldCount, 1]);
+    }
+
+    const decrementCount = (idx) => {
+      if(idx !== 0){
+        count.splice(idx, 1);
+        setCount([...count]);
+      }
+    }
+
+    return (
+      <>
+      {count.map((item, index) => {
+        return (
+          < >
+          <Text>Show a question if response is:</Text>
+          <Select onChange={(val) => {handleItem(val)}}  data={remaining} />
+          <Button variant='subtle'  color='dark' onClick={() => {createNewQuestion(id, opt)}}>Create the question</Button>
+          <ActionIcon onClick={() => {incrementCount()}} title='Add another logic' >
+            <CirclePlus />
+          </ActionIcon>
+          <ActionIcon onClick={() => {decrementCount(index)}} title='Add another logic' >
+            <CircleMinus />
+          </ActionIcon>
+          </>
+        )
+      })}
+      </>
+    )
   }
 
   const createTitleAndDescription = () => {
@@ -768,12 +859,30 @@ export default function AppShellDemo() {
   const duplicateQuestion = (id) => {
     let index = forms.findIndex((obj => obj.id === id));
     let content = forms[index];
-    let chunk = {...content, id: uuid(), position: forms.length+1,};
+    let chunk = {...content, id: uuid(), position: forms.length+1, linked: false, linked_question: null, linked_parameters: null, linked_position: null};
     setForms(prevForms => [...prevForms, chunk]);
   }
 
   const deleteQuestion = (id) => {
     let index = forms.findIndex((obj => obj.id === id));
+    let q = forms[index];
+
+    if(q.linked){
+      let pos = q.linked_position;
+      let idx = forms.findIndex((obj => obj.position == pos));
+      forms.splice(idx, 1);
+    };
+
+    let pos2 = q.position;
+    let idx2 = forms.findIndex((obj => obj.linked_position == pos2));
+
+    if(idx2 !== -1){
+      let q = forms[idx2];
+      q.linked = false;
+      q.linked_question = null;
+      q.linked_parameters = null;
+      q.linked_position = null;
+    }
     forms.splice(index, 1);
     setForms([...forms]);
   }
@@ -2923,6 +3032,15 @@ export default function AppShellDemo() {
               </Card>
             )}
           <Divider />
+          {item.linked ? (
+            <>
+            <Group style={{width: '100%'}}  my={20} mb={20} position='center' >
+           { linkControls(item.id) }
+            </Group>
+          <Divider />
+          </>
+          ): null}
+
             <Group my={20} position='right' style={{width: '100%'}}>
               <ActionIcon title="Duplicate" onClick={() => {duplicateQuestion(item.id)}} >
                 <Copy />
@@ -2940,11 +3058,15 @@ export default function AppShellDemo() {
                 <Menu.Item>Response Validation</Menu.Item>
               </Menu>
                 ) : null}
-                              {item.type === 1 && item.question.questionType == 'Multiple Choice' ? (
-                <ActionIcon onClick={()=> {linkQuestion(item.id)}} title='Link question' >
+                              {item.type === 1 && item.question.questionType == 'Multiple Choice' && !item.linked ? (
+                <ActionIcon onClick={()=> {linkQuestion(item.id)}} title='Link question.' >
                   <Stack />
                 </ActionIcon>
-              ) : null}
+              ) : item.type === 1 && item.question.questionType == 'Multiple Choice' && item.linked && item.linked_position !== null ? (
+                <ActionIcon onClick={()=> {unlinkQuestion(item.id)}} title={`Question linked with question number ${item.linked_position}. Unlink question`} >
+                <X />
+              </ActionIcon>
+              ) :  null}
             </Group>
 
           </Card>

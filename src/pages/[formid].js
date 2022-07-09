@@ -866,13 +866,12 @@ const RenderQuestions = () => {
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
             <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
             <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
-            
           </Box>
             {forms.length > 0 ? (
               <RenderQuestions />
             ) : null}
-          <Group mt={20} position='apart'>
-            <Button onClick={() => {console.log(answers)}} color={obj.color}>Submit</Button>
+          <Group mt={20} position='center'>
+            <Button onClick={() => {console.log(answers)}} style={{backgroundColor: obj.color}} color={obj.color}>Submit</Button>
           </Group>
           </div>
             </MediaQuery>
