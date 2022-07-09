@@ -57,7 +57,7 @@ import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
 import { showNotification } from '@mantine/notifications'
 import ReactMapboxGl, { Layer, Feature } from 'react-mapbox-gl';
-import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpreadshit, UploadPDF, UploadImage, UploadAny } from './upload';
+import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpreadshit, UploadPDF, UploadImage, UploadAny } from '../components/upload';
 import 'mapbox-gl/dist/mapbox-gl.css';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 const Map = ReactMapboxGl({
