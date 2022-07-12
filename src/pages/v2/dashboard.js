@@ -783,7 +783,8 @@ function Dashboard(){
                                               <ActionIcon>
                                                 <Menu onClick={() => {handleMenuClick(item.form_id, !menuopen.state)}} opened={menuopen.state && menuopen.form_id == item.form_id} >
                                                   <Menu.Label>Manage Form</Menu.Label>
-                                                  <Menu.Item onClick={() => {handleCluster(item.title, item.form_id)}}  icon={<TableIcon size={13} />}>Open</Menu.Item>
+                                                  <Menu.Item onClick={() => {handleCluster(item.title, item.form_id)}}  icon={<TableIcon size={13} />}>View Response</Menu.Item>
+                                                  <Menu.Item icon={<Eye size={13} />} component='a' href={`/${item.form_id}`} target="_blank" >View Form</Menu.Item>
                                                   <Menu.Item icon={<Edit size={13}  />}>Edit</Menu.Item>
                                                   {item.active ? <Menu.Item onClick={() => {deactivateForm()}} icon={<X size={13}  />} >Deactivate Form</Menu.Item> : <Menu.Item onClick={() => {activateForm()}}  icon={<Check size={13}  />} >Activate Form</Menu.Item>}
                                                   <Divider />
