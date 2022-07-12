@@ -1,4 +1,4 @@
-import { Group, Text, useMantineTheme, MantineTheme } from '@mantine/core';
+import { Group, Button, Text, useMantineTheme, MantineTheme } from '@mantine/core';
 import { Upload, Photo, X, Icon as TablerIcon } from 'tabler-icons-react';
 import { Dropzone, DropzoneStatus, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useRef } from 'react';

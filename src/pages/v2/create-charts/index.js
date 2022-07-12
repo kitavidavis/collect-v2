@@ -18,13 +18,45 @@ import theme from 'theme';
 import SEO from 'components/seo';
 import { useColorScheme } from '@mantine/hooks';
 import { useStyles } from '../dashboard';
+import { useUser } from 'lib/hooks';
 
  function AppShellDemo() {
+  useUser({ redirectTo: '/auth/login' });
   const theme = useMantineTheme();
   const { classes } = useStyles();
   const [opened, setOpened] = useState(false);
+  const [userforms, setUserForms] = useState([]);
+  const [done, setDone] = useState(false);
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+  const user2 = useUser()
+  React.useEffect(() => {
+    setDone(false);
+    const fetchdata = async () => {
+      if(user2 === null){
+        return false;
+      }
 
+      const body = {
+        user_id: user2? user2.user._id : ''
+      }
+
+      await fetch('/api/getAllUserForms', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+      }).then( async function(res){
+        if(res.status === 200){
+          const data = await res.json();
+          setUserForms(data.forms.reverse());
+          setDone(true);
+        } 
+      }).catch(function(error) {
+        console.log(error);
+      })
+    }
+
+      fetchdata();
+  }, [user2]);
   return (
     <AppShell
       styles={{

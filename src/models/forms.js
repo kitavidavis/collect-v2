@@ -26,6 +26,9 @@ var FormSchema = mongoose.Schema({
     headerfont: {
         type: String
     },
+    header_image: {
+        type: String
+    },
     headersize: {
         type: String
     },
@@ -71,6 +74,7 @@ var FormSchema = mongoose.Schema({
 var Form = module.exports = mongoose.models.forms || mongoose.model('forms', FormSchema );
 
 module.exports.createForm = function(newForm, cb) {
+    console.log(newForm);
     newForm.save(cb);
 };
 

@@ -43,9 +43,10 @@ import {
   useMantineColorScheme,
   Drawer,
   Divider,
+  Table,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
-import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox } from 'tabler-icons-react';
+import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
@@ -59,6 +60,8 @@ import * as d3 from "d3";
 import serverRack from 'assets/images/blue-logo.png';
 import Image  from 'components/image';
 import { Bar } from 'react-chartjs-2';
+import { TableIcon } from '@modulz/radix-icons';
+import { showNotification } from '@mantine/notifications';
 var BarChart = require('react-d3-components').BarChart;
 var PieChart = require('react-d3-components').PieChart;
 
@@ -291,12 +294,30 @@ function Dashboard(){
     const [email, setEmail] = useState('');
     const [active, setActive] = useState('aggregate');
     const [cluster, setCluster] = useState('');
+    const [clusterid, setClusterID] = useState('');
+    const [activetab, setActiveTab] = useState(0);
+    const [ctx, setCTX] = useState([]);
+    const [activeid, setActiveId] = useState('');
     const [item, setItems] = useState([]);
+    const [menuopen, setMenuOpen] = useState({
+      form_id: null,
+      state: false
+    });
+    const { height, width } = useViewportSize();
 
-    const handleCluster = (str) => {
+    const handleCluster = (str, id) => {
       let newItems = item.concat([{title: str, href: '#'}])
+      let idx = userforms.findIndex((obj => obj.form_id == id));
+      let ctx = userforms[idx].question;
+      setCTX(ctx);
       setItems(newItems);
       setCluster(str);
+      setClusterID(id);
+
+      setMenuOpen({
+        form_id: '',
+        state: false
+      });
     }
 
 
@@ -363,6 +384,7 @@ function Dashboard(){
 
     const Layout = () => {
       const theme = useMantineTheme();
+      const [query, setQuery] = useState('');
       const { classes } = useStyles();
       const [opened, setOpened] = useState(false);
       const [drawer, setDrawer] = useState(false);
@@ -525,6 +547,105 @@ function Dashboard(){
         createSizeGraph();
       }, []);
 
+      const deleteForm = async (form_id) => {
+        const body = {
+          form_id: form_id
+        };
+
+        setMenuOpen({
+          form_id: '',
+          state: false
+        });
+
+        try {
+          await fetch('/api/deleteform', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+          }).then(function(res){
+            if(res.status === 200){
+              let idx = userforms.findIndex((obj => obj.form_id == form_id));
+              if(idx != -1){
+                userforms.splice(idx, 1);
+              }
+      
+              setUserForms([...userforms]);
+            }
+          });
+        } catch(error){
+          console.log(error);
+        }
+      }
+
+      const activateForm = async () => {
+        const body = {
+          form_id: activeid
+        };
+
+        setMenuOpen({
+          form_id: '',
+          state: false
+        });
+
+        try {
+          await fetch('/api/activateform', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+          }).then(function(res) {
+            if(res.status == 200){
+              let idx = userforms.findIndex((obj => obj.form_id == activeid));
+              let q = userforms[idx];
+
+              q.active = true;
+
+              setUserForms([...userforms]);
+      
+            }
+          })
+        } catch(error) {
+          console.log(error);
+        }
+      }
+
+      const deactivateForm = async () => {
+        const body = {
+          form_id: activeid
+        };
+
+        setMenuOpen({
+          form_id: '',
+          state: false
+        });
+
+        try {
+          await fetch('/api/deactivateform', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+          }).then(function(res) {
+            if(res.status == 200){
+              let idx = userforms.findIndex((obj => obj.form_id == activeid));
+              let q = userforms[idx];
+
+              q.active = false;
+
+              setUserForms([...userforms]);
+      
+            }
+          })
+        } catch(error) {
+          console.log(error);
+        }
+      }
+
+      const handleMenuClick = (id, state) => {
+        setMenuOpen({
+          form_id: id,
+          state: state
+        });
+        setActiveId(id);
+      }
      
       return (
         <AppShell
@@ -623,31 +744,104 @@ function Dashboard(){
                 <>
               <Group mt={10}>
               <Title order={2} className={classes.title} align="center">
-              Active Forms
+               Form Clusters
             </Title>
+              </Group>
+              <Group mt={10} grow>
+                <TextInput onChange={(e) => {setQuery(e.currentTarget.value)}} value={query} placeholder='Search forms...' rightSection={<Search />} />
               </Group>
                 {done ? (
                             userforms.length > 0 ? 
                               
                                  (
-                                  <Paper radius={'lg'} style={{}} mt={20} shadow='md' p={'md'} >
+                                  <>
+                                  <Table mt={20} highlightOnHover >
+                                    <thead>
+                                      <tr >
+                                        <th style={{whiteSpace: 'nowrap'}}>Form Name</th>
+                                        <th style={{whiteSpace: 'nowrap'}}>Description</th>
+                                        <th style={{whiteSpace: 'nowrap'}}>Status</th>
+                                        <th style={{whiteSpace: 'nowrap'}}>Created At</th>
+                                        <th style={{whiteSpace: 'nowrap'}}>Actions</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {userforms.filter(item => {
+                                        if(query === ''){
+                                          return item;
+                                        } else if(item.title.toLowerCase().includes(query.toLowerCase())) {
+                                          return item;
+                                        }
+                                      }).map((item, index) => {
+                                        return (
+                                          <tr>
+                                            <td>{item.title}</td>
+                                            <td>{item.description}</td>
+                                            <td>{item.active ? <Badge size='xs' >Active</Badge> : <Badge size='xs' color='red' >Inactive</Badge>}</td>
+                                            <td>{item.createdAt}</td>
+                                            <td>
+                                              <ActionIcon>
+                                                <Menu onClick={() => {handleMenuClick(item.form_id, !menuopen.state)}} opened={menuopen.state && menuopen.form_id == item.form_id} >
+                                                  <Menu.Label>Manage Form</Menu.Label>
+                                                  <Menu.Item onClick={() => {handleCluster(item.title, item.form_id)}}  icon={<TableIcon size={13} />}>Open</Menu.Item>
+                                                  <Menu.Item icon={<Edit size={13}  />}>Edit</Menu.Item>
+                                                  {item.active ? <Menu.Item onClick={() => {deactivateForm()}} icon={<X size={13}  />} >Deactivate Form</Menu.Item> : <Menu.Item onClick={() => {activateForm()}}  icon={<Check size={13}  />} >Activate Form</Menu.Item>}
+                                                  <Divider />
+                                                  <Menu.Label>Be Careful</Menu.Label>
+                                                  <Menu.Item onClick={() => {deleteForm(item.form_id)}} icon={<Trash color='red' size={13}  />} >Delete</Menu.Item>
+                                                </Menu>
+                                              </ActionIcon>
+                                            </td>
+                                          </tr>
+                                        )
+                                      })}
+                                    </tbody>
+                                  </Table>
+                                </>
+                                )
+                               : (
+                                <Group position='center' mt={'10%'}>
+                                  <Group direction='column'>
+                                  <Text>You have 0 active forms</Text>
+                                  <Button leftIcon={<Plus />} component="a" href='/v2/build'>Create New Form</Button>
+                                  </Group>
+                                </Group>
+                              )
+                ) : (
+                  <Group position='center' mt={'10%'}>
+                    <Loader variant='dots' color='dark' />
+                  </Group>
+                )}
+              </>
+  ) : (
+    <>
+    <Group mt={10}>
+      <ActionIcon onClick={() => {setCluster('')}} title='Go Back' >
+        <ArrowBack size={20} />
+      </ActionIcon>
+    </Group>
+    <Group mt={20}>
+    <Title order={2} className={classes.title} align="center">
+    {cluster}
+  </Title>
+  </Group>
+    <Tabs active={activetab} onTabChange={setActiveTab} position='apart' mt={10} >
+      <Tabs.Tab label="Overview" value={"Overview"} >
+      <Paper radius={'lg'} style={{}} mt={20} shadow='md' p={'md'} >
                                   <Group position='apart' className={classes.group} >
                                   <Group position='left' mb={20} >
-                                    <Anchor onClick={() => {handleCluster('Turkana')}} size='xs'  href='#'>
-                                      {userforms[0].title}
+                                    <Anchor size='xs'  href='#'>
+                                      {cluster}
                                     </Anchor>
                                     <Button onClick={() => {copyFormId(userforms[0].form_id)}} size='xs'  radius={20}  variant='outline'>
                                       {clipboard.copied ? "Copied" : "Copy URL"}
                                     </Button>
-                                    <Button size='xs'  onClick={() => {handleCluster('Turkana')}} radius={20} variant='outline'>
+                                    <Button onClick={() => {setActiveTab(2)}} size='xs'  radius={20} variant='outline'>
                                       Browse Response
                                     </Button>
                                     <Button size='xs'  radius={20} variant='outline'>
                                       <Menu control={<ActionIcon><Dots /></ActionIcon>} >
-                                        <Menu.Item component='a' href={`/${userforms[0].form_id}`} target="_blank" >Open Form</Menu.Item>
-                                        <Menu.Item >Edit Configuration </Menu.Item>
-                                        <Menu.Item>Load Sample Dataset</Menu.Item>
-                                        <Menu.Item>Terminate Form</Menu.Item>
+                                        <Menu.Item component='a' href={`/${clusterid}`} target="_blank" >Open Form</Menu.Item>
                                       </Menu>
                                     </Button>
                                     </Group>
@@ -718,39 +912,32 @@ function Dashboard(){
                                     </Group>
                                   </Group>
                                 </Paper>
-                                )
-                               : (
-                                <Group position='center' mt={'10%'}>
-                                  <Group direction='column'>
-                                  <Text>You have 0 active forms</Text>
-                                  <Button leftIcon={<Plus />} component="a" href='/v2/build'>Create New Form</Button>
-                                  </Group>
-                                </Group>
-                              )
-                ) : (
-                  <Group position='center' mt={'10%'}>
-                    <Loader variant='dots' color='dark' />
-                  </Group>
-                )}
-              </>
-  ) : (
-    <>
-    <Group mt={10}>
-      <ActionIcon onClick={() => {setCluster('')}} title='Go Back' >
-        <ArrowBack size={20} />
-      </ActionIcon>
-    </Group>
-    <Group mt={20}>
-    <Title order={2} className={classes.title} align="center">
-    {cluster}
-  </Title>
-  </Group>
-    <Tabs position='apart' mt={10} >
-      <Tabs.Tab label="Overview" value={"Overview"} >Overview</Tabs.Tab>
+      </Tabs.Tab>
       <Tabs.Tab label="Real Time">Real Time</Tabs.Tab>
-      <Tabs.Tab label="Forms" value={"Response"}>Response</Tabs.Tab>
-      <Tabs.Tab label="Search" value={"Search"}>Search</Tabs.Tab>
-    </Tabs>
+      <Tabs.Tab label="Response" value={"Response"}>
+        <Group mt={5} mb={5} grow>
+          <TextInput placeholder='Filter response' rightSection={<Search />} />
+        </Group>
+      <Table width={width} style={{overflowX: 'auto', 
+      display: 'block',
+  maxWidth:  '-moz-fit-content',
+  maxWidth: 'fit-content',
+  whiteSpace: 'nowrap'}}>
+        <thead style={{overflowX: 'auto'}}>
+          <tr style={{overflowX: 'auto', alignItems: 'space-between'}}>
+          {ctx.map((item, index) => {
+            if(item.type == 1){
+              return (
+                <th style={{whiteSpace: 'nowrap'}} key={index}>{item.question.defaultValue}</th>
+              )
+            }
+        })}
+          </tr>
+        </thead>
+
+      </Table>
+      </Tabs.Tab>
+          </Tabs>
     </>
   )
             ) : null }

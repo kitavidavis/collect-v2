@@ -44,7 +44,7 @@ import {
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
 import { useBooleanToggle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
-import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Minus, CircleMinus } from 'tabler-icons-react';
+import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Minus, CircleMinus, Upload, Link } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
@@ -174,6 +174,7 @@ const initialState = {
   QuestionSize: 12,
   TextFont: 'Roboto',
   TextSize: 11,
+  HeaderImage: null,
   CollectEmailAddress: false,
   AllowResponseEditing: false,
   LimitToOneResponse: false,
@@ -266,6 +267,13 @@ function FormReducer(state, action){
       return {
         ...state,
         TextSize: action.textsize
+      };
+      break;
+
+    case 'UPDATE_HEADER_IMAGE':
+      return {
+        ...state,
+        HeaderImage: action.headerimage
       };
       break;
 
@@ -380,6 +388,7 @@ export function HeaderPage() {
       title: formbuild_data.title,
       form_id: formbuild_data.form_id,
       user_id: formbuild_data.user_id,
+      header_image: formbuild_data.header_image,
       description: formbuild_data.description,
       color: formbuild_data.color,
       background: formbuild_data.background,
@@ -652,6 +661,7 @@ export default function AppShellDemo() {
         color: state.Color,
         background: state.Background,
         headerfont: state.HeaderFont,
+        header_image: state.HeaderImage,
         headersize: state.HeaderSize,
         questionfont: state.QuestionFont,
         textfont: state.TextFont,
@@ -671,7 +681,7 @@ export default function AppShellDemo() {
     if(user2){
       savedata();
     }
-  }, [forms]);
+  }, [forms, state]);
   
   const createNewQuestion = (link_id, params) => {
     let id = uuid();
@@ -697,7 +707,7 @@ export default function AppShellDemo() {
         video: false,
         presentation: false,
         drawing: false,
-        image: false,
+        image: true,
         audio: false
       },
       linearFrom: 0,
@@ -760,7 +770,6 @@ export default function AppShellDemo() {
       setSelected(oldArr => [...oldArr, val]);
     }
     React.useEffect(() => {
-      let arr2;
       option.forEach(element => {
         if(!selected.includes(element.value)){
           setRemaining(prevArr => [...prevArr, element]);
@@ -807,16 +816,29 @@ export default function AppShellDemo() {
   };
 
   const createSectionImage = () => {
-    setImageModal(false);
-    let id = uuid();
-    let chunk = {id: id, image: selectedimage, type: 3};
-    setForms(prevForms => [...prevForms, chunk]);
-    setImg('');
-    setSelectedImage('');
-    setRes([]);
+    let control = localStorage.getItem('gc-hi-param');
+    if(control !== null){
+      dispatch({type: 'UPDATE_HEADER_IMAGE', headerimage: selectedimage });
+      setImg('');
+      setSelectedImage('');
+      setRes([]);
+      setImageModal(false);
+
+    } else {
+      setImageModal(false);
+      let id = uuid();
+      let chunk = {id: id, image: selectedimage, type: 3};
+      setForms(prevForms => [...prevForms, chunk]);
+      setImg('');
+      setSelectedImage('');
+      setRes([]);
+    }
     }
 
-  const createImage = () => {
+  const createImage = (param) => {
+    if(param !== null){
+      localStorage.setItem('gc-hi-param', param);
+    }
     setImageModal(true);
   }
 
@@ -1512,7 +1534,7 @@ export default function AppShellDemo() {
       video: false,
       presentation: false,
       drawing: false,
-      image: false,
+      image: true,
       audio: false
     });
 
@@ -1542,14 +1564,14 @@ export default function AppShellDemo() {
         {specific ? (
           <Group>
             <SimpleGrid cols={2}>
-              <MantineCheckbox checked={specifics.document} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, document: e.currentTarget.checked}))}} label="Document" />
-              <MantineCheckbox checked={specifics.spreadshit} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, spreadshit: e.currentTarget.checked}))}}  label="Spreadshit" />
-              <MantineCheckbox checked={specifics.pdf} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, pdf: e.currentTarget.checked}))}}  label="PDF" />
-              <MantineCheckbox checked={specifics.video} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, video: e.currentTarget.checked}))}}  label="Video" />
-              <MantineCheckbox checked={specifics.presentation} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, presentation: e.currentTarget.checked}))}}  label="Presentation" />
-              <MantineCheckbox checked={specifics.drawing} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, drawing: e.currentTarget.checked}))}}  label="Drawing" />
-              <MantineCheckbox checked={specifics.image} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, image: e.currentTarget.checked}))}}  label="Image" />
-              <MantineCheckbox checked={specifics.audio} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, audio: e.currentTarget.checked}))}}  label="Audio" />
+              <MantineCheckbox checked={specifics.document} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, document: e.target.checked}))}} label="Document" />
+              <MantineCheckbox checked={specifics.spreadshit} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, spreadshit: e.target.checked}))}}  label="Spreadshit" />
+              <MantineCheckbox checked={specifics.pdf} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, pdf: e.target.checked}))}}  label="PDF" />
+              <MantineCheckbox checked={specifics.video} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, video: e.target.checked}))}}  label="Video" />
+              <MantineCheckbox checked={specifics.presentation} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, presentation: e.target.checked}))}}  label="Presentation" />
+              <MantineCheckbox checked={specifics.drawing} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, drawing: e.target.checked}))}}  label="Drawing" />
+              <MantineCheckbox checked={specifics.image} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, image: e.target.checked}))}}  label="Image" />
+              <MantineCheckbox checked={specifics.audio} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, audio: e.target.checked}))}}  label="Audio" />
             </SimpleGrid>
           </Group>
         ) : null}
@@ -3200,7 +3222,7 @@ export default function AppShellDemo() {
             </Group>
             <Group spacing='xs' direction='column' ml={20} mr={20} grow>
             <Text my={20} weight={500} >Header</Text>
-            <Button variant='outline' leftIcon={<Photo />}>Choose Image</Button>
+            <Button onClick={() => {createImage(true)}} variant='outline' leftIcon={<Photo />}>Choose Image</Button>
             </Group>
             <Group spacing='xs' direction='column' ml={20} mr={20} grow>
               <Text my={20} weight={500}>Color</Text>
@@ -3231,11 +3253,18 @@ export default function AppShellDemo() {
         <>
         {imagemodal ? (
                 <Modal overflow='inside' opened={imagemodal} size='100%' >
-                  <Group mb={20} position='apart' grow>
-                    <TextInput placeholder='Search images...' value={img} onChange={(e) => {setImg(e.currentTarget.value)}} />
-                    <ActionIcon onClick={() => {fetchImages()}} >
-                      <Search />
-                    </ActionIcon>
+                  <Group mb={20}>
+                    <TextInput width={'100%'} placeholder='Search images...' value={img} onChange={(e) => {setImg(e.currentTarget.value)}} />
+                    <Button disabled={img !== '' ? false : true} leftIcon={<Search />} onClick={() => {fetchImages()}} >
+                      Search free online photos
+                    </Button>
+                    <Button leftIcon={<Upload />} variant="outline" >
+                      Upload
+                    </Button>
+                    <Button leftIcon={<Link />} variant="outline" >
+                      Image URL
+                    </Button>
+                    
                   </Group>
                   <Divider />
                   <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
@@ -3351,6 +3380,11 @@ export default function AppShellDemo() {
   
         <MediaQuery smallerThan={"lg"} styles={{display: 'none'}}>
         <div style={{marginRight: state.CustomTheme ? 0: 330, marginLeft: 200}}>
+        {state.HeaderImage !== null ? ( 
+                <Card mt={20} shadow={'sm'} >
+                        <Image  height={200} src={state.HeaderImage} />
+                </Card>
+               ) : null} 
         <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: state.Color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
           <Text size="xl" weight={500} style={{fontFamily: state.HeaderFont, fontSize: state.HeaderSize}}  mt="md" ml="md" >{state.FormName}</Text>
           <TextInput  size='xs' style={{fontFamily: state.TextFont, fontSize: state.TextSize}} mb={20} mt="xs" ml="md" mr="md" variant={readonly ? 'unstyled' : null} readOnly={readonly} onChange={(e) => {setFormDesc(e.currentTarget.value)}} onFocus={(e) => {handleFocus(e)}} onBlur={(e) => {handleBlur(e)}} placeholder="Description (optional)"  />

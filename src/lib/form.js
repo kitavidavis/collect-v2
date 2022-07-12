@@ -10,6 +10,7 @@ export function createForm(obj){
             color: obj.color,
             background: obj.background,
             headerfont: obj.headerfont,
+            header_image: obj.header_image,
             headersize: obj.headersize,
             questionfont: obj.questionfont,
             textfont: obj.textfont,
@@ -59,6 +60,42 @@ export async function findSpecificUserForms({ user_id }) {
                 resolve({forms: forms});
             } else {
                 resolve({forms: null});
+            }
+        })
+    })
+}
+
+export async function deleteSpecificForm({ form_id }) {
+    return new Promise((resolve, reject) => {
+        Form.deleteForm(form_id, function(err, form){
+            if(err) throw err;
+
+            if(form){
+                resolve({done: true});
+            }
+        })
+    })
+}
+
+export async function deactivateSpecificForm({ form_id }) {
+    return new Promise((resolve, reject) => {
+        Form.deactivateForm(form_id, function(err, form) {
+            if(err) throw err;
+
+            if(form){
+                resolve({done: true})
+            }
+        })
+    })
+}
+
+export async function activateSpecificForm({ form_id }) {
+    return new Promise((resolve, reject) => {
+        Form.activateForm(form_id, function(err, form){
+            if(err) throw err;
+
+            if(form){
+                resolve({done: true});
             }
         })
     })

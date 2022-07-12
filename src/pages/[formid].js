@@ -41,10 +41,11 @@ import {
   Slider,
   Modal,
   Image,
+  Alert,
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
 import { useBooleanToggle, useDocumentTitle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
-import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck } from 'tabler-icons-react';
+import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck, Lock, LockOpen, AlertCircle } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
@@ -56,13 +57,15 @@ import { IoMdArrowDropdownCircle, IoMdSave } from 'react-icons/io';
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
 import { showNotification } from '@mantine/notifications'
-import ReactMapboxGl, { Layer, Feature } from 'react-mapbox-gl';
+import ReactMapboxGl, { Layer, Feature, Marker, Source } from 'react-mapbox-gl';
 import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpreadshit, UploadPDF, UploadImage, UploadAny } from '../components/upload';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import Pin from 'components/pin';
+import MapIcon from 'components/marker.gif'
+import { pointRadial } from 'd3';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 const Map = ReactMapboxGl({
   accessToken: accessToken,
-  
 });
  
 const colors = ['#101113', '#212529', '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
@@ -182,6 +185,9 @@ export default function AppShellDemo() {
   const [pid, setPID] = useState('');
   const [obj, setObj] = useState(null);
   const [done, setDone] = useState(false);
+  const [nullform, setNullForm] = useState(false);
+
+  const [errors, setErrors] = useState([]);
   const [answers, setAnswers] = useState([]);
 
   useDocumentTitle(obj === null ? 'Loading...' : obj.title + ' | '+ obj.description)
@@ -240,7 +246,8 @@ export default function AppShellDemo() {
             setForms(res.form.question);
             setDone(true);
           } else {
-            console.log('Null Form');
+            setDone(true);
+            setNullForm(true);
           }
   
         }
@@ -382,24 +389,41 @@ const handleDropdown = (id) => {
 const handleFileUpload = (id) => {
   let idx = forms.findIndex((obj => obj.id == id));
   let q = forms[idx];
+  let item = forms[idx];
   
   return (
     q.question.uploadSpecifics.document ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadDocument />
+      </InputWrapper>
     ) : q.question.uploadSpecifics.spreadshit ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadSpreadshit />
+      </InputWrapper>
     ) : q.question.uploadSpecifics.pdf ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadPDF />
+      </InputWrapper>
     ) : q.question.uploadSpecifics.video ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadVideo />
+      </InputWrapper>
     ) : q.question.uploadSpecifics.audio ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadAudio />
+      </InputWrapper>
     ) : q.question.uploadSpecifics.presentation ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadPresentation />
+      </InputWrapper>
     ) : q.question.uploadSpecifics.image ? (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadImage />
+      </InputWrapper>
     ) : (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <UploadAny />
+      </InputWrapper>
     )
   )
 }
@@ -465,7 +489,7 @@ const handleTime = (id) => {
       let chunk = {id: id, response: time};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
-  }, []);
+  }, [time]);
 
   return (
   <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
@@ -479,9 +503,12 @@ const handlePoint = (id) => {
   const [lng1, setLng1] = useState(null);
   const [acc1, setAcc1] = useState(null);
   const [alt1, setAlt1] = useState(null);
+  const [locked, setLocked] = useState(false);
 
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
+  const [point, setPoint] = useState({});
 
 
   const handleGPS = () => {
@@ -491,6 +518,8 @@ const handlePoint = (id) => {
         setLng1(parseFloat(position.coords.longitude));
         setAcc1(parseFloat(position.coords.accuracy));
         setAlt1(parseFloat(position.coords.altitude));
+
+        setPoint(position);
 
       }, (error) => {showNotification({
         title: 'Check your location settings',
@@ -505,31 +534,35 @@ const handlePoint = (id) => {
     }
   }
 
-  const deletePoint = () => {
-    setLat1(null);
-    setLng1(null);
-    setAcc1(null);
-    setAlt1(null);
+  const lockCoordinate = () => {
+
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx == -1){
+      let chunk = {id: id, response: point };
+      setAnswers(prevArr => [...prevArr, chunk]);
+    } else {
+      let item = answers[idx];
+      item.response = point;
+    }
+
+    setLocked(!locked);
   }
 
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <Group position='right'>
-      <ActionIcon onClick={() => {handleGPS()}} title='Capture Point'>
-        <Gps />
-      </ActionIcon>
-      <ActionIcon onClick={() => {deletePoint()}} title='Delete Point' >
-        <Trash />
-      </ActionIcon>
+    <Group position='right' mb={10}>
+    {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
+      {lat1 !== null ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
+: null} 
     </Group>
     <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
       <Grid.Col span={3}>
         <Group direction='column'>
-          <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng1} size='sm' label='Longitude' />
-          <TextInput value={alt1}  size='sm' label="Altitude" />
-          <TextInput value={acc1}  size='sm' label="Accuracy" />
+          <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
+          <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
+          <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
+          <TextInput disabled={locked} value={acc1}  size='sm' label="Accuracy" />
         </Group>
       </Grid.Col>
 
@@ -540,12 +573,15 @@ const handlePoint = (id) => {
     height: '100%',
     width: '100%'
   }}
-  center={center}
+  zoom={lat1 !== null ? [20] : [0]}
+  center={lat1 !== null ? [lng1, lat1] : center}
 >
-{lat !== null ? (
-    <Layer type="symbol" id="marker" layout={{ 'icon-image': 'marker-15' }}>
-    <Feature coordinates={[lng, lat]} />
-  </Layer>
+{lat1 !== null ? (
+  <Marker
+  coordinates={[lng1, lat1]}
+  anchor="bottom">
+    <img height={30} width={30} src={MapIcon}/>
+</Marker>
 ) : null}
 </Map>      </Grid.Col>
     </Grid>
@@ -564,16 +600,32 @@ const handlePoint = (id) => {
 }
 
 const handlePolyline = (id) => {
+  const [lat1, setLat1] = useState(null);
+  const [lng1, setLng1] = useState(null);
+  const [acc1, setAcc1] = useState(null);
+  const [alt1, setAlt1] = useState(null);
+  const [locked, setLocked] = useState(false);
+
+  const [polyline, setPolyline] = useState([]);
+  const [coords, setCoords] = useState([]);
+
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
 
   const handleGPS = () => {
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition((position) => {
-        document.getElementById('lat-'+id).value = position.coords.latitude;
-        document.getElementById('lng-'+id).value = position.coords.longitude;
-        document.getElementById('acc-'+id).value =  position.coords.accuracy;
-        document.getElementById('alt-'+id).value = position.coords.altitude;
+        setLat1(parseFloat(position.coords.latitude));
+        setLng1(parseFloat(position.coords.longitude));
+        setAcc1(parseFloat(position.coords.accuracy));
+        setAlt1(parseFloat(position.coords.altitude));
+
+        let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
+        setCoords(prevArr => [...prevArr, chunk]);
+
+        setPolyline(prevArr => [...prevArr, position]);
+
       }, (error) => {showNotification({
         title: 'Check your location settings',
         message: 'Seems like your device is not configured well',
@@ -587,27 +639,33 @@ const handlePolyline = (id) => {
     }
   }
 
+  const lockCoordinate = () => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx == -1){
+      let chunk = {id: id, response: polyline};
+      setAnswers(prevArr => [...prevArr, chunk]);
+    } else {
+      let item = answers[idx];
+      item.response = polyline;
+    }
+    setLocked(!locked);
+  }
+
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <Group position='right'>
-      <ActionIcon onClick={() => {handleGPS()}} title='Capture Point'>
-        <Gps />
-      </ActionIcon>
-      <ActionIcon title='Finish' >
-        <IoMdSave />
-      </ActionIcon>
-      <ActionIcon title='Delete Point' >
-        <Trash />
-      </ActionIcon>
+    <Group position='right' mb={10}>
+    {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
+      {polyline.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
+: null} 
     </Group>
-    <MediaQuery smallerThan={'lg'} styles={{display: 'none'}}>
+    <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
       <Grid.Col span={3}>
         <Group direction='column'>
-          <TextInput id={'lat-'+id} size='sm' label='Latitude' />
-          <TextInput id={'lat-'+id} size='sm' label='Longitude' />
-          <TextInput id={'lat-'+id} size='sm' label="Altitude" />
-          <TextInput id={'lat-'+id} size='sm' label="Accuracy" />
+          <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
+          <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
+          <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
+          <TextInput disabled={locked} value={acc1}  size='sm' label="Accuracy" />
         </Group>
       </Grid.Col>
 
@@ -618,43 +676,63 @@ const handlePolyline = (id) => {
     height: '100%',
     width: '100%'
   }}
-  center={center}
+  zoom={lat1 !== null ? [20] : [0]}
+  center={lat1 !== null ? [lng1, lat1] : center}
 >
-{lat !== '' ? (
-    <Layer type="symbol" id="marker" layout={{ 'icon-image': 'marker-15' }}>
-    <Feature coordinates={[parseFloat(lng), parseFloat(lat)]} />
-  </Layer>
-) : null}
+{coords.map((item, index) => {
+  return (
+    <Marker
+          key={`marker-${index}`}
+          coordinates={[item[0], item[1]]}
+          anchor="bottom"
+        >
+          <Pin />
+        </Marker>
+  )
+})}
 </Map>      </Grid.Col>
     </Grid>
     </MediaQuery>
 
     <MediaQuery largerThan='md' styles={{display: 'none'}}>
-      <Group direction='column' mb={20}>
-      <Group direction='column'>
-          <TextInput id={'lat-'+id} size='sm' label='Latitude' />
-          <TextInput id={'lat-'+id} size='sm' label='Longitude' />
-          <TextInput id={'lat-'+id} size='sm' label="Altitude" />
-          <TextInput id={'lat-'+id} size='sm' label="Accuracy" />
+    <Group direction='column'>
+          <TextInput value={lat1} size='sm' label='Latitude' />
+          <TextInput  value={lng} size='sm' label='Longitude' />
+          <TextInput value={alt1}  size='sm' label="Altitude" />
+          <TextInput value={acc1}  size='sm' label="Accuracy" />
         </Group>
-      </Group>
-    </MediaQuery> 
+    </MediaQuery>
   </InputWrapper>
   )
 }
 
 const handlePolygon = (id) => {
+  const [lat1, setLat1] = useState(null);
+  const [lng1, setLng1] = useState(null);
+  const [acc1, setAcc1] = useState(null);
+  const [alt1, setAlt1] = useState(null);
+  const [locked, setLocked] = useState(false);
+
+  const [polygon, setPolygon] = useState([]);
+  const [coords, setCoords] = useState([]);
+
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
-  let arr = [];
+
+
   const handleGPS = () => {
     if(navigator.geolocation){
       navigator.geolocation.getCurrentPosition((position) => {
-        document.getElementById('lat-'+id).value = position.coords.latitude;
-        document.getElementById('lng-'+id).value = position.coords.longitude;
-        document.getElementById('acc-'+id).value =  position.coords.accuracy;
-        document.getElementById('alt-'+id).value = position.coords.altitude;
-        arr.push(position);
+        setLat1(parseFloat(position.coords.latitude));
+        setLng1(parseFloat(position.coords.longitude));
+        setAcc1(parseFloat(position.coords.accuracy));
+        setAlt1(parseFloat(position.coords.altitude));
+
+        let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
+        setCoords(prevArr => [...prevArr, chunk]);
+
+        setPolygon(prevArr => [...prevArr, position]);
+
       }, (error) => {showNotification({
         title: 'Check your location settings',
         message: 'Seems like your device is not configured well',
@@ -668,47 +746,35 @@ const handlePolygon = (id) => {
     }
   }
 
-  const closePolygon = () => {
-    if(arr.length < 3){
-      showNotification({
-        title: 'Error!',
-        message: "Pick atleast three points to close polygon",
-        color: 'red'
-      });
+  const lockCoordinate = () => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx == -1){
+      let chunk = {id: id, response: polygon};
+      setAnswers(prevArr => [...prevArr, chunk]);
     } else {
-      showNotification({
-        title: 'Done',
-        message: 'Polygon created'
-      })
+      let item = answers[idx];
+      item.response = polygon;
+      setAnswers([...answers]);
     }
+
+    setLocked(!locked);
   }
 
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <Group position='right'>
-      <ActionIcon id={'gps-'+id} onClick={() => {handleGPS()}} title='Capture Point'>
-        <Gps />
-      </ActionIcon>
-      <ActionIcon id={'close-'+id} onClick={() => {closePolygon()}} title='Close Polygon'>
-        <LoopIcon />
-      </ActionIcon>
-      <ActionIcon title='Delete Point' >
-        <Trash />
-      </ActionIcon>
+    <Group position='right' mb={10}>
+      {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
+      {polygon.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
+: null} 
     </Group>
+    <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
       <Grid.Col span={3}>
-        <Group spacing='xs'></Group>
-        {arr.map((item, index) => {
-          return (
-            <CircleCheck key={index} size={10} />
-          )
-        })}
         <Group direction='column'>
-          <TextInput id={'lat-'+id} size='sm' label='Latitude' />
-          <TextInput id={'lng-'+id} size='sm' label='Longitude' />
-          <TextInput id={'alt-'+id} size='sm' label="Altitude" />
-          <TextInput id={'acc-'+id}  size='sm' label="Accuracy" />
+          <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
+          <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
+          <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
+          <TextInput disabled={locked} value={acc1}  size='sm' label="Accuracy" />
         </Group>
       </Grid.Col>
 
@@ -719,15 +785,35 @@ const handlePolygon = (id) => {
     height: '100%',
     width: '100%'
   }}
-  center={center}
+  zoom={lat1 !== null ? [20] : [0]}
+  center={lat1 !== null ? [lng1, lat1] : center}
+  onClick={(event) => {
+    console.log(event);
+  }}
 >
-{lat !== '' ? (
-    <Layer type="symbol" id="marker" layout={{ 'icon-image': 'marker-15' }}>
-    <Feature coordinates={[parseFloat(lng), parseFloat(lat)]} />
-  </Layer>
-) : null}
+{coords.map((item, index) => {
+  return (
+    <Marker
+          key={`marker-${index}`}
+          coordinates={[item[0], item[1]]}
+          anchor="bottom"
+        >
+          <Pin />
+        </Marker>
+  )
+})}
 </Map>      </Grid.Col>
     </Grid>
+    </MediaQuery>
+
+    <MediaQuery largerThan='md' styles={{display: 'none'}}>
+    <Group direction='column'>
+          <TextInput value={lat1} size='sm' label='Latitude' />
+          <TextInput  value={lng} size='sm' label='Longitude' />
+          <TextInput value={alt1}  size='sm' label="Altitude" />
+          <TextInput value={acc1}  size='sm' label="Accuracy" />
+        </Group>
+    </MediaQuery>
   </InputWrapper>
   )
 }
@@ -844,21 +930,35 @@ const RenderQuestions = () => {
       >
 
           <>
-          {done ? (
+          {done && !nullform ? (
             <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
             <div style={{marginRight: 300, marginLeft: 300}}>
+              {obj.header_image !== null && obj.header_image !== undefined ? ( 
+                <Card mt={20} shadow={'sm'} >
+                        <Image  height={400} src={obj.header_image} />
+                </Card>
+               ) : null}
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
             <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
             <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
             
           </Box>
-            {forms.length > 0 ? (
+            {forms.length > 0 && obj.active ? (
               <RenderQuestions />
+            ) : forms.length > 0 && !obj.active ? (
+              <Paper mt={20} p='md' >
+              <Alert icon={<AlertCircle size={16} />} title="Bummer" color="red">
+      This form is no longer receiving responses.
+    </Alert>
+            </Paper>
             ) : null}
-          <Group mt={20} position='apart'>
-            <Button onClick={() => {console.log(answers)}} color={obj.color}>Submit</Button>
+
+          {forms.length > 0 && obj.active ? (
+            <Group mt={20} position='center'>
+            <Button onClick={() => {console.log(answers)}} style={{backgroundColor: obj.color}}  color={obj.color}>Submit</Button>
           </Group>
+            ) : null}
           </div>
             </MediaQuery>
             <MediaQuery largerThan='md' styles={{display: 'none'}}>
@@ -876,6 +976,12 @@ const RenderQuestions = () => {
           </div>
             </MediaQuery>
               </>
+          ) : done && nullform ? (
+            <Paper mt={20} p='md' mr={'10%'} ml={'10%'} >
+              <Alert icon={<AlertCircle size={16} />} title="Bummer!" color="red">
+      Something terrible happened! This form cannot be found!
+    </Alert>
+            </Paper>
           ) : null}
 
          
