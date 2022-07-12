@@ -963,6 +963,11 @@ const RenderQuestions = () => {
             </MediaQuery>
             <MediaQuery largerThan='md' styles={{display: 'none'}}>
             <div style={{marginRight: '1%', marginLeft: '1%'}}>
+            {obj.header_image !== null && obj.header_image !== undefined ? ( 
+                <Card mt={20} shadow={'sm'} >
+                        <Image  height={400} src={obj.header_image} />
+                </Card>
+               ) : null}
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
             <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
             <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
