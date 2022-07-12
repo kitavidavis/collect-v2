@@ -590,7 +590,7 @@ const handlePoint = (id) => {
     <MediaQuery largerThan='md' styles={{display: 'none'}}>
     <Group direction='column'>
           <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng} size='sm' label='Longitude' />
+          <TextInput  value={lng1} size='sm' label='Longitude' />
           <TextInput value={alt1}  size='sm' label="Altitude" />
           <TextInput value={acc1}  size='sm' label="Accuracy" />
         </Group>
@@ -697,7 +697,7 @@ const handlePolyline = (id) => {
     <MediaQuery largerThan='md' styles={{display: 'none'}}>
     <Group direction='column'>
           <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng} size='sm' label='Longitude' />
+          <TextInput  value={lng1} size='sm' label='Longitude' />
           <TextInput value={alt1}  size='sm' label="Altitude" />
           <TextInput value={acc1}  size='sm' label="Accuracy" />
         </Group>
@@ -809,7 +809,7 @@ const handlePolygon = (id) => {
     <MediaQuery largerThan='md' styles={{display: 'none'}}>
     <Group direction='column'>
           <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng} size='sm' label='Longitude' />
+          <TextInput  value={lng1} size='sm' label='Longitude' />
           <TextInput value={alt1}  size='sm' label="Altitude" />
           <TextInput value={acc1}  size='sm' label="Accuracy" />
         </Group>
