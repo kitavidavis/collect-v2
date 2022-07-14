@@ -823,6 +823,7 @@ export default function AppShellDemo() {
       setSelectedImage('');
       setRes([]);
       setImageModal(false);
+      localStorage.removeItem('gc-hi-param');
 
     } else {
       setImageModal(false);

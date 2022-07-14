@@ -37,7 +37,7 @@ export async function getAllFormResponse({form_id}){
         Response.getAllFormResponse(form_id, function(err, responses) {
             if(err) throw err;
 
-            if(forms) {
+            if(responses) {
                 resolve({responses: responses});
             }
         });

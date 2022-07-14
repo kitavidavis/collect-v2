@@ -288,6 +288,7 @@ function Dashboard(){
     const { classes, cx } = useStyles();
     const [activeLink, setActiveLink] = useState('Clusters');
     const [userforms, setUserForms] = useState([]);
+    const [response, setResponse] = useState([]);
     const [done, setDone] = useState(false);
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastName] = useState('');
@@ -381,6 +382,34 @@ function Dashboard(){
 
         fetchdata();
     }, [user2]);
+
+    React.useEffect(() => {
+      const fetchdata = async () => {
+        if(user2 === null){
+          return false;
+        }
+
+        const body = {
+          user_id: activeid
+        }
+
+        await fetch('/api/getresponse', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        }).then( async function(res){
+          if(res.status === 200){
+            const data = await res.json();
+            setResponse(data.response);
+          } 
+        }).catch(function(error) {
+          console.log(error);
+        })
+      }
+      if(activeid !== ''){
+        fetchdata();
+      }
+    }, [activeid]);
 
     const Layout = () => {
       const theme = useMantineTheme();
@@ -935,7 +964,19 @@ function Dashboard(){
         })}
           </tr>
         </thead>
-
+        <tbody>
+          {response.map((item, index) => {
+            return (
+              <tr key={index} >
+                {item.response.map((item, index) => {
+                  return (
+                    <td key={index}>{item}</td>
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
       </Table>
       </Tabs.Tab>
           </Tabs>

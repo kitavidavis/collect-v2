@@ -64,9 +64,7 @@ import Pin from 'components/pin';
 import MapIcon from 'components/marker.gif'
 import { pointRadial } from 'd3';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
-const Map = ReactMapboxGl({
-  accessToken: accessToken,
-});
+
  
 const colors = ['#101113', '#212529', '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
 const color_strings = ['dark', 'gray', 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange'];
@@ -498,12 +496,36 @@ const handleTime = (id) => {
   )
 }
 
+const retrievePointLoc = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let ans = answers[idx];
+    return ans.response;
+  } else {
+    return null;
+  }
+}
+
 const handlePoint = (id) => {
+  const Map = ReactMapboxGl({
+    accessToken: accessToken,
+  });
+
   const [lat1, setLat1] = useState(null);
   const [lng1, setLng1] = useState(null);
   const [acc1, setAcc1] = useState(null);
   const [alt1, setAlt1] = useState(null);
   const [locked, setLocked] = useState(false);
+
+  React.useEffect(() => {
+    let itm = retrievePointLoc(id);
+    if(itm !== null){
+      setLat1(parseFloat(itm.coords.latitude));
+      setLng1(parseFloat(itm.coords.longitude));
+      setAcc1(parseFloat(itm.coords.accuracy));
+      setAlt1(parseFloat(itm.coords.altitude));
+    }
+  }, []);
 
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
@@ -521,6 +543,8 @@ const handlePoint = (id) => {
 
         setPoint(position);
 
+        savePoint(position);
+
       }, (error) => {showNotification({
         title: 'Check your location settings',
         message: 'Seems like your device is not configured well',
@@ -534,17 +558,18 @@ const handlePoint = (id) => {
     }
   }
 
-  const lockCoordinate = () => {
-
+  const savePoint = (pos) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx == -1){
-      let chunk = {id: id, response: point };
+      let chunk = {id: id, response: pos };
       setAnswers(prevArr => [...prevArr, chunk]);
     } else {
       let item = answers[idx];
-      item.response = point;
+      item.response = pos;
     }
+  }
 
+  const lockCoordinate = () => {
     setLocked(!locked);
   }
 
@@ -552,8 +577,6 @@ const handlePoint = (id) => {
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
     <Group position='right' mb={10}>
     {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-      {lat1 !== null ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
-: null} 
     </Group>
     <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
@@ -599,18 +622,49 @@ const handlePoint = (id) => {
   )
 }
 
+const retrievePolylineLoc = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let ans = answers[idx];
+    console.log(ans.response.length - 1);
+     return  ans.response.length - 1;
+  } else {
+    return null;
+  }
+}
+
 const handlePolyline = (id) => {
+  const Map = ReactMapboxGl({
+    accessToken: accessToken,
+  });
+
   const [lat1, setLat1] = useState(null);
   const [lng1, setLng1] = useState(null);
   const [acc1, setAcc1] = useState(null);
   const [alt1, setAlt1] = useState(null);
   const [locked, setLocked] = useState(false);
 
+  const [res, setRes] = useState([]);
+
   const [polyline, setPolyline] = useState([]);
   const [coords, setCoords] = useState([]);
 
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
+  React.useEffect(() => {
+    let n = retrievePolylineLoc(id);
+    if(n !== null){
+      let idx = answers.findIndex((obj => obj.id == id));
+      let answ = answers[idx];
+      setRes(answ.response);
+      let itm = answ.response[n];
+      setLat1(parseFloat(itm.coords.latitude));
+      setLng1(parseFloat(itm.coords.longitude));
+      setAcc1(parseFloat(itm.coords.accuracy));
+      setAlt1(parseFloat(itm.coords.altitude));
+    }
+  }, [])
 
 
   const handleGPS = () => {
@@ -626,6 +680,8 @@ const handlePolyline = (id) => {
 
         setPolyline(prevArr => [...prevArr, position]);
 
+        savePoint(position);
+
       }, (error) => {showNotification({
         title: 'Check your location settings',
         message: 'Seems like your device is not configured well',
@@ -639,24 +695,37 @@ const handlePolyline = (id) => {
     }
   }
 
-  const lockCoordinate = () => {
+  const savePoint = (pos) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx == -1){
-      let chunk = {id: id, response: polyline};
+      let chunk = {id: id, response: [pos]};
       setAnswers(prevArr => [...prevArr, chunk]);
     } else {
       let item = answers[idx];
-      item.response = polyline;
+      let arr = item.response;
+      arr.push(pos);
+      item.response = arr;
+
+      setAnswers([...answers]);
     }
+  }
+
+
+  const lockCoordinate = () => {
     setLocked(!locked);
   }
 
   return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+    <Group position='left'>
+    {res.map((item, index) => {
+          <ActionIcon key={index} >
+            <CircleCheck size={13} />
+          </ActionIcon>
+        })}
+    </Group>
     <Group position='right' mb={10}>
     {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-      {polyline.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
-: null} 
     </Group>
     <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
@@ -679,11 +748,11 @@ const handlePolyline = (id) => {
   zoom={lat1 !== null ? [20] : [0]}
   center={lat1 !== null ? [lng1, lat1] : center}
 >
-{coords.map((item, index) => {
+{res.map((item, index) => {
   return (
     <Marker
           key={`marker-${index}`}
-          coordinates={[item[0], item[1]]}
+          coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
           anchor="bottom"
         >
           <Pin />
@@ -706,12 +775,28 @@ const handlePolyline = (id) => {
   )
 }
 
+const retrievePolygonLoc = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let ans = answers[idx];
+     return  ans.response.length - 1;
+  } else {
+    return null;
+  }
+}
+
 const handlePolygon = (id) => {
+  const Map = ReactMapboxGl({
+    accessToken: accessToken,
+  });
+
   const [lat1, setLat1] = useState(null);
   const [lng1, setLng1] = useState(null);
   const [acc1, setAcc1] = useState(null);
   const [alt1, setAlt1] = useState(null);
   const [locked, setLocked] = useState(false);
+
+  const [res, setRes] = useState([]);
 
   const [polygon, setPolygon] = useState([]);
   const [coords, setCoords] = useState([]);
@@ -719,6 +804,19 @@ const handlePolygon = (id) => {
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
 
+  React.useEffect(() => {
+    let n = retrievePolygonLoc(id);
+    if(n !== null){
+      let idx = answers.findIndex((obj => obj.id == id));
+      let answ = answers[idx];
+      setRes(answ.response);
+      let itm = answ.response[n];
+      setLat1(parseFloat(itm.coords.latitude));
+      setLng1(parseFloat(itm.coords.longitude));
+      setAcc1(parseFloat(itm.coords.accuracy));
+      setAlt1(parseFloat(itm.coords.altitude));
+    }
+  }, [])
 
   const handleGPS = () => {
     if(navigator.geolocation){
@@ -733,6 +831,8 @@ const handlePolygon = (id) => {
 
         setPolygon(prevArr => [...prevArr, position]);
 
+        savePoint(position);
+
       }, (error) => {showNotification({
         title: 'Check your location settings',
         message: 'Seems like your device is not configured well',
@@ -746,17 +846,23 @@ const handlePolygon = (id) => {
     }
   }
 
-  const lockCoordinate = () => {
+  const savePoint = (pos) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx == -1){
-      let chunk = {id: id, response: polygon};
+      let chunk = {id: id, response: [pos]};
       setAnswers(prevArr => [...prevArr, chunk]);
     } else {
       let item = answers[idx];
-      item.response = polygon;
+      let arr = item.response;
+      arr.push(pos);
+      item.response = arr;
+
       setAnswers([...answers]);
     }
+  }
 
+
+  const lockCoordinate = () => {
     setLocked(!locked);
   }
 
@@ -764,13 +870,20 @@ const handlePolygon = (id) => {
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
     <Group position='right' mb={10}>
       {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-      {polygon.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
+      {res.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
 : null} 
     </Group>
     <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
     <Grid columns={12}>
       <Grid.Col span={3}>
         <Group direction='column'>
+        <Group>
+        {res.map((item, index) => {
+          <ActionIcon key={index} >
+            <CircleCheck size={13} />
+          </ActionIcon>
+        })}
+      </Group>
           <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
           <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
           <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
@@ -791,11 +904,11 @@ const handlePolygon = (id) => {
     console.log(event);
   }}
 >
-{coords.map((item, index) => {
+{res.map((item, index) => {
   return (
     <Marker
           key={`marker-${index}`}
-          coordinates={[item[0], item[1]]}
+          coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
           anchor="bottom"
         >
           <Pin />
@@ -904,6 +1017,33 @@ const RenderQuestions = () => {
     </>
   )
 }
+
+const submitAnswers = async () => {
+  const body = {
+    response: answers,
+    response_id: uuid(),
+    form_id: obj.form_id
+  };
+
+  try {
+    await fetch('/api/createresponse', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body),
+    }).then(function(res){
+      if(res.status == 200){
+        showNotification({
+          title: `Success`,
+          message: 'Your response has been recorded!',
+          color: 'teal',
+          icon: <Check />,
+        });
+      }
+    })
+  } catch(error){
+    console.log(error);
+  }
+}
     
   return (
       <MantineProvider
@@ -956,7 +1096,7 @@ const RenderQuestions = () => {
 
           {forms.length > 0 && obj.active ? (
             <Group mt={20} position='center'>
-            <Button onClick={() => {console.log(answers)}} style={{backgroundColor: obj.color}}  color={obj.color}>Submit</Button>
+            <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color}>Submit</Button>
           </Group>
             ) : null}
           </div>
@@ -976,7 +1116,7 @@ const RenderQuestions = () => {
               <RenderQuestions />
             ) : null}
           <Group mt={20} position='center'>
-            <Button onClick={() => {console.log(answers)}} style={{backgroundColor: obj.color}} color={obj.color}>Submit</Button>
+            <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}} color={obj.color}>Submit</Button>
           </Group>
           </div>
             </MediaQuery>
