@@ -762,50 +762,14 @@ export default function AppShellDemo() {
 
   const linkControls = (id) => {
     let option = linkedRadioOptions(id);
-    const [count, setCount] = useState([1]);
-    const [selected, setSelected] = useState([]);
-    const [remaining, setRemaining] = useState([]);
-
-    const handleItem = (val) => {
-      setSelected(oldArr => [...oldArr, val]);
-    }
-    React.useEffect(() => {
-      option.forEach(element => {
-        if(!selected.includes(element.value)){
-          setRemaining(prevArr => [...prevArr, element]);
-        }
-      });
-    }, [selected]);
-
-    const incrementCount = () => {
-      setCount(oldCount => [...oldCount, 1]);
-    }
-
-    const decrementCount = (idx) => {
-      if(idx !== 0){
-        count.splice(idx, 1);
-        setCount([...count]);
-      }
-    }
+    const [selected, setSelected] = useState('');
 
     return (
-      <>
-      {count.map((item, index) => {
-        return (
-          < >
+          <>
           <Text>Show a question if response is:</Text>
-          <Select onChange={(val) => {handleItem(val)}}  data={remaining} />
-          <Button variant='subtle'  color='dark' onClick={() => {createNewQuestion(id, opt)}}>Create the question</Button>
-          <ActionIcon onClick={() => {incrementCount()}} title='Add another logic' >
-            <CirclePlus />
-          </ActionIcon>
-          <ActionIcon onClick={() => {decrementCount(index)}} title='Add another logic' >
-            <CircleMinus />
-          </ActionIcon>
+          <Select value={selected} onChange={(val) => {setSelected(val)}}  data={option} />
+          <Button variant='subtle'  color='dark' onClick={() => {createNewQuestion(id, selected)}}>Create the question</Button>
           </>
-        )
-      })}
-      </>
     )
   }
 

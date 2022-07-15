@@ -1,6 +1,7 @@
 const Response = require('../models/response');
 
 export function createResponse(obj) {
+    console.log(obj);
     return new Promise((resolve, reject) => {
         let newResponse = new Response({
             response: obj.response,

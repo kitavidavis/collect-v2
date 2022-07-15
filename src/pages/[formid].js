@@ -258,11 +258,27 @@ export default function AppShellDemo() {
   retrieveForm();
 }, [router])
 
+const retrieveShortAns = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let ans = answers[idx];
+    return ans.response;
+  } else {
+    return null;
+  }
+}
 
 const handleShortAnswer = (id) => {
   const [text, setText] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
+  React.useEffect(() => {
+    let ans = retrieveShortAns(id);
+    if(ans !== null){
+      setText(ans);
+    }
+  }, []);
 
     React.useEffect(() => {
       let idx = answers.findIndex((obj => obj.id == id));
@@ -270,7 +286,7 @@ const handleShortAnswer = (id) => {
         let chunk = answers[idx];
         chunk.response = text;
       } else {
-        let chunk = {id: id, response: text};
+        let chunk = {id: id, position: item.position, response: text};
         setAnswers(prevAns => [...prevAns, chunk]);
       }
     }, [text]);
@@ -284,10 +300,27 @@ const handleShortAnswer = (id) => {
   )
 }
 
+const retrieveParagraphAnsw = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let ans = answers[idx];
+    return ans.response;
+  } else {
+    return null;
+  }
+}
+
 const handleParagraph = (id) => {
   const [text, setText] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
+  React.useEffect(() => {
+    let ans = retrieveParagraphAnsw(id);
+    if(ans !== null){
+      setText(ans);
+    }
+  }, []);
 
 React.useEffect(() => {
   let idx = answers.findIndex((obj => obj.id == id));
@@ -295,7 +328,7 @@ React.useEffect(() => {
     let chunk = answers[idx];
     chunk.response = text;
   } else {
-    let chunk = {id: id, response: text};
+    let chunk = {id: id, position: item.position, response: text};
     setAnswers(prevAns => [...prevAns, chunk]);
   }
 }, [text])
@@ -308,10 +341,27 @@ React.useEffect(() => {
   )
 }
 
+const retrieveMultipleChoiceAns = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let answ = answers[idx];
+    return answ.response;
+  } else {
+    return null;
+  }
+}
+
 const handleMultipleChoice = (id) => {
   const [str, setStr] = useState('');
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
+  React.useEffect(() => {
+    let opt = retrieveMultipleChoiceAns(id);
+    if(opt !== null){
+      setStr(opt);
+    }
+  }, []);
 
   React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
@@ -319,7 +369,7 @@ const handleMultipleChoice = (id) => {
       let chunk = answers[idx];
       chunk.response = str;
     } else {
-      let chunk = {id: id, response: str};
+      let chunk = {id: id, position: item.position, response: str};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
   }, [str]);
@@ -333,11 +383,26 @@ const handleMultipleChoice = (id) => {
       </RadioGroup>
   )
 }
-
+const retrieveCheckboxAnsw = (id) => {
+  let idx = answers.findIndex((obj => obj.id == id));
+  if(idx !== -1){
+    let answ = answers[idx];
+    return answ.response
+  } else {
+    return null;
+  }
+}
 const handleCheckbox = (id) => {
   const [str, setStr] = useState([]);
   let idx = forms.findIndex((obj => obj.id == id));
   let item = forms[idx];
+
+  React.useEffect(() => {
+    let opts = retrieveCheckboxAnsw(id);
+    if(opts !== null){
+      setStr(opts);
+    }
+  }, []);
 
   React.useEffect(() => {
     let idx = answers.findIndex((obj => obj.id == id));
@@ -345,7 +410,7 @@ const handleCheckbox = (id) => {
       let chunk = answers[idx];
       chunk.response = str;
     } else {
-      let chunk = {id: id, response: str};
+      let chunk = {id: id, position: item.position, response: str};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
   }, [str]);
@@ -372,7 +437,7 @@ const handleDropdown = (id) => {
       let chunk = answers[idx];
       chunk.response = str;
     } else {
-      let chunk = {id: id, response: str};
+      let chunk = {id: id, position: item.position, response: str};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
   }, [str]);
@@ -437,7 +502,7 @@ const handleLinearScale = (id) => {
       let chunk = answers[idx];
       chunk.response = value;
     } else {
-      let chunk = {id: id, response: value};
+      let chunk = {id: id, position: item.position, response: value};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
   }, [value]);
@@ -461,7 +526,7 @@ const handleDate = (id) => {
       let chunk = answers[idx];
       chunk.response = date;
     } else {
-      let chunk = {id: id, response: date};
+      let chunk = {id: id, position: item.position, response: date};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
   }, [date]);
@@ -484,7 +549,7 @@ const handleTime = (id) => {
       let chunk = answers[idx];
       chunk.response = time;
     } else {
-      let chunk = {id: id, response: time};
+      let chunk = {id: id, position: item.position, response: time};
       setAnswers(prevAns => [...prevAns, chunk]);
     }
   }, [time]);
@@ -561,7 +626,7 @@ const handlePoint = (id) => {
   const savePoint = (pos) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx == -1){
-      let chunk = {id: id, response: pos };
+      let chunk = {id: id, position: item.position, response: pos };
       setAnswers(prevArr => [...prevArr, chunk]);
     } else {
       let item = answers[idx];
@@ -698,15 +763,13 @@ const handlePolyline = (id) => {
   const savePoint = (pos) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx == -1){
-      let chunk = {id: id, response: [pos]};
+      let chunk = {id: id, position: item.position, response: [pos]};
       setAnswers(prevArr => [...prevArr, chunk]);
     } else {
       let item = answers[idx];
       let arr = item.response;
       arr.push(pos);
       item.response = arr;
-
-      setAnswers([...answers]);
     }
   }
 
@@ -849,15 +912,13 @@ const handlePolygon = (id) => {
   const savePoint = (pos) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx == -1){
-      let chunk = {id: id, response: [pos]};
+      let chunk = {id: id, position: item.position, response: [pos]};
       setAnswers(prevArr => [...prevArr, chunk]);
     } else {
       let item = answers[idx];
       let arr = item.response;
       arr.push(pos);
       item.response = arr;
-
-      setAnswers([...answers]);
     }
   }
 
@@ -1018,7 +1079,8 @@ const RenderQuestions = () => {
   )
 }
 
-const submitAnswers = async () => {
+const submitAnswers = async (e) => {
+  e.preventDefault();
   const body = {
     response: answers,
     response_id: uuid(),
@@ -1074,6 +1136,7 @@ const submitAnswers = async () => {
             <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
             <div style={{marginRight: 300, marginLeft: 300}}>
+              <form onSubmit={(e) => {submitAnswers(e)}}  >
               {obj.header_image !== null && obj.header_image !== undefined ? ( 
                 <Card mt={20} shadow={'sm'} >
                         <Image  height={400} src={obj.header_image} />
@@ -1096,13 +1159,16 @@ const submitAnswers = async () => {
 
           {forms.length > 0 && obj.active ? (
             <Group mt={20} position='center'>
-            <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color}>Submit</Button>
+            <Button style={{backgroundColor: obj.color}}  color={obj.color} type='submit' >Submit</Button>
           </Group>
             ) : null}
+
+            </form>
           </div>
             </MediaQuery>
             <MediaQuery largerThan='md' styles={{display: 'none'}}>
             <div style={{marginRight: '1%', marginLeft: '1%'}}>
+              <form onSubmit={(e) => {submitAnswers(e)}} >
             {obj.header_image !== null && obj.header_image !== undefined ? ( 
                 <Card mt={20} shadow={'sm'} >
                         <Image  height={400} src={obj.header_image} />
@@ -1116,8 +1182,9 @@ const submitAnswers = async () => {
               <RenderQuestions />
             ) : null}
           <Group mt={20} position='center'>
-            <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}} color={obj.color}>Submit</Button>
+            <Button style={{backgroundColor: obj.color}} color={obj.color} type="submit" >Submit</Button>
           </Group>
+          </form>
           </div>
             </MediaQuery>
               </>
