@@ -1,15 +1,15 @@
-import Document, { Html, Head, Main, NextScript } from 'next/document';
+import { createGetInitialProps } from '@mantine/next';
+import Document, { Head, Html, Main, NextScript } from 'next/document';
 
-class CustomDocument extends Document {
-  static async getInitialProps(ctx) {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
-  }
+const getInitialProps = createGetInitialProps();
+
+export default class _Document extends Document {
+  static getInitialProps = getInitialProps;
 
   render() {
     return (
-      <Html lang="en-US">
-        <Head>
+      <Html>
+                <Head>
           <link
             href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=DM+Sans:wght@400;500;700&display=swap"
             rel="stylesheet"
@@ -45,5 +45,3 @@ class CustomDocument extends Document {
     );
   }
 }
-
-export default CustomDocument;

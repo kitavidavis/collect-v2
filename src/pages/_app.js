@@ -5,6 +5,8 @@ import Router from 'next/router';
 import { initGA, logPageView } from 'analytics';
 import { SessionProvider } from 'next-auth/react';
 import 'assets/css/react-slick.css';
+import { MantineProvider } from '@mantine/core';
+
 
 export default function CustomApp({ Component, pageProps }) {
    useEffect(() => {
@@ -14,8 +16,18 @@ export default function CustomApp({ Component, pageProps }) {
    }, []);
    
    return (
+    <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          /** Put your mantine theme override here */
+          colorScheme: 'light',
+        }}
+      >
     <SessionProvider session={pageProps.session}>
       <Component {...pageProps} />
     </SessionProvider>
+
+    </MantineProvider>
    )
 }
