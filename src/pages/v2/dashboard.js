@@ -44,10 +44,12 @@ import {
   Drawer,
   Divider,
   Table,
+  ScrollArea,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
-import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye } from 'tabler-icons-react';
+import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
+import AvaterImage from 'assets/illustrations/215.png'
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
 import Router from 'next/dist/next-server/server/router';
@@ -78,6 +80,28 @@ return {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+        },
+
+        tableHeader: {
+          position: 'sticky',
+          top: 0,
+          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+          transition: 'box-shadow 150ms ease',
+      
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderBottom: `1px solid ${
+              theme.colorScheme === 'dark' ? theme.colors.dark[3] : theme.colors.gray[2]
+            }`,
+          },
+        },
+      
+        scrolled: {
+          boxShadow: theme.shadows.sm,
         },
       
         links: {
@@ -286,6 +310,7 @@ function Dashboard(){
     const [linkactive, setLinkActive] = useState('Forms');
     const [hash, setHash] = useHash();
     const { classes, cx } = useStyles();
+    const [scrolled, setScrolled] = useState(false);
     const [activeLink, setActiveLink] = useState('Clusters');
     const [userforms, setUserForms] = useState([]);
     const [response, setResponse] = useState([]);
@@ -309,7 +334,7 @@ function Dashboard(){
     const handleCluster = (str, id) => {
       let newItems = item.concat([{title: str, href: '#'}])
       let idx = userforms.findIndex((obj => obj.form_id == id));
-      let ctx = userforms[idx].question;
+      let ctx = userforms[idx];
       setCTX(ctx);
       setItems(newItems);
       setCluster(str);
@@ -369,9 +394,11 @@ function Dashboard(){
         }).then( async function(res){
           if(res.status === 200){
             const data = await res.json();
-            setFirstname(user2.user.firstname);
-            setLastName(user2.user.lastname)
-            setEmail(user2.user.username)
+            if(user2.user !== null && user2.user !== undefined){
+              setFirstname(user2.user.firstname);
+              setLastName(user2.user.lastname)
+              setEmail(user2.user.username)
+            }
             setUserForms(data.forms.reverse());
             setDone(true);
           } 
@@ -390,7 +417,7 @@ function Dashboard(){
         }
 
         const body = {
-          user_id: activeid
+          form_id: ctx.form_id
         }
 
         await fetch('/api/getresponse', {
@@ -400,16 +427,176 @@ function Dashboard(){
         }).then( async function(res){
           if(res.status === 200){
             const data = await res.json();
+            console.log(data);
             setResponse(data.response);
           } 
         }).catch(function(error) {
           console.log(error);
         })
       }
+      
       if(activeid !== ''){
         fetchdata();
       }
-    }, [activeid]);
+    }, [ctx]);
+
+    const handleResponse = (response, type) => {
+      switch(type){
+        case 'Short Answer':
+          return responseShortAnswer(response);
+
+        case 'Paragraph':
+          return responseParagraph(response);
+
+        case 'Multiple Choice':
+          return responseMultipleChoice(response);
+
+        case 'Checkbox':
+          return responseCheckbox(response);
+
+        case 'Dropdown':
+          return responseDropdown(response);
+
+        case 'File Upload':
+          return responseFileUpload(response);
+
+        case 'Linear Scale':
+          return responseLinearScale(response);
+
+        case 'Date':
+          return responseDate(response);
+
+        case 'Time':
+          return responseTime(response);
+
+        case 'Point':
+            return responsePoint(response);
+
+        case 'Polyline':
+            return responsePolyline(response);
+
+        case 'Polygon':
+            return responsePolygon(response);
+
+        default:
+          console.log('undefined');
+      }
+    }
+
+    const responseShortAnswer = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responseParagraph = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responseMultipleChoice = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responseDropdown = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responseCheckbox = (res) => {
+      return(
+        <Group grow>
+          {res.map((item, index) => {
+            return (
+              <Text align='center' key={index} >{item}</Text>
+            )
+          })}
+        </Group>
+      )
+    }
+
+    const responseFileUpload = (res) => {
+      return (
+        <Group position='center' >
+          <ActionIcon >
+          <ExternalLink color='green' />
+        </ActionIcon>
+        </Group>
+      )
+    }
+
+    const responseLinearScale = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responseDate = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responseTime = (res) => {
+      return (
+        <Text align='center'>{res}</Text>
+      )
+    }
+
+    const responsePoint = (item) => {
+      console.log(item);
+      if(item !== null ){
+        return (
+          <Group position='center' >
+          <Text>{item.latitude + ','+item.longitude}</Text>
+        </Group>
+        )
+      }
+    }
+
+    const responsePolyline = (res) => {
+      return (
+        res.map((item, idx) => {
+          if(item.coords !== undefined){
+            return (
+              <div key={idx}>
+              <Text>{"Latitude:"+item.coords.latitude}</Text>
+              <Text>{"Longitude:"+item.coords.longitude}</Text>
+              <Text>{"Altitude:"+item.coords.altitude}</Text>
+              <Text>{"Accuracy:"+item.coords.accuracy}</Text>
+            </div>
+            )
+          }
+        })
+      )
+    }
+
+    const responsePolygon = (res) => {
+      return (
+        res.map((item, idx) => {
+          if(item.coords !== undefined){
+            return (
+              <div key={idx}>
+              <Text>{"Latitude:"+item.coords.latitude}</Text>
+              <Text>{"Longitude:"+item.coords.longitude}</Text>
+              <Text>{"Altitude:"+item.coords.altitude}</Text>
+              <Text>{"Accuracy:"+item.coords.accuracy}</Text>
+            </div>
+            )
+          }
+        })
+      )
+    }
+
+    const sortArr = (arr) => {
+      return arr.sort((a, b) => {
+        return a.position - b.position;
+      });
+    }
 
     const Layout = () => {
       const theme = useMantineTheme();
@@ -691,7 +878,7 @@ function Dashboard(){
         <Navbar.Section className={classes.section}>
         <UnstyledButton className={classes.user}>
       <Group position='apart' >
-        <Avatar src="https://i.imgur.com/fGxgcDF.png" radius="xl" />
+        <Avatar src={AvaterImage} radius="xl" />
 
         <div style={{ flex: 1 }}>
           <Text size="sm" weight={500}>
@@ -803,24 +990,24 @@ function Dashboard(){
                                         }
                                       }).map((item, index) => {
                                         return (
-                                          <tr>
+                                          <tr key={index} >
                                             <td>{item.title}</td>
                                             <td>{item.description}</td>
                                             <td>{item.active ? <Badge size='xs' >Active</Badge> : <Badge size='xs' color='red' >Inactive</Badge>}</td>
                                             <td>{item.createdAt}</td>
                                             <td>
-                                              <ActionIcon>
+                                              
                                                 <Menu onClick={() => {handleMenuClick(item.form_id, !menuopen.state)}} opened={menuopen.state && menuopen.form_id == item.form_id} >
                                                   <Menu.Label>Manage Form</Menu.Label>
-                                                  <Menu.Item onClick={() => {handleCluster(item.title, item.form_id)}}  icon={<TableIcon size={13} />}>View Response</Menu.Item>
                                                   <Menu.Item icon={<Eye size={13} />} component='a' href={`/${item.form_id}`} target="_blank" >View Form</Menu.Item>
+                                                  <Menu.Item onClick={() => {handleCluster(item.title, item.form_id)}}  icon={<TableIcon size={13} />}>Response</Menu.Item>
                                                   <Menu.Item icon={<Edit size={13}  />}>Edit</Menu.Item>
                                                   {item.active ? <Menu.Item onClick={() => {deactivateForm()}} icon={<X size={13}  />} >Deactivate Form</Menu.Item> : <Menu.Item onClick={() => {activateForm()}}  icon={<Check size={13}  />} >Activate Form</Menu.Item>}
                                                   <Divider />
                                                   <Menu.Label>Be Careful</Menu.Label>
                                                   <Menu.Item onClick={() => {deleteForm(item.form_id)}} icon={<Trash color='red' size={13}  />} >Delete</Menu.Item>
                                                 </Menu>
-                                              </ActionIcon>
+              
                                             </td>
                                           </tr>
                                         )
@@ -948,14 +1135,15 @@ function Dashboard(){
         <Group mt={5} mb={5} grow>
           <TextInput placeholder='Filter response' rightSection={<Search />} />
         </Group>
-      <Table width={width} style={{overflowX: 'auto', 
+        <ScrollArea onScrollPositionChange={({ y }) => setScrolled(y !== 200)}>
+      <Table highlightOnHover width={width} style={{overflowX: 'auto', 
       display: 'block',
   maxWidth:  '-moz-fit-content',
   maxWidth: 'fit-content',
   whiteSpace: 'nowrap'}}>
-        <thead style={{overflowX: 'auto'}}>
+    <thead style={{overflowX: 'auto'}} className={cx(classes.tableHeader, { [classes.scrolled]: scrolled })}>
           <tr style={{overflowX: 'auto', alignItems: 'space-between'}}>
-          {ctx.map((item, index) => {
+          {sortArr(ctx.question).map((item, index) => {
             if(item.type == 1){
               return (
                 <th style={{whiteSpace: 'nowrap'}} key={index}>{item.question.defaultValue}</th>
@@ -968,9 +1156,11 @@ function Dashboard(){
           {response.map((item, index) => {
             return (
               <tr key={index} >
-                {item.response.map((item, index) => {
+                {sortArr(item.response).map((item, index) => {
                   return (
-                    <td key={index}>{item}</td>
+                    <td key={'td'+index} >
+                      {handleResponse(item.response, item.questionType)}
+                    </td>
                   )
                 })}
               </tr>
@@ -978,6 +1168,7 @@ function Dashboard(){
           })}
         </tbody>
       </Table>
+      </ScrollArea>
       </Tabs.Tab>
           </Tabs>
     </>

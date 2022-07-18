@@ -526,12 +526,14 @@ export default function AppShellDemo() {
   const [img, setImg] = useState('');
   const [res, setRes] = useState([]);
   const [imagemodal, setImageModal] = useState(false);
+  const [imagemodal2, setImageModal2] = useState(false);
   const [selectedimage, setSelectedImage] = useState('');
   const [headerimg, setHeaderImg] = useState('');
   const [video, setVideo] = useState('');
   const [videores, setVideoRes] = useState([]);
   const [videomodalopened, setVideoModalOpened] = useState(false);
   const [videoselected, setVideoSelected] = useState('');
+  const [param, setParam] = useState(null);
   const Access_Key = 'SZMxfetdVLzmhlllpelhSjdTiHYhEEnqInpun7hQZFw';
   const video_key = 'AIzaSyDMzfZMNpyPU8zrBu7BiLIrzuldHQgsJ8k';
   const [linkctx, setLinkCtx] = useState({
@@ -780,17 +782,7 @@ export default function AppShellDemo() {
   };
 
   const createSectionImage = () => {
-    let control = localStorage.getItem('gc-hi-param');
-    if(control !== null){
-      dispatch({type: 'UPDATE_HEADER_IMAGE', headerimage: selectedimage });
-      setImg('');
-      setSelectedImage('');
-      setRes([]);
-      setImageModal(false);
-      localStorage.removeItem('gc-hi-param');
-
-    } else {
-      setImageModal(false);
+      setImageModal2(false);
       let id = uuid();
       let chunk = {id: id, image: selectedimage, type: 3};
       setForms(prevForms => [...prevForms, chunk]);
@@ -798,13 +790,21 @@ export default function AppShellDemo() {
       setSelectedImage('');
       setRes([]);
     }
+
+    const createHeaderImage = () => {
+      dispatch({type: 'UPDATE_HEADER_IMAGE', headerimage: headerimg });
+      setImg('');
+      setHeaderImg('');
+      setRes([]);
+      setImageModal(false);
     }
 
   const createImage = (param) => {
-    if(param !== null){
-      localStorage.setItem('gc-hi-param', param);
-    }
     setImageModal(true);
+  }
+
+  const createImage2 = () => {
+    setImageModal2(true);
   }
 
   const fetchImages = async() => {
@@ -2998,11 +2998,11 @@ export default function AppShellDemo() {
                 </Card.Section>
               </Card>
             ) : item.type == 3 ? (
-              <Card className={classes.item} shadow={'sm'} >
+              <Card shadow={'sm'} >
                                         <div {...provided.dragHandleProps} className={classes.dragHandle}>
                           {state.length > 1 ? (<GripVertical size={18} />) : null}
                         </div>
-                <Image style={{marginLeft: '10%', marginRight: '10%'}} height={200} src={item.image} />
+                <Image height={200} src={item.image} />
               </Card>
             ) : item.type == 4 ? (
               <Card shadow={'sm'} >
@@ -3239,6 +3239,57 @@ export default function AppShellDemo() {
                       <div style={{backgroundColor: item.urls.full === selectedimage ? 'gray' : 'transparent', cursor: 'pointer'}} key={item.urls.small} >
                       <Image  width={200}
                       height={80}
+                        onClick={() => {setHeaderImg(item.urls.full)}} radius="md" src={item.urls.small} alt={item.alt_description} />
+                      </div>
+                    )
+                  })}
+                  </SimpleGrid>
+                  </MediaQuery>
+
+                  <MediaQuery largerThan="md" styles={{display: 'none'}}>
+                  <SimpleGrid style={{height: 250}} mt={20} cols={1}>
+                  {res.length > 0 && res.map((item) => {
+                    return (
+                      <div style={{backgroundColor: item.urls.full === selectedimage ? 'gray' : 'transparent', cursor: 'pointer'}} key={item.urls.small} >
+                      <Image  width={200}
+                      height={80}
+                        onClick={() => {setHeaderImg(item.urls.full)}} radius="md" src={item.urls.small} alt={item.alt_description} />
+                      </div>
+                    )
+                  })}
+                  </SimpleGrid>
+                  </MediaQuery>
+                  <Divider />
+                  <Group mt={20} mb={20} position='right'>
+                    <Button size='sm' onClick={() => {setImageModal(false)}} variant='subtle'>Cancel</Button>
+                    <Button disabled={headerimg === '' ? true : false} size='sm' onClick={() => {createHeaderImage()}} variant='outline'>Set Header</Button>
+                  </Group>
+              </Modal>
+        ) : null}
+
+{imagemodal2 ? (
+                <Modal overflow='inside' opened={imagemodal2} size='100%' >
+                  <Group mb={20}>
+                    <TextInput width={'100%'} placeholder='Search images...' value={img} onChange={(e) => {setImg(e.currentTarget.value)}} />
+                    <Button disabled={img !== '' ? false : true} leftIcon={<Search />} onClick={() => {fetchImages()}} >
+                      Search free online photos
+                    </Button>
+                    <Button leftIcon={<Upload />} variant="outline" >
+                      Upload
+                    </Button>
+                    <Button leftIcon={<Link />} variant="outline" >
+                      Image URL
+                    </Button>
+                    
+                  </Group>
+                  <Divider />
+                  <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
+                  <SimpleGrid style={{height: 250}} mt={20} cols={4}>
+                  {res.length > 0 && res.map((item) => {
+                    return (
+                      <div style={{backgroundColor: item.urls.full === selectedimage ? 'gray' : 'transparent', cursor: 'pointer'}} key={item.urls.small} >
+                      <Image  width={200}
+                      height={80}
                         onClick={() => {setSelectedImage(item.urls.full)}} radius="md" src={item.urls.small} alt={item.alt_description} />
                       </div>
                     )
@@ -3261,7 +3312,7 @@ export default function AppShellDemo() {
                   </MediaQuery>
                   <Divider />
                   <Group mt={20} mb={20} position='right'>
-                    <Button size='sm' onClick={() => {setImageModal(false)}} variant='subtle'>Cancel</Button>
+                    <Button size='sm' onClick={() => {setImageModal2(false)}} variant='subtle'>Cancel</Button>
                     <Button disabled={selectedimage === '' ? true : false} size='sm' onClick={() => {createSectionImage()}} variant='outline'>Set Image</Button>
                   </Group>
               </Modal>
@@ -3316,7 +3367,7 @@ export default function AppShellDemo() {
         <DndListHandleXS />
 
                   
-        {!videomodalopened || !imagemodal ? ( 
+        {!videomodalopened || !imagemodal || !imagemodal2 ? ( 
                     <Group style={{backgroundColor: 'white', width: '100%', right: '1%', left: '1%', position: 'fixed', bottom: 0}} position='apart' grow>
 
                     <ActionIcon mb={20} mt={10} onClick={() => {createNewQuestion()}} title='Add Question'>
@@ -3328,7 +3379,7 @@ export default function AppShellDemo() {
                     <ActionIcon mb={20} mt={10}  onClick={() => {createTitleAndDescription()}} title='Add title and description' >
                       <ClearFormatting />
                     </ActionIcon>
-                    <ActionIcon mb={20} mt={10}  onClick={() => {createImage()}}  title='Add Image'>
+                    <ActionIcon mb={20} mt={10}  onClick={() => {createImage2()}}  title='Add Image'>
                       <Photo />
                     </ActionIcon>
                     <ActionIcon mb={20} mt={10}  onClick={() => {createVideo()}} title='Add Video' >
@@ -3356,7 +3407,7 @@ export default function AppShellDemo() {
         </Box>
         <DndListHandle />
   
-        {!videomodalopened || !imagemodal ? ( 
+        {!videomodalopened || !imagemodal || !imagemodal2 ? ( 
           <Menu hidden={videomodalopened || imagemodal} style={{alignItems: 'center', position: 'fixed', bottom: 0, right: '10%'}} placement='center' shadow='xl'  size={60} control={<p></p>} opened ={!state.CustomTheme && (!videomodalopened || imagemodal)}>
             <Group mt={20} mb={20} position='center'>
               <ActionIcon onClick={() => {createNewQuestion()}} title='Add Question'>
@@ -3374,7 +3425,7 @@ export default function AppShellDemo() {
               </ActionIcon>
             </Group>
             <Group mb={20} position='center'>
-              <ActionIcon onClick={() => {createImage()}}  title='Add Image'>
+              <ActionIcon onClick={() => {createImage2()}}  title='Add Image'>
                 <Photo />
               </ActionIcon>
             </Group>

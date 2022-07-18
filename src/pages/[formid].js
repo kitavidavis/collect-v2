@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AppShell,
   Navbar,
@@ -62,7 +62,7 @@ import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpr
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Pin from 'components/pin';
 import MapIcon from 'components/marker.gif'
-import { pointRadial } from 'd3';
+import { pointRadial, timeFormatDefaultLocale } from 'd3';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 
  
@@ -256,31 +256,112 @@ export default function AppShellDemo() {
   }
 
   retrieveForm();
-}, [router])
+}, [router]);
 
-const retrieveShortAns = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let ans = answers[idx];
-    return ans.response;
-  } else {
-    return null;
-  }
-}
-
-const handleShortAnswer = (id) => {
-  const [text, setText] = useState('');
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let ans = retrieveShortAns(id);
-    if(ans !== null){
-      setText(ans);
+React.useEffect(() => {
+  const prepareAnswerStore = () => {
+    let arr = [];
+    for(let i=0; i<forms.length; i++){
+      if(forms[i].type === 1){
+        let qt = forms[i].question.questionType;
+        let chunk = {id:forms[i].id, position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : null };
+        arr.push(chunk);
+      } else {
+        continue;
+      }
     }
-  }, []);
 
+    console.log(arr);
+    setAnswers(arr);
+  }
+
+  if(done && !nullform){
+    prepareAnswerStore();
+  }
+
+}, [done]);
+
+const RenderQuestions = () => {
+  const handleQuestion = (q, id, parent) => {
+    switch(q) {
+      case 'Short Answer':
+        return handleShortAnswer(id, parent);
+  
+      case 'Paragraph':
+        return handleParagraph(id, parseInt);
+  
+  
+      case 'Multiple Choice':
+        return handleMultipleChoice(id, parseInt);
+  
+  
+      case 'Checkbox':
+        return handleCheckbox(id, parent);
+  
+      case 'Dropdown':
+        return handleDropdown(id, parent);
+  
+      case 'File Upload':
+        return handleFileUpload(id, parent);
+  
+      case 'Linear Scale':
+        return handleLinearScale(id, parent);
+  
+      case 'Multiple Choice Grid':
+        return handleMultipleChoiceGrid(id, parent);
+  
+      case 'Checkbox Grid':
+        return handleCheckboxGrid(id, parent);
+  
+      case 'Date':
+        return handleDate(id, parent);
+  
+      case 'Time':
+        return handleTime(id, parent);
+  
+      case 'Point':
+        return handlePoint(id, parent);
+  
+      case 'Polyline':
+        return handlePolyline(id, parent);
+  
+      case 'Polygon':
+        return handlePolygon(id, parent);
+  
+      default:
+        console.log('undefined');
+    }
+  }
+
+  const retrieveShortAns = (id) => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx !== -1){
+      let ans = answers[idx];
+      return ans.response;
+    } else {
+      return null;
+    }
+  }
+  
+  const handleShortAnswer = (id, p) => {
+    const [text, setText] = useState('');
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
     React.useEffect(() => {
+      let ans = retrieveShortAns(id);
+      if(ans !== null){
+        setText(ans);
+      }
+    }, []);
+
+    const handleChange = (text) => {
+      setText(text);
+
+      handleChange2(text);
+    }
+
+    const handleChange2 = useCallback((text) => {
       let idx = answers.findIndex((obj => obj.id == id));
       if(idx !== -1){
         let chunk = answers[idx];
@@ -289,766 +370,738 @@ const handleShortAnswer = (id) => {
         let chunk = {id: id, position: item.position, response: text};
         setAnswers(prevAns => [...prevAns, chunk]);
       }
-    }, [text]);
-  return (
-          <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
 
-<TextInput value={text} onChange={(e) => {setText(e.currentTarget.value)}} />
-
-</InputWrapper>
     
-  )
-}
-
-const retrieveParagraphAnsw = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let ans = answers[idx];
-    return ans.response;
-  } else {
-    return null;
-  }
-}
-
-const handleParagraph = (id) => {
-  const [text, setText] = useState('');
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let ans = retrieveParagraphAnsw(id);
-    if(ans !== null){
-      setText(ans);
-    }
-  }, []);
-
-React.useEffect(() => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let chunk = answers[idx];
-    chunk.response = text;
-  } else {
-    let chunk = {id: id, position: item.position, response: text};
-    setAnswers(prevAns => [...prevAns, chunk]);
-  }
-}, [text])
-  return (
-    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-
-    <Textarea value={text} onChange={(e) => {setText(e.currentTarget.value)}}  />
-
-    </InputWrapper>
-  )
-}
-
-const retrieveMultipleChoiceAns = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let answ = answers[idx];
-    return answ.response;
-  } else {
-    return null;
-  }
-}
-
-const handleMultipleChoice = (id) => {
-  const [str, setStr] = useState('');
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let opt = retrieveMultipleChoiceAns(id);
-    if(opt !== null){
-      setStr(opt);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = str;
-    } else {
-      let chunk = {id: id, position: item.position, response: str};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
-  }, [str]);
-  return (
-    <RadioGroup onChange={(val) => {setStr(val)}} value={str} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        {item.question.radioOptions.length > 0 && item.question.radioOptions.map((radio) => {
-          return (
-            <Radio value={radio.label} label={radio.label} key={radio.id} />
-          )
-        })}
-      </RadioGroup>
-  )
-}
-const retrieveCheckboxAnsw = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let answ = answers[idx];
-    return answ.response
-  } else {
-    return null;
-  }
-}
-const handleCheckbox = (id) => {
-  const [str, setStr] = useState([]);
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let opts = retrieveCheckboxAnsw(id);
-    if(opts !== null){
-      setStr(opts);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = str;
-    } else {
-      let chunk = {id: id, position: item.position, response: str};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
-  }, [str]);
-
-  return (
-    <CheckboxGroup onChange={setStr} value={str} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    {item.question.checkboxOptions.length > 0 && item.question.checkboxOptions.map((check) => {
-      return (
-        <MantineCheckbox key={check.id} value={check.label} label={check.label} />
-      )
-    })}
-  </CheckboxGroup>
-  )
-}
-
-const handleDropdown = (id) => {
-  const [str, setStr] = useState('');
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = str;
-    } else {
-      let chunk = {id: id, position: item.position, response: str};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
-  }, [str]);
-
-  return (
-    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <Select onChange={(val) => {setStr(val)}} data={item.question.dropdownOptions} />
-    </InputWrapper>
-  )
-}
-
-const handleFileUpload = (id) => {
-  let idx = forms.findIndex((obj => obj.id == id));
-  let q = forms[idx];
-  let item = forms[idx];
+    }, []);
   
-  return (
-    q.question.uploadSpecifics.document ? (
+
+    return (
+            <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+  
+  <TextInput value={text} onChange={(e) => {handleChange(e.currentTarget.value)}} />
+  
+  </InputWrapper>
+      
+    )
+  }
+  
+  const retrieveParagraphAnsw = (id) => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx !== -1){
+      let ans = answers[idx];
+      return ans.response;
+    } else {
+      return null;
+    }
+  }
+  
+  const handleParagraph = (id, p) => {
+    const [text, setText] = useState('');
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
+    React.useEffect(() => {
+      let ans = retrieveParagraphAnsw(id);
+      if(ans !== null){
+        setText(ans);
+      }
+    }, []);
+  
+    const handleChange = (text) => {
+      setText(text);
+
+      handleChange2(text);
+    }
+
+    const handleChange2 = useCallback((text) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = text;
+      } else {
+        let chunk = {id: id, position: item.position, response: text};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+
+    
+    }, []);
+
+    return (
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadDocument />
-      </InputWrapper>
-    ) : q.question.uploadSpecifics.spreadshit ? (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadSpreadshit />
-      </InputWrapper>
-    ) : q.question.uploadSpecifics.pdf ? (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadPDF />
-      </InputWrapper>
-    ) : q.question.uploadSpecifics.video ? (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadVideo />
-      </InputWrapper>
-    ) : q.question.uploadSpecifics.audio ? (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadAudio />
-      </InputWrapper>
-    ) : q.question.uploadSpecifics.presentation ? (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadPresentation />
-      </InputWrapper>
-    ) : q.question.uploadSpecifics.image ? (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadImage />
-      </InputWrapper>
-    ) : (
-      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <UploadAny />
+  
+      <Textarea value={text} onChange={(e) => {handleChange(e.currentTarget.value)}}  />
+  
       </InputWrapper>
     )
-  )
-}
-
-const handleLinearScale = (id) => {
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-  const [value, setValue] = useState(item.question.linearFrom)
-
-  React.useEffect(() => {
+  }
+  
+  const retrieveMultipleChoiceAns = (id) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = value;
+      let answ = answers[idx];
+      return answ.response;
     } else {
-      let chunk = {id: id, position: item.position, response: value};
-      setAnswers(prevAns => [...prevAns, chunk]);
+      return null;
     }
-  }, [value]);
-  return (
+  }
+  
+  const handleMultipleChoice = (id, p) => {
+    const [str, setStr] = useState('');
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
+    React.useEffect(() => {
+      let opt = retrieveMultipleChoiceAns(id);
+      if(opt !== null){
+        setStr(opt);
+      }
+    }, []);
+  
+    const handleChange = (text) => {
+      setStr(text);
+
+      handleChange2(text);
+    }
+
+    const handleChange2 = useCallback((text) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = text;
+      } else {
+        let chunk = {id: id, position: item.position, response: text};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+
+    
+    }, []);
+
+    return (
+      <RadioGroup value={str} onChange={(val) => {handleChange(val)}} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+          {item.question.radioOptions.length > 0 && item.question.radioOptions.map((radio) => {
+            return (
+              <Radio value={radio.label} label={radio.label} key={radio.id} />
+            )
+          })}
+        </RadioGroup>
+    )
+  }
+  const retrieveCheckboxAnsw = (id) => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx !== -1){
+      let answ = answers[idx];
+      return answ.response
+    } else {
+      return null;
+    }
+  }
+  const handleCheckbox = (id, p) => {
+    const [str, setStr] = useState([]);
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
+    React.useEffect(() => {
+      let opts = retrieveCheckboxAnsw(id);
+      if(opts !== null){
+        setStr(opts);
+      }
+    }, []);
+
+    const handleChange = (str) => {
+      setStr(str);
+
+      handleChange2(str);
+    }
+  
+    const handleChange2 = useCallback((str) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = str;
+      } else {
+        let chunk = {id: id, position: item.position, response: str};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+
+
+    }, []);
+  
+    return (
+      <CheckboxGroup value={str} onChange={handleChange} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+      {item.question.checkboxOptions.length > 0 && item.question.checkboxOptions.map((check) => {
+        return (
+          <MantineCheckbox key={check.id} value={check.label} label={check.label} />
+        )
+      })}
+    </CheckboxGroup>
+    )
+  }
+  
+  const handleDropdown = (id, p) => {
+    const [str, setStr] = useState('');
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+
+    const handleChange = (str) => {
+      setStr(str);
+      handleChange2(str);
+    }
+  
+    const handleChange2 = useCallback((str) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = str;
+      } else {
+        let chunk = {id: id, position: item.position, response: str};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+
+    }, []);
+  
+    return (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <Select value={str} onChange={(val) => {handleChange(val)}} data={item.question.dropdownOptions} />
+      </InputWrapper>
+    )
+  }
+  
+  const handleFileUpload = (id, p) => {
+    let idx = forms.findIndex((obj => obj.id == id));
+    let q = forms[idx];
+    let item = forms[idx];
+    
+    return (
+      q.question.uploadSpecifics.document ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadDocument />
+        </InputWrapper>
+      ) : q.question.uploadSpecifics.spreadshit ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadSpreadshit />
+        </InputWrapper>
+      ) : q.question.uploadSpecifics.pdf ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadPDF />
+        </InputWrapper>
+      ) : q.question.uploadSpecifics.video ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadVideo />
+        </InputWrapper>
+      ) : q.question.uploadSpecifics.audio ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadAudio />
+        </InputWrapper>
+      ) : q.question.uploadSpecifics.presentation ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadPresentation />
+        </InputWrapper>
+      ) : q.question.uploadSpecifics.image ? (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadImage />
+        </InputWrapper>
+      ) : (
+        <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+        <UploadAny />
+        </InputWrapper>
+      )
+    )
+  }
+  
+  const handleLinearScale = (id, p) => {
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+    const [value, setValue] = useState(item.question.linearFrom)
+  
+    const handleChange = (value) => {
+      setValue(value);
+
+      handleChange2(value);
+    }
+
+    const handleChange2 = useCallback((value) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = value;
+      } else {
+        let chunk = {id: id, position: item.position, response: value};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+
+    }, []);
+    return (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+  
+  <Slider value={value} min={item.question.linearFrom} max={item.question.linearTo}  onChange={(val) => {handleChange(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
+  
+      </InputWrapper>
+    )
+  }
+  
+  const handleDate = (id, p) => {
+    const [date, setDate] = useState(new Date());
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+
+    const handleChange = (date) => {
+      setDate(date);
+      handleChange2(date);
+    }
+  
+    const handleChange2 = useCallback((date) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = date;
+      } else {
+        let chunk = {id: id, position: item.position, response: date};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+
+    }, []);
+  
+    return (
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-
-<Slider min={item.question.linearFrom} max={item.question.linearTo} value={value} onChange={(val) => {setValue(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
-
+      <DatePicker value={date} onChange={(val) => {handleChange(val)}} />
     </InputWrapper>
-  )
-}
+    )
+  }
+  
+  const handleTime = (id, p) => {
+    const [time, setTime] = useState(new Date());
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
 
-const handleDate = (id) => {
-  const [date, setDate] = useState(new Date());
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
+    const handleChange = (time) => {
+      setTime(time);
 
-  React.useEffect(() => {
+      handleChange2(time);
+    }
+  
+    const handleChange2 = useCallback((time) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      if(idx !== -1){
+        let chunk = answers[idx];
+        chunk.response = time;
+      } else {
+        let chunk = {id: id, position: item.position, response: time};
+        setAnswers(prevAns => [...prevAns, chunk]);
+      }
+    }, []);
+  
+    return (
+    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+      <TimeInput value={time} onChange={(val) => {handleChange(val)}} />
+    </InputWrapper>
+    )
+  }
+  
+  const retrievePointLoc = (id) => {
     let idx = answers.findIndex((obj => obj.id == id));
     if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = date;
+      let ans = answers[idx];
+      return ans.response;
     } else {
-      let chunk = {id: id, position: item.position, response: date};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
-  }, [date]);
-
-  return (
-  <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <DatePicker value={date} onChange={(val) => {setDate(val)}} />
-  </InputWrapper>
-  )
-}
-
-const handleTime = (id) => {
-  const [time, setTime] = useState(new Date());
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx !== -1){
-      let chunk = answers[idx];
-      chunk.response = time;
-    } else {
-      let chunk = {id: id, position: item.position, response: time};
-      setAnswers(prevAns => [...prevAns, chunk]);
-    }
-  }, [time]);
-
-  return (
-  <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <TimeInput value={time} onChange={(val) => {setTime(val)}} />
-  </InputWrapper>
-  )
-}
-
-const retrievePointLoc = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let ans = answers[idx];
-    return ans.response;
-  } else {
-    return null;
-  }
-}
-
-const handlePoint = (id) => {
-  const Map = ReactMapboxGl({
-    accessToken: accessToken,
-  });
-
-  const [lat1, setLat1] = useState(null);
-  const [lng1, setLng1] = useState(null);
-  const [acc1, setAcc1] = useState(null);
-  const [alt1, setAlt1] = useState(null);
-  const [locked, setLocked] = useState(false);
-
-  React.useEffect(() => {
-    let itm = retrievePointLoc(id);
-    if(itm !== null){
-      setLat1(parseFloat(itm.coords.latitude));
-      setLng1(parseFloat(itm.coords.longitude));
-      setAcc1(parseFloat(itm.coords.accuracy));
-      setAlt1(parseFloat(itm.coords.altitude));
-    }
-  }, []);
-
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  const [point, setPoint] = useState({});
-
-
-  const handleGPS = () => {
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition((position) => {
-        setLat1(parseFloat(position.coords.latitude));
-        setLng1(parseFloat(position.coords.longitude));
-        setAcc1(parseFloat(position.coords.accuracy));
-        setAlt1(parseFloat(position.coords.altitude));
-
-        setPoint(position);
-
-        savePoint(position);
-
-      }, (error) => {showNotification({
-        title: 'Check your location settings',
-        message: 'Seems like your device is not configured well',
-        color: 'red'
-      })})
-    } else {
-      showNotification({
-        title: 'Geolocation error',
-        message: 'Your device does not support geolocation'
-      })
+      return null;
     }
   }
-
-  const savePoint = (pos) => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx == -1){
-      let chunk = {id: id, position: item.position, response: pos };
-      setAnswers(prevArr => [...prevArr, chunk]);
-    } else {
-      let item = answers[idx];
-      item.response = pos;
+  
+  const handlePoint = (id) => {
+    const Map = ReactMapboxGl({
+      accessToken: accessToken,
+    });
+  
+    const [lat1, setLat1] = useState('');
+    const [lng1, setLng1] = useState('');
+    const [acc1, setAcc1] = useState('');
+    const [alt1, setAlt1] = useState('');
+    const [locked, setLocked] = useState(false);
+  
+    React.useEffect(() => {
+      let itm = retrievePointLoc(id);
+      if(itm !== null){
+        setLat1(parseFloat(itm.coords.latitude));
+        setLng1(parseFloat(itm.coords.longitude));
+        setAcc1(parseFloat(itm.coords.accuracy));
+        setAlt1(itm.coords.altitude);
+      }
+    }, []);
+  
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
+    const [point, setPoint] = useState({});
+  
+  
+    const handleGPS = () => {
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition((position) => {
+          setLat1(parseFloat(position.coords.latitude));
+          setLng1(parseFloat(position.coords.longitude));
+          setAcc1(parseFloat(position.coords.accuracy));
+          setAlt1(position.coords.altitude);
+  
+          savePoint(position);
+  
+        }, (error) => {showNotification({
+          title: 'Check your location settings',
+          message: 'Seems like your device is not configured well',
+          color: 'red'
+        })})
+      } else {
+        showNotification({
+          title: 'Geolocation error',
+          message: 'Your device does not support geolocation'
+        })
+      }
     }
-  }
 
-  const lockCoordinate = () => {
-    setLocked(!locked);
-  }
-
-  return (
-    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <Group position='right' mb={10}>
-    {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-    </Group>
-    <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
-    <Grid columns={12}>
-      <Grid.Col span={3}>
-        <Group direction='column'>
-          <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
-          <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
-          <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
-          <TextInput disabled={locked} value={acc1}  size='sm' label="Accuracy" />
-        </Group>
-      </Grid.Col>
-
-      <Grid.Col span={9}>                
-      <Map
-  style="mapbox://styles/mapbox/streets-v9"
-  containerStyle={{
-    height: '100%',
-    width: '100%'
-  }}
-  zoom={lat1 !== null ? [20] : [0]}
-  center={lat1 !== null ? [lng1, lat1] : center}
->
-{lat1 !== null ? (
-  <Marker
-  coordinates={[lng1, lat1]}
-  anchor="bottom">
-    <img height={30} width={30} src={MapIcon}/>
-</Marker>
-) : null}
-</Map>      </Grid.Col>
-    </Grid>
-    </MediaQuery>
-
-    <MediaQuery largerThan='md' styles={{display: 'none'}}>
-    <Group direction='column'>
-          <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng1} size='sm' label='Longitude' />
-          <TextInput value={alt1}  size='sm' label="Altitude" />
-          <TextInput value={acc1}  size='sm' label="Accuracy" />
-        </Group>
-    </MediaQuery>
-  </InputWrapper>
-  )
-}
-
-const retrievePolylineLoc = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let ans = answers[idx];
-    console.log(ans.response.length - 1);
-     return  ans.response.length - 1;
-  } else {
-    return null;
-  }
-}
-
-const handlePolyline = (id) => {
-  const Map = ReactMapboxGl({
-    accessToken: accessToken,
-  });
-
-  const [lat1, setLat1] = useState(null);
-  const [lng1, setLng1] = useState(null);
-  const [acc1, setAcc1] = useState(null);
-  const [alt1, setAlt1] = useState(null);
-  const [locked, setLocked] = useState(false);
-
-  const [res, setRes] = useState([]);
-
-  const [polyline, setPolyline] = useState([]);
-  const [coords, setCoords] = useState([]);
-
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let n = retrievePolylineLoc(id);
-    if(n !== null){
+    const savePoint = useCallback((pos) => {
       let idx = answers.findIndex((obj => obj.id == id));
-      let answ = answers[idx];
-      setRes(answ.response);
-      let itm = answ.response[n];
-      setLat1(parseFloat(itm.coords.latitude));
-      setLng1(parseFloat(itm.coords.longitude));
-      setAcc1(parseFloat(itm.coords.accuracy));
-      setAlt1(parseFloat(itm.coords.altitude));
-    }
-  }, [])
-
-
-  const handleGPS = () => {
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition((position) => {
-        setLat1(parseFloat(position.coords.latitude));
-        setLng1(parseFloat(position.coords.longitude));
-        setAcc1(parseFloat(position.coords.accuracy));
-        setAlt1(parseFloat(position.coords.altitude));
-
-        let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
-        setCoords(prevArr => [...prevArr, chunk]);
-
-        setPolyline(prevArr => [...prevArr, position]);
-
-        savePoint(position);
-
-      }, (error) => {showNotification({
-        title: 'Check your location settings',
-        message: 'Seems like your device is not configured well',
-        color: 'red'
-      })})
-    } else {
-      showNotification({
-        title: 'Geolocation error',
-        message: 'Your device does not support geolocation'
-      })
-    }
-  }
-
-  const savePoint = (pos) => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx == -1){
-      let chunk = {id: id, position: item.position, response: [pos]};
-      setAnswers(prevArr => [...prevArr, chunk]);
-    } else {
       let item = answers[idx];
-      let arr = item.response;
-      arr.push(pos);
-      item.response = arr;
-    }
-  }
-
-
-  const lockCoordinate = () => {
-    setLocked(!locked);
-  }
-
-  return (
-    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <Group position='left'>
-    {res.map((item, index) => {
-          <ActionIcon key={index} >
-            <CircleCheck size={13} />
-          </ActionIcon>
-        })}
-    </Group>
-    <Group position='right' mb={10}>
-    {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-    </Group>
-    <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
-    <Grid columns={12}>
-      <Grid.Col span={3}>
-        <Group direction='column'>
-          <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
-          <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
-          <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
-          <TextInput disabled={locked} value={acc1}  size='sm' label="Accuracy" />
-        </Group>
-      </Grid.Col>
-
-      <Grid.Col span={9}>                
-      <Map
-  style="mapbox://styles/mapbox/streets-v9"
-  containerStyle={{
-    height: '100%',
-    width: '100%'
-  }}
-  zoom={lat1 !== null ? [20] : [0]}
-  center={lat1 !== null ? [lng1, lat1] : center}
->
-{res.map((item, index) => {
-  return (
-    <Marker
-          key={`marker-${index}`}
-          coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
-          anchor="bottom"
-        >
-          <Pin />
-        </Marker>
-  )
-})}
-</Map>      </Grid.Col>
-    </Grid>
-    </MediaQuery>
-
-    <MediaQuery largerThan='md' styles={{display: 'none'}}>
-    <Group direction='column'>
-          <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng1} size='sm' label='Longitude' />
-          <TextInput value={alt1}  size='sm' label="Altitude" />
-          <TextInput value={acc1}  size='sm' label="Accuracy" />
-        </Group>
-    </MediaQuery>
-  </InputWrapper>
-  )
-}
-
-const retrievePolygonLoc = (id) => {
-  let idx = answers.findIndex((obj => obj.id == id));
-  if(idx !== -1){
-    let ans = answers[idx];
-     return  ans.response.length - 1;
-  } else {
-    return null;
-  }
-}
-
-const handlePolygon = (id) => {
-  const Map = ReactMapboxGl({
-    accessToken: accessToken,
-  });
-
-  const [lat1, setLat1] = useState(null);
-  const [lng1, setLng1] = useState(null);
-  const [acc1, setAcc1] = useState(null);
-  const [alt1, setAlt1] = useState(null);
-  const [locked, setLocked] = useState(false);
-
-  const [res, setRes] = useState([]);
-
-  const [polygon, setPolygon] = useState([]);
-  const [coords, setCoords] = useState([]);
-
-  let idx = forms.findIndex((obj => obj.id == id));
-  let item = forms[idx];
-
-  React.useEffect(() => {
-    let n = retrievePolygonLoc(id);
-    if(n !== null){
-      let idx = answers.findIndex((obj => obj.id == id));
-      let answ = answers[idx];
-      setRes(answ.response);
-      let itm = answ.response[n];
-      setLat1(parseFloat(itm.coords.latitude));
-      setLng1(parseFloat(itm.coords.longitude));
-      setAcc1(parseFloat(itm.coords.accuracy));
-      setAlt1(parseFloat(itm.coords.altitude));
-    }
-  }, [])
-
-  const handleGPS = () => {
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition((position) => {
-        setLat1(parseFloat(position.coords.latitude));
-        setLng1(parseFloat(position.coords.longitude));
-        setAcc1(parseFloat(position.coords.accuracy));
-        setAlt1(parseFloat(position.coords.altitude));
-
-        let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
-        setCoords(prevArr => [...prevArr, chunk]);
-
-        setPolygon(prevArr => [...prevArr, position]);
-
-        savePoint(position);
-
-      }, (error) => {showNotification({
-        title: 'Check your location settings',
-        message: 'Seems like your device is not configured well',
-        color: 'red'
-      })})
-    } else {
-      showNotification({
-        title: 'Geolocation error',
-        message: 'Your device does not support geolocation'
-      })
-    }
-  }
-
-  const savePoint = (pos) => {
-    let idx = answers.findIndex((obj => obj.id == id));
-    if(idx == -1){
-      let chunk = {id: id, position: item.position, response: [pos]};
-      setAnswers(prevArr => [...prevArr, chunk]);
-    } else {
-      let item = answers[idx];
-      let arr = item.response;
-      arr.push(pos);
-      item.response = arr;
-    }
-  }
-
-
-  const lockCoordinate = () => {
-    setLocked(!locked);
-  }
-
-  return (
-    <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-    <Group position='right' mb={10}>
-      {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-      {res.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
-: null} 
-    </Group>
-    <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
-    <Grid columns={12}>
-      <Grid.Col span={3}>
-        <Group direction='column'>
-        <Group>
-        {res.map((item, index) => {
-          <ActionIcon key={index} >
-            <CircleCheck size={13} />
-          </ActionIcon>
-        })}
+      item.response = {latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy, altitude: pos.coords.altitude};
+    }, []);
+  
+  
+    return (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+      <Group position='right' mb={10}>
+      {lat1 === '' ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
       </Group>
-          <TextInput disabled={locked} value={lat1} size='sm' label='Latitude' />
-          <TextInput disabled={locked}  value={lng1} size='sm' label='Longitude' />
-          <TextInput disabled={locked} value={alt1}  size='sm' label="Altitude" />
-          <TextInput disabled={locked} value={acc1}  size='sm' label="Accuracy" />
-        </Group>
-      </Grid.Col>
-
-      <Grid.Col span={9}>                
-      <Map
-  style="mapbox://styles/mapbox/streets-v9"
-  containerStyle={{
-    height: '100%',
-    width: '100%'
-  }}
-  zoom={lat1 !== null ? [20] : [0]}
-  center={lat1 !== null ? [lng1, lat1] : center}
-  onClick={(event) => {
-    console.log(event);
-  }}
->
-{res.map((item, index) => {
-  return (
+      <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
+      <Grid columns={12}>
+        <Grid.Col span={3}>
+          <Group direction='column'>
+          <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+            <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
+            <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
+            <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
+          </Group>
+        </Grid.Col>
+  
+        <Grid.Col span={9}>                
+        <Map
+    style="mapbox://styles/mapbox/streets-v9"
+    containerStyle={{
+      height: '100%',
+      width: '100%'
+    }}
+    zoom={lat1 !== null ? [20] : [0]}
+    center={lat1 !== null ? [lng1, lat1] : center}
+  >
+  {lat1 !== null ? (
     <Marker
-          key={`marker-${index}`}
-          coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
-          anchor="bottom"
-        >
-          <Pin />
-        </Marker>
-  )
-})}
-</Map>      </Grid.Col>
-    </Grid>
-    </MediaQuery>
-
-    <MediaQuery largerThan='md' styles={{display: 'none'}}>
-    <Group direction='column'>
-          <TextInput value={lat1} size='sm' label='Latitude' />
-          <TextInput  value={lng1} size='sm' label='Longitude' />
-          <TextInput value={alt1}  size='sm' label="Altitude" />
-          <TextInput value={acc1}  size='sm' label="Accuracy" />
-        </Group>
-    </MediaQuery>
-  </InputWrapper>
-  )
-}
-
-const handleQuestion = (q, id) => {
-  switch(q) {
-    case 'Short Answer':
-      return handleShortAnswer(id);
-
-    case 'Paragraph':
-      return handleParagraph(id);
-
-
-    case 'Multiple Choice':
-      return handleMultipleChoice(id);
-
-
-    case 'Checkbox':
-      return handleCheckbox(id);
-
-    case 'Dropdown':
-      return handleDropdown(id);
-
-    case 'File Upload':
-      return handleFileUpload(id);
-
-    case 'Linear Scale':
-      return handleLinearScale(id);
-
-    case 'Multiple Choice Grid':
-      return handleMultipleChoiceGrid(id);
-
-    case 'Checkbox Grid':
-      return handleCheckboxGrid(id);
-
-    case 'Date':
-      return handleDate(id);
-
-    case 'Time':
-      return handleTime(id);
-
-    case 'Point':
-      return handlePoint(id);
-
-    case 'Polyline':
-      return handlePolyline(id);
-
-    case 'Polygon':
-      return handlePolygon(id);
-
-    default:
-      console.log('undefined');
+    coordinates={[lng1, lat1]}
+    anchor="bottom">
+      <img height={30} width={30} src={MapIcon}/>
+  </Marker>
+  ) : null}
+  </Map>      </Grid.Col>
+      </Grid>
+      </MediaQuery>
+  
+      <MediaQuery largerThan='md' styles={{display: 'none'}}>
+      <Group direction='column'>
+      <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+            <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
+            <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
+            <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
+          </Group>
+      </MediaQuery>
+    </InputWrapper>
+    )
   }
-}
+  
+  const retrievePolylineLoc = (id) => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx !== -1){
+      let ans = answers[idx];
+      console.log(ans.response.length - 1);
+       return  ans.response.length - 1;
+    } else {
+      return null;
+    }
+  }
+  
+  const handlePolyline = (id, p) => {
+    const Map = ReactMapboxGl({
+      accessToken: accessToken,
+    });
+  
+    const [lat1, setLat1] = useState('');
+    const [lng1, setLng1] = useState('');
+    const [acc1, setAcc1] = useState('');
+    const [alt1, setAlt1] = useState('');
+    const [locked, setLocked] = useState(false);
+  
+    const [res, setRes] = useState([]);
+  
+    const [polyline, setPolyline] = useState([]);
+    const [coords, setCoords] = useState([]);
+  
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
+    React.useEffect(() => {
+      let n = retrievePolylineLoc(id);
+      if(n !== null){
+        let idx = answers.findIndex((obj => obj.id == id));
+        let answ = answers[idx];
+        setRes(answ.response);
+        let itm = answ.response[n];
+        setLat1(parseFloat(itm.coords.latitude));
+        setLng1(parseFloat(itm.coords.longitude));
+        setAcc1(parseFloat(itm.coords.accuracy));
+        setAlt1(parseFloat(itm.coords.altitude));
+      }
+    }, [])
+  
+  
+    const handleGPS = () => {
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition((position) => {
+          setLat1(parseFloat(position.coords.latitude));
+          setLng1(parseFloat(position.coords.longitude));
+          setAcc1(parseFloat(position.coords.accuracy));
+          setAlt1(parseFloat(position.coords.altitude));
+  
+          let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
+          setCoords(prevArr => [...prevArr, chunk]);
+  
+          setPolyline(prevArr => [...prevArr, position]);
+  
+          savePoint(position);
+  
+        }, (error) => {showNotification({
+          title: 'Check your location settings',
+          message: 'Seems like your device is not configured well',
+          color: 'red'
+        })})
+      } else {
+        showNotification({
+          title: 'Geolocation error',
+          message: 'Your device does not support geolocation'
+        })
+      }
+    }
+  
+    const savePoint = useCallback((pos) => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      let item = answers[idx];
+      item.response.push(pos);
+    }, []);
+  
+  
+    const lockCoordinate = () => {
+      setLocked(!locked);
+    }
+  
+    return (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+      <Group position='left'>
+      {res.map((item, index) => {
+            <ActionIcon key={index} >
+              <CircleCheck size={13} />
+            </ActionIcon>
+          })}
+      </Group>
+      <Group position='right' mb={10}>
+      {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
+      </Group>
+      <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
+      <Grid columns={12}>
+        <Grid.Col span={3}>
+          <Group direction='column'>
+          <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+            <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
+            <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
+            <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
+          </Group>
+        </Grid.Col>
+  
+        <Grid.Col span={9}>                
+        <Map
+    style="mapbox://styles/mapbox/streets-v9"
+    containerStyle={{
+      height: '100%',
+      width: '100%'
+    }}
+    zoom={lat1 !== null ? [20] : [0]}
+    center={lat1 !== null ? [lng1, lat1] : center}
+  >
+  {res.map((item, index) => {
+    return (
+      <Marker
+            key={`marker-${index}`}
+            coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
+            anchor="bottom"
+          >
+            <Pin />
+          </Marker>
+    )
+  })}
+  </Map>      </Grid.Col>
+      </Grid>
+      </MediaQuery>
+  
+      <MediaQuery largerThan='md' styles={{display: 'none'}}>
+      <Group direction='column'>
+      <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+            <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
+            <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
+            <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
+          </Group>
+      </MediaQuery>
+    </InputWrapper>
+    )
+  }
+  
+  const retrievePolygonLoc = (id) => {
+    let idx = answers.findIndex((obj => obj.id == id));
+    if(idx !== -1){
+      let ans = answers[idx];
+       return  ans.response.length - 1;
+    } else {
+      return null;
+    }
+  }
+  
+  const handlePolygon = (id, p) => {
+    const Map = ReactMapboxGl({
+      accessToken: accessToken,
+    });
+  
+    const [lat1, setLat1] = useState('');
+    const [lng1, setLng1] = useState('');
+    const [acc1, setAcc1] = useState('');
+    const [alt1, setAlt1] = useState('');
+    const [locked, setLocked] = useState(false);
+  
+    const [res, setRes] = useState([]);
+  
+    const [polygon, setPolygon] = useState([]);
+    const [coords, setCoords] = useState([]);
+  
+    let idx = forms.findIndex((obj => obj.id == id));
+    let item = forms[idx];
+  
+  
+    const handleGPS = () => {
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition((position) => {
+          setLat1(parseFloat(position.coords.latitude));
+          setLng1(parseFloat(position.coords.longitude));
+          setAcc1(parseFloat(position.coords.accuracy));
+          setAlt1(parseFloat(position.coords.altitude));
+  
+          let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
+          setCoords(prevArr => [...prevArr, chunk]);
+  
+          setPolygon(prevArr => [...prevArr, position]);
+  
+          savePoint(position);
+  
+        }, (error) => {showNotification({
+          title: 'Check your location settings',
+          message: 'Seems like your device is not configured well',
+          color: 'red'
+        })})
+      } else {
+        showNotification({
+          title: 'Geolocation error',
+          message: 'Your device does not support geolocation'
+        })
+      }
+    }
 
-const RenderQuestions = () => {
+    const savePoint = useCallback((pos) => {
+      let chunk = {latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy, altitude: pos.coords.altitude};
+      setRes(chunk);
+    }, []);
+  
+    const savePoint2 = useCallback(() => {
+      let idx = answers.findIndex((obj => obj.id == id));
+      let item = answers[idx];
+      item.response = polygon;
+    }, []);
+  
+  
+    const lockCoordinate = () => {
+      setLocked(!locked);
+      savePoint2();
+    }
+  
+    return (
+      <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+      <Group position='right' mb={10}>
+        {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
+        {polygon.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
+  : null} 
+      </Group>
+      <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
+      <Grid columns={12}>
+        <Grid.Col span={3}>
+          <Group direction='column'>
+          <Group>
+          {polygon.map((item, index) => {
+            <ActionIcon key={index} >
+              <CircleCheck size={13} />
+            </ActionIcon>
+          })}
+        </Group>
+            <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+            <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
+            <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
+            <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
+          </Group>
+        </Grid.Col>
+  
+        <Grid.Col span={9}>                
+        <Map
+    style="mapbox://styles/mapbox/streets-v9"
+    containerStyle={{
+      height: '100%',
+      width: '100%'
+    }}
+    zoom={lat1 !== null ? [20] : [0]}
+    center={lat1 !== null ? [lng1, lat1] : center}
+    onClick={(event) => {
+      console.log(event);
+    }}
+  >
+  {polygon.length > 0 ? polygon.map((item, index) => {
+    return (
+      <Marker
+            key={`marker-${index}`}
+            coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
+            anchor="bottom"
+          >
+            <Pin />
+          </Marker>
+    )
+  }) : null}
+  </Map>      </Grid.Col>
+      </Grid>
+      </MediaQuery>
+  
+      <MediaQuery largerThan='md' styles={{display: 'none'}}>
+      <Group direction='column'>
+      <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+            <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
+            <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
+            <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
+       </Group>
+      </MediaQuery>
+    </InputWrapper>
+    )
+  }
+
   const items = forms.map((item, index) => (
     <Card key={item.id} shadow='md' className={classes.maincard}>
       {item.type == 1 ? (
         <Card>
-            {handleQuestion(item.question.questionType, item.id)}
+            {handleQuestion(item.question.questionType, item.id, item.parent)}
         </Card>
       ) : item.type == 2 ? (
         <Card mt={20} style={{borderLeftWidth: 5, borderLeftColor: obj.Color}} >
@@ -1080,14 +1133,15 @@ const RenderQuestions = () => {
 }
 
 const submitAnswers = async (e) => {
-  e.preventDefault();
+
+  console.log(answers)
   const body = {
     response: answers,
     response_id: uuid(),
-    form_id: obj.form_id
+    form_id: pid
   };
 
-  try {
+   try {
     await fetch('/api/createresponse', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -1104,7 +1158,9 @@ const submitAnswers = async (e) => {
     })
   } catch(error){
     console.log(error);
-  }
+  }  
+
+  
 }
     
   return (
@@ -1159,7 +1215,7 @@ const submitAnswers = async (e) => {
 
           {forms.length > 0 && obj.active ? (
             <Group mt={20} position='center'>
-            <Button style={{backgroundColor: obj.color}}  color={obj.color} type='submit' >Submit</Button>
+            <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color} >Submit</Button>
           </Group>
             ) : null}
 
@@ -1168,7 +1224,7 @@ const submitAnswers = async (e) => {
             </MediaQuery>
             <MediaQuery largerThan='md' styles={{display: 'none'}}>
             <div style={{marginRight: '1%', marginLeft: '1%'}}>
-              <form onSubmit={(e) => {submitAnswers(e)}} >
+              <form >
             {obj.header_image !== null && obj.header_image !== undefined ? ( 
                 <Card mt={20} shadow={'sm'} >
                         <Image  height={400} src={obj.header_image} />
@@ -1182,7 +1238,7 @@ const submitAnswers = async (e) => {
               <RenderQuestions />
             ) : null}
           <Group mt={20} position='center'>
-            <Button style={{backgroundColor: obj.color}} color={obj.color} type="submit" >Submit</Button>
+            <Button style={{backgroundColor: obj.color}} color={obj.color} onClick={() => {submitAnswers()}} >Submit</Button>
           </Group>
           </form>
           </div>

@@ -6,7 +6,7 @@ export function createResponse(obj) {
         let newResponse = new Response({
             response: obj.response,
             response_id: obj.response_id,
-            form_id: obj.response_id
+            form_id: obj.form_id
         });
 
         Response.createResponse(newResponse, function(err, response) {
@@ -39,6 +39,7 @@ export async function getAllFormResponse({form_id}){
             if(err) throw err;
 
             if(responses) {
+                console.log(responses);
                 resolve({responses: responses});
             }
         });
