@@ -165,7 +165,7 @@ const useStyles = createStyles((theme) => ({
 const initialState = {
   FormName: 'Untitled Form',
   ActiveTab: 0,
-  CustomTheme: true,
+  CustomTheme: false,
   Color: '#E67700',
   Background: backgrounds[1].value,
   HeaderFont: 'Roboto',
