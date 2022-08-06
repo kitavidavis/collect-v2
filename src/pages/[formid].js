@@ -1330,21 +1330,34 @@ const submitAnswers = async (e) => {
             <MediaQuery largerThan='md' styles={{display: 'none'}}>
             <div style={{marginRight: '1%', marginLeft: '1%'}}>
               <form >
-            {obj.header_image !== null && obj.header_image !== undefined ? ( 
-                <Card mt={20} shadow={'sm'} >
-                        <Image  height={400} src={obj.header_image} />
-                </Card>
-               ) : null}
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
             <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
-            <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
+            <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description === 'Form description' ? "" : obj.description}</Text>
+            <Text ml='md' mt='md' mb={20} color='dimmed'><span style={{color: 'red'}} >*</span> Required</Text>
           </Box>
-            {forms.length > 0 ? (
+          {forms.length > 0 && obj.active ? (
               <RenderQuestions />
+            ) : forms.length > 0 && !obj.active ? (
+              <Paper mt={20} p='md' >
+              <Alert icon={<AlertCircle size={16} />} title="Bummer" color="red">
+      This form is no longer receiving responses.
+    </Alert>
+            </Paper>
             ) : null}
-          <Group mt={20} position='center'>
-            <Button style={{backgroundColor: obj.color}} color={obj.color} onClick={() => {submitAnswers()}} >Submit</Button>
+
+          {forms.length > 0 && obj.active ? (
+            <>
+            <Group  ml="md" mt={20}>
+              <Text ><strong>Note: </strong>Do not submit your passwords or any other personal information.</Text>
+            </Group>
+            <Group  ml="md">
+              <Text >This form violates our <Anchor>Terms</Anchor>? Report <Anchor>here</Anchor></Text>
+            </Group>
+            <Group ml="md" mt={20} position='center'>
+            <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color} >Submit</Button>
           </Group>
+          </>
+            ) : null}
           </form>
           </div>
             </MediaQuery>
