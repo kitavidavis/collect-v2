@@ -53,7 +53,7 @@ import { uuid } from 'uuidv4';
 import { useRouter } from 'next/router';
 import { useUser } from 'lib/hooks';
 import { LoopIcon, SliderIcon, TextAlignLeftIcon } from '@modulz/radix-icons';
-import { IoMdArrowDropdownCircle, IoMdSave } from 'react-icons/io';
+import { IoMdArrowDropdownCircle, IoMdCheckmarkCircle, IoMdSave } from 'react-icons/io';
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
 import { showNotification } from '@mantine/notifications'
@@ -61,6 +61,7 @@ import ReactMapboxGl, { Layer, Feature, Marker, Source } from 'react-mapbox-gl';
 import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpreadshit, UploadPDF, UploadImage, UploadAny } from '../components/upload';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Pin from 'components/pin';
+import SuccessImage from 'assets/illustrations/success.png';
 import MapIcon from 'components/marker.gif'
 import { pointRadial, timeFormatDefaultLocale } from 'd3';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
@@ -184,9 +185,10 @@ export default function AppShellDemo() {
   const [obj, setObj] = useState(null);
   const [done, setDone] = useState(false);
   const [nullform, setNullForm] = useState(false);
-
+  const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState([]);
   const [answers, setAnswers] = useState([]);
+  const [required, setRequired] = useState([]);
 
   useDocumentTitle(obj === null ? 'Loading...' : obj.title + ' | '+ obj.description)
 
@@ -258,28 +260,33 @@ export default function AppShellDemo() {
   retrieveForm();
 }, [router]);
 
-React.useEffect(() => {
-  const prepareAnswerStore = () => {
-    let arr = [];
-    for(let i=0; i<forms.length; i++){
-      if(forms[i].type === 1){
-        let qt = forms[i].question.questionType;
-        let chunk = {id:forms[i].id, position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : null };
-        arr.push(chunk);
-      } else {
-        continue;
-      }
+const prepareAnswerStore = () => {
+  let arr = [];
+  let required = [];
+  for(let i=0; i<forms.length; i++){
+    if(forms[i].type === 1){
+      let qt = forms[i].question.questionType;
+      let req = forms[i].question.required;
+      let chunk = {id:forms[i].id, required: req,  position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : qt === 'Date' || qt === 'Time' ? new Date() : null };
+      arr.push(chunk);
+    } else {
+      continue;
     }
-
-    console.log(arr);
-    setAnswers(arr);
   }
+  setAnswers(arr);
+}
 
+React.useEffect(() => {
   if(done && !nullform){
     prepareAnswerStore();
   }
 
 }, [done]);
+
+const submitAnotherResponse = () => {
+  prepareAnswerStore();
+  setSubmitted(false);
+}
 
 const RenderQuestions = () => {
   const handleQuestion = (q, id, parent) => {
@@ -345,8 +352,11 @@ const RenderQuestions = () => {
   
   const handleShortAnswer = (id, p) => {
     const [text, setText] = useState('');
+    const [error, setError] = useState(false);
+    const [required, setRequired] = useState(false);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
   
     React.useEffect(() => {
       let ans = retrieveShortAns(id);
@@ -357,8 +367,21 @@ const RenderQuestions = () => {
 
     const handleChange = (text) => {
       setText(text);
-
       handleChange2(text);
+    }
+
+    const handleBlur = (txt) => {
+      if(item.question.required){
+        if(txt == ''){
+          setError(true)
+        } else {
+          setError(false);
+        }
+      }
+    }
+
+    const handleFocus = () => {
+      setError(false);
     }
 
     const handleChange2 = useCallback((text) => {
@@ -370,17 +393,16 @@ const RenderQuestions = () => {
         let chunk = {id: id, position: item.position, response: text};
         setAnswers(prevAns => [...prevAns, chunk]);
       }
-
     
     }, []);
   
 
     return (
-            <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+    <InputWrapper error={error} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
   
-  <TextInput value={text} onChange={(e) => {handleChange(e.currentTarget.value)}} />
+  <TextInput error={error ? "The response for this question is required" : null} onFocus={() => {handleFocus()}} onBlur={(e) => {handleBlur(e.currentTarget.value)}} value={text} onChange={(e) => {handleChange(e.currentTarget.value)}} />
   
-  </InputWrapper>
+    </InputWrapper>
       
     )
   }
@@ -397,6 +419,7 @@ const RenderQuestions = () => {
   
   const handleParagraph = (id, p) => {
     const [text, setText] = useState('');
+    const [error, setError] = useState(false);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
   
@@ -411,6 +434,20 @@ const RenderQuestions = () => {
       setText(text);
 
       handleChange2(text);
+    }
+
+    const handleBlur = (txt) => {
+      if(item.question.required){
+        if(txt == ''){
+          setError(true)
+        } else {
+          setError(false);
+        }
+      }
+    }
+
+    const handleFocus = () => {
+      setError(false);
     }
 
     const handleChange2 = useCallback((text) => {
@@ -429,7 +466,7 @@ const RenderQuestions = () => {
     return (
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
   
-      <Textarea value={text} onChange={(e) => {handleChange(e.currentTarget.value)}}  />
+      <Textarea error={error ? "The response for this question is required" : null} value={text} onFocus={() => {handleFocus()}} onBlur={(e) => {handleBlur(e.currentTarget.value)}} onChange={(e) => {handleChange(e.currentTarget.value)}}  />
   
       </InputWrapper>
     )
@@ -447,6 +484,7 @@ const RenderQuestions = () => {
   
   const handleMultipleChoice = (id, p) => {
     const [str, setStr] = useState('');
+    const [error, setError] = useState(false);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
   
@@ -463,6 +501,20 @@ const RenderQuestions = () => {
       handleChange2(text);
     }
 
+    const handleBlur = () => {
+      if(item.question.required){
+        if(str == ''){
+          setError(true)
+        } else {
+          setError(false);
+        }
+      }
+    }
+
+    const handleFocus = () => {
+      setError(false);
+    }
+
     const handleChange2 = useCallback((text) => {
       let idx = answers.findIndex((obj => obj.id == id));
       if(idx !== -1){
@@ -477,7 +529,7 @@ const RenderQuestions = () => {
     }, []);
 
     return (
-      <RadioGroup value={str} onChange={(val) => {handleChange(val)}} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
+      <RadioGroup error={error} onFocus={() => {handleFocus()}} onBlur={() => {handleBlur()}} value={str} onChange={(val) => {handleChange(val)}} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
           {item.question.radioOptions.length > 0 && item.question.radioOptions.map((radio) => {
             return (
               <Radio value={radio.label} label={radio.label} key={radio.id} />
@@ -1148,12 +1200,7 @@ const submitAnswers = async (e) => {
       body: JSON.stringify(body),
     }).then(function(res){
       if(res.status == 200){
-        showNotification({
-          title: `Success`,
-          message: 'Your response has been recorded!',
-          color: 'teal',
-          icon: <Check />,
-        });
+        setSubmitted(true);
       }
     })
   } catch(error){
@@ -1188,7 +1235,7 @@ const submitAnswers = async (e) => {
       >
 
           <>
-          {done && !nullform ? (
+          {done && !nullform && !submitted ? (
             <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
             <div style={{marginRight: 300, marginLeft: 300}}>
@@ -1200,8 +1247,8 @@ const submitAnswers = async (e) => {
                ) : null}
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
             <Text style={{fontFamily: obj.headerfont, fontSize: parseInt(obj.headersize)}} weight={500}  mt="md" ml="md" >{obj.title}</Text>
-            <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description}</Text>
-            
+            <Text color='gray'  ml='md' mt='md' mb={20}>{obj.description === 'Form description' ? "" : obj.description}</Text>
+            <Text ml='md' mt='md' mb={20} color='dimmed'><span style={{color: 'red'}} >*</span> Required</Text>
           </Box>
             {forms.length > 0 && obj.active ? (
               <RenderQuestions />
@@ -1214,9 +1261,17 @@ const submitAnswers = async (e) => {
             ) : null}
 
           {forms.length > 0 && obj.active ? (
-            <Group mt={20} position='center'>
+            <>
+            <Group  ml="md" mt={20} position="left">
+              <Text ><strong>Note: </strong>Do not submit your passwords or any other personal information.</Text>
+            </Group>
+            <Group  ml="md" position="left">
+              <Text >This form violates our <Anchor>Terms</Anchor>? Report <Anchor>here</Anchor></Text>
+            </Group>
+            <Group ml="md" mt={20} position='left'>
             <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color} >Submit</Button>
           </Group>
+          </>
             ) : null}
 
             </form>
@@ -1244,6 +1299,20 @@ const submitAnswers = async (e) => {
           </div>
             </MediaQuery>
               </>
+          ) : done && !nullform && submitted ? (
+              <Paper mt={20} p='md' style={{backgroundColor: obj.background}} >
+                <Group position='center'>
+                  <Check color='green' size={100} />
+                </Group>
+              <Group mt={20} position='center'>
+                Success! Your response has been recorded.
+              </Group>
+    <Group mt={20} position='center'>
+                  {obj.show_link_to_submit_another_response ? (
+                    <Button style={{backgroundColor: obj.color}} color={obj.color} onClick={() => {submitAnotherResponse()}} >Submit Another Response</Button>
+                  ) : null}
+                </Group>
+            </Paper>
           ) : done && nullform ? (
             <Paper mt={20} p='md' mr={'10%'} ml={'10%'} >
               <Alert icon={<AlertCircle size={16} />} title="Bummer!" color="red">

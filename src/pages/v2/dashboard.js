@@ -45,9 +45,10 @@ import {
   Divider,
   Table,
   ScrollArea,
+  Card,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
-import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink } from 'tabler-icons-react';
+import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import AvaterImage from 'assets/illustrations/215.png'
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
@@ -427,7 +428,6 @@ function Dashboard(){
         }).then( async function(res){
           if(res.status === 200){
             const data = await res.json();
-            console.log(data);
             setResponse(data.response);
           } 
         }).catch(function(error) {
@@ -598,6 +598,8 @@ function Dashboard(){
       });
     }
 
+    
+
     const Layout = () => {
       const theme = useMantineTheme();
       const [query, setQuery] = useState('');
@@ -762,6 +764,65 @@ function Dashboard(){
         createInOutGraph();
         createSizeGraph();
       }, []);
+
+      const parseArr = (arr) => {
+        let parsedArr = [];
+        for(let j=0; j<arr.length; j++){
+          let item = arr[j].response;
+          let itm = arr[j];
+
+          for(let i=0; i<item.length; i++){
+            let qType = item[i].questionType;
+            let chunk = {position: item[i].position, createdAt: itm.createdAt, questionType: qType, required: item[i].required ? "Yes" : "No", question: item[i].question, response: qType === 'Point' || qType === 'Polyline' || qType === 'Polygon' ? JSON.stringify(item[i].response) : item[i].response}
+            parsedArr.push(chunk);
+          }
+        }
+
+        return parsedArr;
+      }
+
+      function convertToCSV(arr) {
+        const array = [Object.keys(arr[0])].concat(arr)
+      
+        return array.map(it => {
+          return Object.values(it).toString()
+        }).join('\n')
+      }
+
+      const downloadCSV = () => {
+        let res = parseArr(response);
+        let csv = convertToCSV(res);
+
+        var downloadLink = document.createElement("a");
+        var blob = new Blob(["\ufeff", csv]);
+        var url = URL.createObjectURL(blob);
+        downloadLink.href = url;
+        downloadLink.download = "GeoPsyCollect-"+new Date()+".csv";
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
+
+      const downloadJSON = () => {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(response, null, 2));
+        var downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", "GeoPsyCollect-"+new Date()+".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      }
+
+      const downloadMinifiedJSON = () => {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(response));
+        var downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", "GeoPsyCollect-"+new Date()+".json");
+        document.body.appendChild(downloadAnchorNode); // required for firefox
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+      }
 
       const deleteForm = async (form_id) => {
         const body = {
@@ -1032,12 +1093,12 @@ function Dashboard(){
               </>
   ) : (
     <>
-    <Group mt={10}>
+    <Group>
       <ActionIcon onClick={() => {setCluster('')}} title='Go Back' >
-        <ArrowBack size={20} />
+        <ArrowLeft size={20} />
       </ActionIcon>
     </Group>
-    <Group mt={20}>
+    <Group>
     <Title order={2} className={classes.title} align="center">
     {cluster}
   </Title>
@@ -1132,43 +1193,63 @@ function Dashboard(){
       </Tabs.Tab>
       <Tabs.Tab label="Real Time">Real Time</Tabs.Tab>
       <Tabs.Tab label="Response" value={"Response"}>
-        <Group mt={5} mb={5} grow>
-          <TextInput placeholder='Filter response' rightSection={<Search />} />
+        <Group position='apart'>
+          <Group position='left'>
+            <Text color='dimmed'>TOTAL DOCUMENTS:<strong>{response.length}</strong></Text>
+          </Group>
+        <Group mt={5} mb={10} position='right'>
+          <TextInput  placeholder='Search response' rightSection={<Search />} />
+            <Button compact variant='outline' leftIcon={<ChartArea />}>Visualize</Button>
+            <Button compact variant='outline' leftIcon={<Refresh />}>Refresh</Button>
+          <Menu control={<Button compact variant='outline' leftIcon={<Download />}>Export</Button>}>
+            <Menu.Item onClick={() => {downloadCSV()}}>CSV</Menu.Item>
+            <Menu.Item onClick={() => {downloadJSON()}}>JSON</Menu.Item>
+            <Menu.Label>Others</Menu.Label>
+            <Menu.Item onClick={() => { downloadMinifiedJSON()}} >Minified JSON</Menu.Item>
+          </Menu>
         </Group>
-        <ScrollArea onScrollPositionChange={({ y }) => setScrolled(y !== 200)}>
-      <Table highlightOnHover width={width} style={{overflowX: 'auto', 
-      display: 'block',
-  maxWidth:  '-moz-fit-content',
-  maxWidth: 'fit-content',
-  whiteSpace: 'nowrap'}}>
-    <thead style={{overflowX: 'auto'}} className={cx(classes.tableHeader, { [classes.scrolled]: scrolled })}>
-          <tr style={{overflowX: 'auto', alignItems: 'space-between'}}>
-          {sortArr(ctx.question).map((item, index) => {
-            if(item.type == 1){
-              return (
-                <th style={{whiteSpace: 'nowrap'}} key={index}>{item.question.defaultValue}</th>
-              )
-            }
-        })}
-          </tr>
-        </thead>
-        <tbody>
+        </Group>
+        <ScrollArea style={{height: height - 250  }} >
           {response.map((item, index) => {
             return (
-              <tr key={index} >
-                {sortArr(item.response).map((item, index) => {
+              <Paper p="md" ml="10%" mr="10%" mb={15} key={index}>
+               <Group mb={5} grow>
+               <Text size='xs' ><strong>Response Id:</strong> <span style={{color: '#D9480F'}}>{'ObjectId("'+item.response_id+'")'}</span></Text>
+               <Group position='right'>
+                <ActionIcon title='Copy response' >
+                  <Copy size={15} />
+                </ActionIcon>
+                <ActionIcon title='Delete response'>
+                  <Trash size={15} />
+                </ActionIcon>
+               </Group>
+               </Group>
+              {sortArr(item.response).map((item, index) => {
                   return (
-                    <td key={'td'+index} >
-                      {handleResponse(item.response, item.questionType)}
-                    </td>
+                    item.questionType === 'Point' || item.questionType === 'Polyline' || item.questionType === 'Polygon' ? (
+                      <div style={{marginLeft: 20}}>
+                                          <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}} >{'ObjectId("'+item.id+'")'}</span></Text>
+                                          <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
+                                          <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
+                                          <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
+                                          <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{JSON.stringify(item.response)}</span></Text>
+                                          </div>
+                    ) : (
+                      <div style={{marginLeft: 20}}>
+                                          <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
+                                          <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
+                                          <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
+                                          <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
+                                          <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.response}</span></Text>
+                                          </div>
+                    )
                   )
                 })}
-              </tr>
+                
+              </Paper>
             )
           })}
-        </tbody>
-      </Table>
-      </ScrollArea>
+          </ScrollArea>
       </Tabs.Tab>
           </Tabs>
     </>
@@ -1180,14 +1261,11 @@ function Dashboard(){
     }
 
     const preferredColorScheme = useColorScheme();
-    const [colorScheme, setColorScheme] = useState(preferredColorScheme);
+    const [colorScheme, setColorScheme] = useState('dark');
     const toggleColorScheme = (value) =>
       setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
   
       
-React.useEffect(()=> {
-  setColorScheme(preferredColorScheme);
-}, [preferredColorScheme]);
     return (
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>

@@ -2,7 +2,7 @@ import { serialize, parse } from "cookie";
 
 const TOKEN_NAME = "geopsy-collect";
 
-export const MAX_AGE = 60 * 60 * 24 * 2 // 2 days
+export const MAX_AGE = 60 * 60 * 24 * 30 // 1 month
 
 export function setTokenCookie(res, token){
     const cookie = serialize(TOKEN_NAME, token, {

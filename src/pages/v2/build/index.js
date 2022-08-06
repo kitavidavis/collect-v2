@@ -41,6 +41,7 @@ import {
   Slider,
   Modal,
   Image,
+  ColorSchemeProvider,
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
 import { useBooleanToggle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
@@ -56,8 +57,8 @@ import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
 import { showNotification } from '@mantine/notifications'
 
-const colors = ['#101113', '#212529', '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
-const color_strings = ['dark', 'gray', 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange'];
+const colors = [ '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
+const color_strings = [ 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange'];
 const backgrounds = [{label: 'Light', value: '#foebf8'}, {label: 'Medium', value: '#e1d8f1'}, {label: 'Dark', value: '#d1c4e9'}, {label: 'Gray', value: '#f6f6f6'}]
 
 const useStyles = createStyles((theme) => ({
@@ -69,7 +70,6 @@ const useStyles = createStyles((theme) => ({
   wrapper: {
     borderRadius: theme.radius.md,
     marginBottom: 20,
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
     border: `1px solid ${
       theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[3]
     }`,
@@ -165,8 +165,8 @@ const useStyles = createStyles((theme) => ({
 const initialState = {
   FormName: 'Untitled Form',
   ActiveTab: 0,
-  CustomTheme: false,
-  Color: '#5F3DC4',
+  CustomTheme: true,
+  Color: '#E67700',
   Background: backgrounds[1].value,
   HeaderFont: 'Roboto',
   HeaderSize: 24,
@@ -181,7 +181,7 @@ const initialState = {
   ShowProgressBar: false,
   ShuffleQuestionOrder: false,
   ConfirmationMessage: 'Your response has been recorded',
-  ShowLinkToSubmitAnotherResponse: false,
+  ShowLinkToSubmitAnotherResponse: true,
   CollectEmailAddressByDefault: false,
   MakeQuestionsRequiredByDefault: false
 }
@@ -488,7 +488,7 @@ export function HeaderPage() {
 
         </Group>
       </Group>
-      <Tabs color={state.Color} active={activeTab} onTabChange={(val) => {handleTabChange(val)}} position='center' style={{backgroundColor: 'white', left: 0, right: 0}} >
+      <Tabs color={state.Color} active={activeTab} onTabChange={(val) => {handleTabChange(val)}} position='center' style={{left: 0, right: 0}} >
       <Tabs.Tab color={state.Color} label="Questions" ></Tabs.Tab>
       <Tabs.Tab label="Preview"></Tabs.Tab>
       <Tabs.Tab label="Settings" ></Tabs.Tab>
@@ -846,7 +846,56 @@ export default function AppShellDemo() {
   const duplicateQuestion = (id) => {
     let index = forms.findIndex((obj => obj.id === id));
     let content = forms[index];
-    let chunk = {...content, id: uuid(), position: forms.length+1, linked: false, linked_question: null, linked_parameters: null, linked_position: null};
+    let chunk = {id: uuid(),  question: {
+      questionType: content.question.questionType,
+      defaultValue: content.question.defaultValue,
+      required: content.question.required,
+      description: content.question.description,
+      descriptionValue: content.question.description,
+      dropdownOptions: null,
+      responseValidation: false,
+      responseValidationValue: {},
+      radioOptions: null,
+      checkboxOptions: null,
+      dropdownOptions: null,
+      uploadSize: '10',
+      uploadSpecifics: {
+        document: false,
+        spreadshit: false,
+        pdf: false,
+        video: false,
+        presentation: false,
+        drawing: false,
+        image: true,
+        audio: false
+      },
+      linearFrom: 0,
+      linearTo: 5,
+      linearLabel1: '',
+      linearLabel2: '',
+      gridRadioRow: null,
+      gridRadioColumn: null,
+      gridCheckboxRow: null,
+      gridCheckboxColumn: null,
+      pointSource: 'gps',
+      pointBackgroundCheck: true,
+      pointLaskKnownLocation: false,
+      pointCustomTile: true,
+      polylineSource: 'gps',
+      polylineMinPairs: '2',
+      polylineMaxResponse: '1',
+      polylineBackgroundCheck: true,
+      polylineLastKnownLocation: false,
+      polylineCustomTile: true,
+      polygonSource: 'gps',
+      polygonMinPairs: '3',
+      polygonMaxResponse: '1',
+      polygonBackgroundCheck: true,
+      polygonLastKnownLocation: false,
+      polygonCustomTile: true
+
+    }, position: forms.length+1, linked:false, parent:false, parentID: null, linked_parameters: null, linked_question: null, linked_position: null, type: 1};
+
     setForms(prevForms => [...prevForms, chunk]);
   }
 
@@ -1123,7 +1172,10 @@ export default function AppShellDemo() {
               Cancel
             </Anchor>
             <Button onClick={() => {createOptions()}} type="button" size="sm">
-              Save
+              Apply
+            </Button>
+            <Button onClick={() => {setOpened(false)}} type="button" size="sm">
+              Close
             </Button>
           </Group>
         </form>
@@ -1284,7 +1336,10 @@ export default function AppShellDemo() {
               Cancel
             </Anchor>
             <Button onClick={() => {createOptions()}} type="button" size="sm">
-              Save
+              Apply
+            </Button>
+            <Button onClick={() => {setOpened(false)}} type="button" size="sm">
+              Close
             </Button>
           </Group>
         </form>
@@ -1407,7 +1462,7 @@ export default function AppShellDemo() {
         let q = forms[index];
         q.question.dropdownOptions = newTempArr;
 
-        setOpened(false)
+        //setOpened(false)
       }
 
       return (
@@ -1428,7 +1483,10 @@ export default function AppShellDemo() {
               Cancel
             </Anchor>
             <Button onClick={() => {createOptions()}} type="button" size="sm">
-              Save
+              Apply
+            </Button>
+            <Button onClick={() => {setOpened(false)}} type="button" size="sm">
+              Close
             </Button>
           </Group>
         </form>
@@ -1735,7 +1793,7 @@ export default function AppShellDemo() {
               Cancel
             </Anchor>
             <Button onClick={() => {createOptions()}} type="button" size="sm">
-              Save
+              Create
             </Button>
           </Group>
         </form>
@@ -1776,7 +1834,7 @@ export default function AppShellDemo() {
 
         q.question.gridRadioColumn = [... new Set(tempArr)];
 
-        setOpened2(false)
+        //setOpened2(false)
       }
 
       return (
@@ -1797,7 +1855,10 @@ export default function AppShellDemo() {
               Cancel
             </Anchor>
             <Button onClick={() => {createOptions()}} type="button" size="sm">
-              Save
+              Apply
+            </Button>
+            <Button onClick={() => {setOpened(false)}} type="button" size="sm">
+              Close
             </Button>
           </Group>
         </form>
@@ -1875,6 +1936,10 @@ export default function AppShellDemo() {
 
     }
 
+    const handlePopoverClose = () => {
+
+      setOpened(false)
+    }
     return (
       <Group position='apart' grow>
         <Group position='left'>
@@ -1891,7 +1956,7 @@ export default function AppShellDemo() {
         <Group>
         <Popover
         opened={opened}
-        onClose={() => setOpened(false)}
+        onClose={() => {handlePopoverClose()}}
         position="top"
         placement="end"
         withCloseButton
@@ -3080,7 +3145,7 @@ export default function AppShellDemo() {
     );
   }
 
-  const swatches = Object.keys(theme.colors).map((color) => (
+  const swatches = Object.keys(theme.colors).map((color, index) => (
     <ColorSwatch title={color} component="button" onClick={() => handleColors(color)} key={color} color={theme.fn.rgba(theme.colors[color][8], 1.0)} >
       {checked === color ? <Check size={13} color='white' /> : null}
     </ColorSwatch>
@@ -3097,10 +3162,12 @@ export default function AppShellDemo() {
     
   return (
     <FormContext.Provider value={{state, dispatch}}>
+      <ColorSchemeProvider colorScheme='dark'>
       <MantineProvider
       withGlobalStyles
       withNormalizeCSS
       theme={{
+        colorScheme: 'dark',
         other: {
           RobotoFamily: 'Roboto, sans-serif',
           SplashFamily: 'Splash, sans-serif',
@@ -3110,11 +3177,6 @@ export default function AppShellDemo() {
     >
     <NotificationsProvider position="top-right" zIndex={2077} >
     <AppShell
-      styles={{
-        main: {
-          background: state.Background,
-        },
-      }}
       navbarOffsetBreakpoint="sm"
       asideOffsetBreakpoint="sm"
       fixed
@@ -3195,23 +3257,15 @@ export default function AppShellDemo() {
               {swatches}
               </Group>
             </Group>
-            <Group mb={30} spacing='xs' direction='column' ml={20} mr={20} grow>
-              <Text my={20} weight={500}>Background Color</Text>
-              <Group>
-              {bgSwatches}
-              </Group>
-            </Group>
             </Aside.Section>
           </Aside>
 
         ) : null
       }
       header={
-        state.ActiveTab !== 1 ? (
           <Header height={100} p="md">
           <HeaderPage />
         </Header>
-        ) : null
       }
     >
       {state.ActiveTab == 0 ? (
@@ -3359,7 +3413,7 @@ export default function AppShellDemo() {
         ) : null}
         <MediaQuery largerThan={'md'} styles={{display: 'none'}}>
           <div>
-        <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 5, borderTopColor: state.Color, borderLeftWidth: 3, borderLeftColor: '#2f5496'}} >
+        <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 5, borderTopColor: state.Color, borderLeftWidth: 3, borderLeftColor: state.Color}} >
           <Text size="xl" weight={500} style={{fontFamily: state.HeaderFont, fontSize: state.HeaderSize}}  mt="md" ml="md" >{state.FormName}</Text>
           <TextInput  size='xs' style={{fontFamily: state.TextFont, fontSize: state.TextSize}} mb={20} mt="xs" ml="md" mr="md" variant={readonly ? 'unstyled' : null} readOnly={readonly} onChange={(e) => {setFormDesc(e.currentTarget.value)}} onFocus={(e) => {handleFocus(e)}} onBlur={(e) => {handleBlur(e)}} placeholder="Description (optional)"  />
         </Box>
@@ -3401,7 +3455,7 @@ export default function AppShellDemo() {
                         <Image  height={200} src={state.HeaderImage} />
                 </Card>
                ) : null} 
-        <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: state.Color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
+        <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: state.Color, borderLeftWidth: 5, borderLeftColor: state.Color}} >
           <Text size="xl" weight={500} style={{fontFamily: state.HeaderFont, fontSize: state.HeaderSize}}  mt="md" ml="md" >{state.FormName}</Text>
           <TextInput  size='xs' style={{fontFamily: state.TextFont, fontSize: state.TextSize}} mb={20} mt="xs" ml="md" mr="md" variant={readonly ? 'unstyled' : null} readOnly={readonly} onChange={(e) => {setFormDesc(e.currentTarget.value)}} onFocus={(e) => {handleFocus(e)}} onBlur={(e) => {handleBlur(e)}} placeholder="Description (optional)"  />
         </Box>
@@ -3448,14 +3502,10 @@ export default function AppShellDemo() {
           <>
           <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
           <div style={{marginRight: state.CustomTheme ? 0: 300, marginLeft: 300}}>
-          <Group>
-            <ActionIcon title='Navigate back to builder' onClick={() => {dispatch({type: 'UPDATE_ACTIVE_TAB', activetab: 0});}} >
-              <ArrowBack color={state.Color} />
-            </ActionIcon>
-          </Group>
-        <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: state.Color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
+        <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: state.Color, borderLeftWidth: 5, borderLeftColor: state.Color}} >
           <Text size="xl" weight={500} style={{fontFamily: state.HeaderFont, fontSize: state.HeaderSize}}  mt="md" ml="md" >{state.FormName}</Text>
-          <Text color='gray' style={{fontFamily: state.TextFont, fontSize: state.TextSize}} ml='md' mt='md' mb={20}>{formdesc}</Text>
+          <Text color='gray' style={{fontFamily: state.TextFont, fontSize: state.TextSize}} ml='md' mt='md' mb={20}>{formdesc === 'Form description' ? "" : formdesc}</Text>
+          <Text ml='md' mt='md' mb={20} color='dimmed'><span style={{color: 'red'}} >*</span> Required</Text>
           
         </Box>
           {forms.length > 0 && forms.map((item) => {
@@ -3849,6 +3899,7 @@ export default function AppShellDemo() {
     </AppShell>
     </NotificationsProvider>
     </MantineProvider>
+    </ColorSchemeProvider>
     </FormContext.Provider>
   );
 }
