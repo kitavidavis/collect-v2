@@ -61,6 +61,7 @@ import ReactMapboxGl, { Layer, Feature, Marker, Source } from 'react-mapbox-gl';
 import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpreadshit, UploadPDF, UploadImage, UploadAny } from '../components/upload';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Pin from 'components/pin';
+import { Helmet } from 'react-helmet';
 import SuccessImage from 'assets/illustrations/success.png';
 import MapIcon from 'components/marker.gif'
 import { pointRadial, timeFormatDefaultLocale } from 'd3';
@@ -190,7 +191,7 @@ export default function AppShellDemo() {
   const [answers, setAnswers] = useState([]);
   const [required, setRequired] = useState([]);
 
-  useDocumentTitle(obj === null ? 'Loading...' : obj.title + ' | '+ obj.description)
+  //useDocumentTitle(obj === null ? 'Loading...' : obj.title + ' | '+ obj.description)
 
   const [lat, setLat] = useState('');
   const [lng, setLng] = useState('');
@@ -1235,6 +1236,55 @@ const submitAnswers = async (e) => {
       >
 
           <>
+          <Helmet title = {obj === null ? "GeoPsy Collect Form" : obj.title}
+          htmlAttributes={{ lang: "en" }}
+          meta={[
+        {
+          name: `description`,
+          content: obj === null ? "Derive patterns and insights from complex data" : obj.description,
+        },
+        {
+          property: "og:url",
+          content: "https://collect-v2.vercel.app"
+        },
+        {
+          property: "og:type",
+          content: "website"
+        },
+        {
+          property: "og:title",
+          content: obj === null ? "GeoPsy Collect | Survey Form" : obj.title
+        },
+        {
+          property: "og:description",
+          content: obj === null ? "Derive patterns and insights from complex data with ease." : obj.description,
+        },
+        {
+          property: "og:image",
+          content: SuccessImage
+        }, 
+        {
+          property: "twitter:card",
+          content: "GeoPsy Collect | Derive insights and patterns from complex data with ease."
+        },
+        {
+          property: "twitter:creator",
+          content: "David Kitavi | GeoPsy Collect"
+        },
+        {
+          property: "twitter:title",
+          content: obj === null ? "GeoPsy Collect | Survey Form" : obj.title
+        },
+        {
+          property: "twitter:description",
+          content:  obj === null ? "Derive patterns and insights from complex data with ease." : obj.description,
+        },
+        {
+          property: "twitter:image",
+          content: SuccessImage
+        }
+      ]}
+   />
           {done && !nullform && !submitted ? (
             <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
