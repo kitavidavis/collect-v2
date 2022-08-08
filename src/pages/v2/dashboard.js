@@ -46,6 +46,7 @@ import {
   Table,
   ScrollArea,
   Card,
+  Modal,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
 import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle } from 'tabler-icons-react';
@@ -64,9 +65,14 @@ import serverRack from 'assets/images/blue-logo.png';
 import Image  from 'components/image';
 import { Bar } from 'react-chartjs-2';
 import { TableIcon } from '@modulz/radix-icons';
+import ReactMapboxGl, { Layer, Feature, Marker, Source } from 'react-mapbox-gl';
 import { showNotification } from '@mantine/notifications';
 var BarChart = require('react-d3-components').BarChart;
 var PieChart = require('react-d3-components').PieChart;
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
+
 
 export const useStyles = createStyles((theme, _params, getRef) => {
 const icon = getRef('icon');
@@ -326,6 +332,8 @@ function Dashboard(){
     const [ctx, setCTX] = useState([]);
     const [activeid, setActiveId] = useState('');
     const [item, setItems] = useState([]);
+    const [visopen, setVisOpen] = useState(false);
+    const [query2, setQuery2] = useState('');
     const [menuopen, setMenuOpen] = useState({
       form_id: null,
       state: false
@@ -362,7 +370,13 @@ function Dashboard(){
     ];
 
 
-    const mainLinks = navlinks.map((link) => (
+    const mainLinks = navlinks.filter(item => {
+      if(query2 === '') {
+        return item;
+      } else if(item.label.toLocaleLowerCase().includes(query2.toLocaleLowerCase())){
+        return item;
+      }
+    }).map((link) => (
       <UnstyledButton mt={10} onClick={() => {setLinkActive(link.label)}} component="a" href={link.href} key={link.label} className={classes.mainLink}>
         <div className={classes.mainLinkInner}>
         <link.icon size={20} color={theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black} className={classes.mainLinkIcon} />
@@ -592,6 +606,59 @@ function Dashboard(){
       )
     }
 
+    const VisualizeGeometryData = () => {
+      const [data, setData] = useState([]);
+      const Map = ReactMapboxGl({
+        accessToken: accessToken,
+      });
+
+      useEffect(() => {
+        for(let i=0; i<response.length; i++){
+          let item = response[i];
+  
+          for(let k=0; k<item.response.length; k++){
+            let obj = item.response[k];
+  
+            if(obj.questionType === 'Point'){
+              let chunk = item.response[k].response;
+  
+              if(chunk !== null){
+                setData(prevData => [...prevData, chunk]);
+              }
+            }
+          }
+        }
+      }, []);
+
+      return (
+
+                <Map
+    style="mapbox://styles/mapbox/dark-v10"
+    containerStyle={{
+      height: height - 250,
+      width: width - 250
+    }}
+    center={data.length > 0 ? [data[0].longitude, data[0].latitude] : [36.567, -1.234]}
+    zoom={data.length > 0 ? [14] : [0]}
+  >
+
+    {data.length > 0 ? (
+      data.map((item, index) => {
+        return (
+          <Layer key={index} type='symbol'>
+          <Marker
+        coordinates={[item.longitude, item.latitude]}
+        anchor="bottom">
+          <p>Hello</p>
+      </Marker>
+          </Layer>
+        )
+      })
+    ) : null}
+
+  </Map> 
+      )
+    }
     const sortArr = (arr) => {
       return arr.sort((a, b) => {
         return a.position - b.position;
@@ -955,6 +1022,8 @@ function Dashboard(){
         <TextInput
         placeholder="Search"
         size="xs"
+        value={query2}
+        onChange={(e) => {setQuery2(e.currentTarget.value)}}
         icon={<Search size={12} />}
         rightSectionWidth={70}
         rightSection={<Code className={classes.searchCode}>Ctrl + K</Code>}
@@ -1199,9 +1268,13 @@ function Dashboard(){
           </Group>
         <Group mt={5} mb={10} position='right'>
           <TextInput  placeholder='Search response' rightSection={<Search />} />
-            <Button compact variant='outline' leftIcon={<ChartArea />}>Visualize</Button>
-            <Button compact variant='outline' leftIcon={<Refresh />}>Refresh</Button>
-          <Menu control={<Button compact variant='outline' leftIcon={<Download />}>Export</Button>}>
+          {!visopen ? (
+                        <Button onClick={() => {setVisOpen(true)}} variant='subtle'  leftIcon={<ChartArea />}>Toggle View</Button>
+          ) : (
+            <Button onClick={() => {setVisOpen(false)}} variant='subtle' leftIcon={<TableIcon />}>Toggle View</Button>
+          )}
+            <Button compact variant='subtle' leftIcon={<Refresh />}>Refresh</Button>
+          <Menu control={<Button compact variant='subtle' leftIcon={<Download />}>Export</Button>}>
             <Menu.Item onClick={() => {downloadCSV()}}>CSV</Menu.Item>
             <Menu.Item onClick={() => {downloadJSON()}}>JSON</Menu.Item>
             <Menu.Label>Others</Menu.Label>
@@ -1209,47 +1282,52 @@ function Dashboard(){
           </Menu>
         </Group>
         </Group>
-        <ScrollArea style={{height: height - 250  }} >
-          {response.map((item, index) => {
-            return (
-              <Paper p="md" ml="10%" mr="10%" mb={15} key={index}>
-               <Group mb={5} grow>
-               <Text size='xs' ><strong>Response Id:</strong> <span style={{color: '#D9480F'}}>{'ObjectId("'+item.response_id+'")'}</span></Text>
-               <Group position='right'>
-                <ActionIcon title='Copy response' >
-                  <Copy size={15} />
-                </ActionIcon>
-                <ActionIcon title='Delete response'>
-                  <Trash size={15} />
-                </ActionIcon>
-               </Group>
-               </Group>
-              {sortArr(item.response).map((item, index) => {
-                  return (
-                    item.questionType === 'Point' || item.questionType === 'Polyline' || item.questionType === 'Polygon' ? (
-                      <div style={{marginLeft: 20}}>
-                                          <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}} >{'ObjectId("'+item.id+'")'}</span></Text>
-                                          <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
-                                          <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
-                                          <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                          <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{JSON.stringify(item.response)}</span></Text>
-                                          </div>
-                    ) : (
-                      <div style={{marginLeft: 20}}>
-                                          <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
-                                          <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
-                                          <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
-                                          <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                          <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.response}</span></Text>
-                                          </div>
+        {!visopen ? (
+                  <ScrollArea style={{height: height - 250  }} >
+                  {response.map((item, index) => {
+                    return (
+                      <Paper p="md" ml="10%" mr="10%" mb={15} key={index}>
+                       <Group mb={5} grow>
+                       <Text size='xs' ><strong>Response Id:</strong> <span style={{color: '#D9480F'}}>{'ObjectId("'+item.response_id+'")'}</span></Text>
+                       <Group position='right'>
+                        <ActionIcon title='Copy response' >
+                          <Copy size={15} />
+                        </ActionIcon>
+                        <ActionIcon title='Delete response'>
+                          <Trash size={15} />
+                        </ActionIcon>
+                       </Group>
+                       </Group>
+                      {sortArr(item.response).map((item, index) => {
+                          return (
+                            item.questionType === 'Point' || item.questionType === 'Polyline' || item.questionType === 'Polygon' ? (
+                              <div style={{marginLeft: 20}}>
+                                                  <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}} >{'ObjectId("'+item.id+'")'}</span></Text>
+                                                  <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
+                                                  <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
+                                                  <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
+                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{JSON.stringify(item.response)}</span></Text>
+                                                  </div>
+                            ) : (
+                              <div style={{marginLeft: 20}}>
+                                                  <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
+                                                  <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
+                                                  <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
+                                                  <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
+                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.response}</span></Text>
+                                                  </div>
+                            )
+                          )
+                        })}
+                        
+                      </Paper>
                     )
-                  )
-                })}
-                
-              </Paper>
-            )
-          })}
-          </ScrollArea>
+                  })}
+        
+                  </ScrollArea>
+        ) : (
+          <VisualizeGeometryData />
+        )}
       </Tabs.Tab>
           </Tabs>
     </>
