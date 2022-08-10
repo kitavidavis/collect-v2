@@ -166,10 +166,10 @@ const initialState = {
   FormName: 'Untitled Form',
   ActiveTab: 0,
   CustomTheme: false,
-  Color: '#E67700',
+  Color: 'teal',
   Background: backgrounds[1].value,
   HeaderFont: 'Roboto',
-  HeaderSize: 24,
+  HeaderSize: 18,
   QuestionFont: 'Roboto',
   QuestionSize: 12,
   TextFont: 'Roboto',
@@ -347,6 +347,7 @@ function FormReducer(state, action){
 export function HeaderPage() {
   const [opened, toggleOpened] = useBooleanToggle(false);
   const { classes } = useStyles();
+  const [focused, setFocused] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [readonly, setReadOnly] = useState(true);
   const { state, dispatch } = React.useContext(FormContext);
@@ -355,6 +356,7 @@ export function HeaderPage() {
   const [customtheme, setCustomTheme] = useState(state.CustomTheme);
 
   const handleFocus = (e) => {
+    setFocused(true);
     e.target.select();
     setReadOnly(false);
   }
@@ -365,6 +367,7 @@ export function HeaderPage() {
   }
 
   const handleBlur = (e) => {
+    setFocused(false);
     setReadOnly(true);
     var regExp = /[a-zA-Z]/g;
     if(regExp.test(formname)){
@@ -439,6 +442,18 @@ export function HeaderPage() {
 
   }
 
+  const defaultTheme = () => {
+    dispatch({type: 'UPDATE_COLOR', color: 'teal'});
+    dispatch({type: 'UPDATE_HEADER_FONT', headerfont: 'Roboto'});
+    dispatch({type: 'UPDATE_HEADER_SIZE', headersize: 18})
+  }
+
+  const clearForm = () => {
+    setForms([]);
+    dispatch({type: 'UPDATE_HEADER_IMAGE', headerimage: ''});
+    dispatch({type: 'UPDATE_FORM_NAME', formname: 'Untitled Form'});
+  }
+
   React.useEffect(() => {
     document.title = 'Build Form - GeoPsy Collect: Cloud';
   }, [state.FormName])
@@ -466,14 +481,19 @@ export function HeaderPage() {
           <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
           <FileText color={state.Color} size={55} />
           </MediaQuery>
-          <TextInput size='lg' style={{fontFamily: state.HeaderFont, fontSize: state.HeaderSize}} variant={readonly ? 'unstyled' : null} readOnly={readonly} onChange={(e) => {setFormName(e.currentTarget.value)}} onFocus={(e) => {handleFocus(e)}} onBlur={() => {handleBlur()}} value={formname} />
+          <TextInput icon={!focused ? <Edit size={15} /> : null} size='lg' style={{fontFamily: state.HeaderFont, fontSize: state.HeaderSize}} variant={readonly ? 'unstyled' : null} readOnly={readonly} onChange={(e) => {setFormName(e.currentTarget.value)}} onFocus={(e) => {handleFocus(e)}} onBlur={() => {handleBlur()}} value={formname} />
         </Group>
 
         <Group position='right'  >
           <Group className={classes.links}  >
           <ActionIcon disabled={state.CustomTheme} onClick={() => {handleCustomTheme()}} mr={20} title='Customize theme' >
-      <Palette />
+      <Palette color={state.Color} />
     </ActionIcon>
+    <Menu mr={20} title='More Configurations' control={  <ActionIcon>
+      <DotsVertical color={state.Color} />
+    </ActionIcon>}>
+      <Menu.Item onClick={() => {defaultTheme()}} >Reset to Default Theme</Menu.Item>
+    </Menu>
     <Button onClick={() => {deployForm()}} mr={20} style={{backgroundColor: state.Color}} color={state.Color} >Deploy</Button>
 
           </Group>
@@ -481,7 +501,8 @@ export function HeaderPage() {
             <Menu control={   <ActionIcon>
             <DotsVertical />
           </ActionIcon>}>
-            <Menu.Item onClick={() => {handleCustomTheme()}} icon={<Palette />}>Customize theme</Menu.Item>
+            <Menu.Item onClick={() => {handleCustomTheme()}} >Customize theme</Menu.Item>
+            <Menu.Item onClick={() => {defaultTheme()}} >Reset to Default Theme</Menu.Item>
             <Menu.Item onClick={() => {deployForm()}} icon={<Send />}>Deploy</Menu.Item>
           </Menu>
           </MediaQuery>
@@ -499,7 +520,7 @@ export function HeaderPage() {
 }
 
 export default function AppShellDemo() {
-  //useUser({ redirectTo: '/auth/login' });
+  useUser({ redirectTo: '/auth/login' });
   let user2 = useUser();
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
@@ -510,7 +531,7 @@ export default function AppShellDemo() {
   const { ref, focused2 } = useFocusWithin();
   const [headerFont, setHeaderFont] = useState('Roboto');
   const [headerSize, setHeaderSize] = useState(24);
-  const [checked, setChecked] = useState('violet');
+  const [checked, setChecked] = useState(state.Color);
   const [bgchecked, setBgChecked] = useState(state.Background);
   const [forms, setForms] = useState([]);
   const [handler, setHandler] = useState(false);
@@ -634,8 +655,7 @@ export default function AppShellDemo() {
   }
 
   const handleColors = (color) => {
-    let clrIndex = color_strings.indexOf(color);
-    dispatch({type: 'UPDATE_COLOR', color: colors[clrIndex]});
+    dispatch({type: 'UPDATE_COLOR', color: color});
     setChecked(color);
   }
 
@@ -658,7 +678,7 @@ export default function AppShellDemo() {
       let data = {
         title: state.FormName,
         form_id: uuid(),
-        user_id: user2.user._id,
+        user_id: user2.user?._id,
         description: formdesc,
         color: state.Color,
         background: state.Background,
@@ -2819,7 +2839,7 @@ export default function AppShellDemo() {
 
     return(
       <>
-      <Text contentEditable onBlur={(e) => {handleBlur1(e)}} >{stitle}</Text>
+      <Title order={3} contentEditable onBlur={(e) => {handleBlur1(e)}} >{stitle}</Title>
       <Text size='xs' color='gray' contentEditable onBlur={(e) => {handleBlur2(e)}}>{sdesc}</Text>
       </>
     )
@@ -2882,7 +2902,7 @@ export default function AppShellDemo() {
                                 <Menu.Item  onClick={() => {handleShortAnswer(menuid)}} icon={<ClearFormatting />}>Short Answer</Menu.Item>
                                 <Menu.Item onClick={() => {handleParagraph(menuid)}} icon={<AlignCenter />}>Paragraph</Menu.Item>
                                 <Divider />
-                                <Menu.Item  onClick={() => {handleMultipleChoice(menuid)}} icon={<Selector />}>Multiple Choice</Menu.Item>
+                                <Menu.Item  onClick={() => {handleMultipleChoice(menuid)}} icon={<Selector />}>Select One</Menu.Item>
                                 <Menu.Item  onClick={() => {handleCheckbox(menuid)}} icon={<Checkbox />}>Checkbox</Menu.Item>
                                 <Menu.Item onClick={() => {handleDropdown(menuid)}} icon={<IoMdArrowDropdownCircle />}>Dropdown</Menu.Item>
                                 <Divider />
@@ -2958,7 +2978,18 @@ export default function AppShellDemo() {
       <DragDropContext
         onDragEnd={({ destination, source }) => {
           handlers.reorder({ from: source.index, to: destination.index });
-          setTimeout(function(){console.log(state)}, 1000)
+          /**
+           * destination is the index where the dragged file is being dropped.
+           * source is the index of the file being dragged
+           */
+
+          // replacing the files
+          Array.prototype.move = function(from, to){
+            this.splice(to, 0, this.splice(from, 1)[0]);
+          }
+
+          forms.move(source.index, destination.index);
+
         }}
       >
         <Droppable droppableId="dnd-list" direction="vertical">
@@ -3130,7 +3161,13 @@ export default function AppShellDemo() {
       <DragDropContext
         onDragEnd={({ destination, source }) => {
           handlers.reorder({ from: source.index, to: destination.index });
-          setTimeout(function(){console.log(state)}, 1000)
+
+          Array.prototype.move = function(from, to){
+            this.splice(to, 0, this.splice(from, 1)[0]);
+          }
+
+          forms.move(source.index, destination.index);
+   
         }}
       >
         <Droppable droppableId="dnd-list" direction="vertical">
@@ -3145,9 +3182,13 @@ export default function AppShellDemo() {
     );
   }
 
-  const swatches = Object.keys(theme.colors).map((color, index) => (
+  const swatches = Object.keys(theme.colors).filter((item, index) => {
+    if(index > 1 && index !== 4){
+      return item;
+    }
+  }).map((color, index) => (
     <ColorSwatch title={color} component="button" onClick={() => handleColors(color)} key={color} color={theme.fn.rgba(theme.colors[color][8], 1.0)} >
-      {checked === color ? <Check size={13} color='white' /> : null}
+      {checked === color  ? <Check size={13} color='white' /> : null}
     </ColorSwatch>
   ));
 
@@ -3251,7 +3292,7 @@ export default function AppShellDemo() {
             <Text my={20} weight={500} >Header</Text>
             <Button onClick={() => {createImage(true)}} variant='outline' leftIcon={<Photo />}>Choose Image</Button>
             </Group>
-            <Group spacing='xs' direction='column' ml={20} mr={20} grow>
+            <Group mb={30} spacing='xs' direction='column' ml={20} mr={20} grow>
               <Text my={20} weight={500}>Color</Text>
               <Group>
               {swatches}
@@ -3422,7 +3463,7 @@ export default function AppShellDemo() {
 
                   
         {!videomodalopened || !imagemodal || !imagemodal2 ? ( 
-                    <Group style={{backgroundColor: 'white', width: '100%', right: '1%', left: '1%', position: 'fixed', bottom: 0}} position='apart' grow>
+                    <Group style={{width: '100%', right: '1%', left: '1%', position: 'fixed', bottom: 0,}} position='apart' grow>
 
                     <ActionIcon mb={20} mt={10} onClick={() => {createNewQuestion()}} title='Add Question'>
                       <CirclePlus  />

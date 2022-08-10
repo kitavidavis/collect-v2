@@ -1077,6 +1077,7 @@ const RenderQuestions = () => {
       let idx = answers.findIndex((obj => obj.id == id));
       let item = answers[idx];
       item.response = polygon;
+      console.log(coords);
     }, []);
   
   
@@ -1089,7 +1090,7 @@ const RenderQuestions = () => {
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
         {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-        {polygon.length > 2 ? <ActionIcon onClick={() => {lockCoordinate()}}>{!locked ? <Lock /> : <LockOpen />}</ActionIcon>
+        {polygon.length > 2 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}>{!locked ? <Lock size={30} /> : <LockOpen />}</ActionIcon>
   : null} 
       </Group>
       <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
@@ -1188,7 +1189,7 @@ const RenderQuestions = () => {
 const submitAnswers = async (e) => {
 
   console.log(answers)
-  const body = {
+   const body = {
     response: answers,
     response_id: uuid(),
     form_id: pid
@@ -1206,7 +1207,7 @@ const submitAnswers = async (e) => {
     })
   } catch(error){
     console.log(error);
-  }  
+  } 
 
   
 }
