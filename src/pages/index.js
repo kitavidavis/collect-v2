@@ -9,12 +9,15 @@ import TopBar from 'components/topbar';
 import { useUser } from 'lib/hooks';
 import UltimateFeatures from 'sections/ultimate-feature';
 import Footer from 'components/footer/footer';
-
+import LoaderCard from 'components/loaders/bolt';
+import { Hero } from 'sections/hero';
+import { Statistics } from 'sections/statistics';
+import FAQ from 'sections/frquently-asked-questions';
 
 export default function IndexPage() {
   useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
   return (
-    <ThemeProvider theme={theme}>
+      <ThemeProvider theme={theme}>
       <TopBar />
       <Layout>
         <Header />
@@ -23,6 +26,8 @@ export default function IndexPage() {
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
         <Banner />
+        <Hero />
+        <Statistics />
         <UltimateFeatures />
         <Footer />
       </Layout>

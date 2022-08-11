@@ -49,7 +49,7 @@ import {
   Modal,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
-import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle } from 'tabler-icons-react';
+import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import AvaterImage from 'assets/illustrations/215.png'
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
@@ -70,6 +70,7 @@ import { showNotification } from '@mantine/notifications';
 var BarChart = require('react-d3-components').BarChart;
 var PieChart = require('react-d3-components').PieChart;
 import 'mapbox-gl/dist/mapbox-gl.css';
+import LoaderCard from 'components/loaders/bolt';
 
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 
@@ -572,6 +573,20 @@ function Dashboard(){
       }
     }
 
+    const handleItemResponse = (res) => {
+      return (
+        <Text size='xs' >
+          [
+       {res.map((item, index) => {
+          return (
+            <span key={index} >{JSON.stringify(item)},</span>
+          )
+        })}
+          ]
+</Text>
+      )
+    }
+
     const responsePolyline = (res) => {
       return (
         res.map((item, idx) => {
@@ -906,14 +921,22 @@ function Dashboard(){
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body),
-          }).then(function(res){
+          }).then(async  function(res){
             if(res.status === 200){
-              let idx = userforms.findIndex((obj => obj.form_id == form_id));
-              if(idx != -1){
-                userforms.splice(idx, 1);
-              }
-      
-              setUserForms([...userforms]);
+              await fetch('/api/deleteallformresponse', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body),
+              }).then(function(res){
+                if(res.status === 200){
+                  let idx = userforms.findIndex((obj => obj.form_id == form_id));
+                  if(idx != -1){
+                    userforms.splice(idx, 1);
+                  }
+          
+                  setUserForms([...userforms]);
+                }
+              })
             }
           });
         } catch(error){
@@ -1122,7 +1145,7 @@ function Dashboard(){
                                         return (
                                           <tr key={index} >
                                             <td>{item.title}</td>
-                                            <td>{item.description}</td>
+                                            <td>{item.description === 'Form description' ? 'N/A' : item.description}</td>
                                             <td>{item.active ? <Badge size='xs' >Active</Badge> : <Badge size='xs' color='red' >Inactive</Badge>}</td>
                                             <td>{item.createdAt}</td>
                                             <td>
@@ -1262,25 +1285,24 @@ function Dashboard(){
       </Tabs.Tab>
       <Tabs.Tab label="Real Time">Real Time</Tabs.Tab>
       <Tabs.Tab label="Response" value={"Response"}>
-        <Group position='apart'>
-          <Group position='left'>
+        <Group mb={10} position='apart'>
             <Text color='dimmed'>TOTAL DOCUMENTS:<strong>{response.length}</strong></Text>
-          </Group>
-        <Group mt={5} mb={10} position='right'>
+            <Select placeholder='Filter by:' data={[
+              {label: 'Position', value:'position'},
+              {label: 'Question Type', value: 'qtype'},
+              {label: 'Question', value: 'question'},
+              {label: 'Response', value: 'response'},
+              {label: 'All Categories', value: 'all'}
+            ]} />
           <TextInput  placeholder='Search response' rightSection={<Search />} />
-          {!visopen ? (
-                        <Button onClick={() => {setVisOpen(true)}} variant='subtle'  leftIcon={<ChartArea />}>Toggle View</Button>
-          ) : (
-            <Button onClick={() => {setVisOpen(false)}} variant='subtle' leftIcon={<TableIcon />}>Toggle View</Button>
-          )}
-            <Button compact variant='subtle' leftIcon={<Refresh />}>Refresh</Button>
+          <Button variant='subtle'  leftIcon={<LayoutDashboard />}>Create Dashboard</Button>
+          <Button variant='subtle'  leftIcon={<ChartDonut />}>Create Chart</Button>
           <Menu control={<Button compact variant='subtle' leftIcon={<Download />}>Export</Button>}>
             <Menu.Item onClick={() => {downloadCSV()}}>CSV</Menu.Item>
             <Menu.Item onClick={() => {downloadJSON()}}>JSON</Menu.Item>
             <Menu.Label>Others</Menu.Label>
             <Menu.Item onClick={() => { downloadMinifiedJSON()}} >Minified JSON</Menu.Item>
           </Menu>
-        </Group>
         </Group>
         {!visopen ? (
                   <ScrollArea style={{height: height - 250  }} >
@@ -1306,7 +1328,7 @@ function Dashboard(){
                                                   <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
                                                   <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
                                                   <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{JSON.stringify(item.response)}</span></Text>
+                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.questionType === 'Point' ? JSON.stringify(item.response) : handleItemResponse(item.response)}</span></Text>
                                                   </div>
                             ) : (
                               <div style={{marginLeft: 20}}>

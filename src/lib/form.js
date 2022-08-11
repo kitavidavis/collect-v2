@@ -100,3 +100,17 @@ export async function activateSpecificForm({ form_id }) {
         })
     })
 }
+
+export async function getAllForms(){
+    return new Promise((resolve, reject) => {
+        Form.getAllForms(function(err, forms){
+            if(err){
+                throw err;
+            }
+
+            if(forms){
+                resolve({forms: forms.length});
+            }
+        })
+    })
+}

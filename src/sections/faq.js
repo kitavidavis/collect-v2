@@ -49,11 +49,6 @@ const Faq = () => {
   return (
     <Box as="section" id="faq" sx={styles.section}>
       <Container>
-        <SectionHeading
-          sx={styles.heading}
-          slogan="Get yours question answer"
-          title="Frequantly asked question"
-        />
         <Masonry options={masonryOptions} sx={styles.grid}>
           {data.map((item) => {
             return <FaqItem key={item.id} faq={item} className="faq-item" />;
@@ -67,11 +62,4 @@ const Faq = () => {
 export default Faq;
 
 const styles = {
-  section: {
-    pt: [8, null, null, null, 10, 14],
-    pb: [null, null, null, null, null, null, 10, 6],
-  },
-  grid: {
-    mx: [null, null, null, -6, -8, 'unset'],
-  },
 };

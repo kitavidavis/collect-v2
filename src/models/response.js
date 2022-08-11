@@ -41,6 +41,10 @@ module.exports.deleteResponse = function(response_id, cb){
     Response.deleteOne(query, cb);
 }
 
+module.exports.getAllResponses = function(callback){
+    Response.find({}, callback);
+}
+
 module.exports.deleteAllResponse = function(form_id, cb){
     var query = {form_id: form_id};
     Response.deleteMany(query, cb);

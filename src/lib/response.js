@@ -45,3 +45,15 @@ export async function getAllFormResponse({form_id}){
         });
     });
 }
+
+export async function getAllResponses(){
+    return new Promise((resolve, reject) => {
+        Response.getAllResponses(function(err, responses){
+            if(err) throw err;
+
+            if(responses){
+                resolve({responses: responses.length});
+            }
+        })
+    })
+}

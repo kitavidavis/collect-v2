@@ -120,6 +120,10 @@ module.exports.deleteAllUserForm = function(username, cb) {
     Form.deleteMany(query, cb);
 }
 
+module.exports.getAllForms = function(callback){
+    Form.find({}, callback);
+}
+
 module.exports.deactivateForm = function(form_id, cb) {
     Form.getFormByFormId(form_id, function(err, form) {
         if(err) throw err;

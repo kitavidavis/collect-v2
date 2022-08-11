@@ -268,7 +268,7 @@ const prepareAnswerStore = () => {
     if(forms[i].type === 1){
       let qt = forms[i].question.questionType;
       let req = forms[i].question.required;
-      let chunk = {id:forms[i].id, required: req,  position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : qt === 'Date' || qt === 'Time' ? new Date() : null };
+      let chunk = {id:forms[i].id, required: req,  position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : qt === 'Date' || qt === 'Time' ? new Date() :  null };
       arr.push(chunk);
     } else {
       continue;
@@ -882,10 +882,10 @@ const RenderQuestions = () => {
       accessToken: accessToken,
     });
   
-    const [lat1, setLat1] = useState('');
-    const [lng1, setLng1] = useState('');
-    const [acc1, setAcc1] = useState('');
-    const [alt1, setAlt1] = useState('');
+    const [lat1, setLat1] = useState(-1.234);
+    const [lng1, setLng1] = useState(36.754);
+    const [acc1, setAcc1] = useState(0);
+    const [alt1, setAlt1] = useState(0);
     const [locked, setLocked] = useState(false);
   
     const [res, setRes] = useState([]);
@@ -896,20 +896,7 @@ const RenderQuestions = () => {
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
   
-    React.useEffect(() => {
-      let n = retrievePolylineLoc(id);
-      if(n !== null){
-        let idx = answers.findIndex((obj => obj.id == id));
-        let answ = answers[idx];
-        setRes(answ.response);
-        let itm = answ.response[n];
-        setLat1(parseFloat(itm.coords.latitude));
-        setLng1(parseFloat(itm.coords.longitude));
-        setAcc1(parseFloat(itm.coords.accuracy));
-        setAlt1(parseFloat(itm.coords.altitude));
-      }
-    }, [])
-  
+    let arr = [];
   
     const handleGPS = () => {
       if(navigator.geolocation){
@@ -922,9 +909,12 @@ const RenderQuestions = () => {
           let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
           setCoords(prevArr => [...prevArr, chunk]);
   
-          setPolyline(prevArr => [...prevArr, position]);
+          let chunk2 = {latitude: parseFloat(position.coords.latitude), longitude: parseFloat(position.coords.longitude), accuracy: parseFloat(position.coords.accuracy), altitude: position.coords.altitude }
+
+          setPolyline(prevArr => [...prevArr, chunk2]);
   
           savePoint(position);
+          arr.push(chunk);
   
         }, (error) => {showNotification({
           title: 'Check your location settings',
@@ -938,35 +928,39 @@ const RenderQuestions = () => {
         })
       }
     }
-  
+
     const savePoint = useCallback((pos) => {
-      let idx = answers.findIndex((obj => obj.id == id));
-      let item = answers[idx];
-      item.response.push(pos);
+      let chunk = {latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy, altitude: pos.coords.altitude};
+      setRes(chunk);
     }, []);
-  
+
   
     const lockCoordinate = () => {
       setLocked(!locked);
+      let idx = answers.findIndex((obj => obj.id == id));
+      let item = answers[idx];
+      item.response = polyline;
     }
   
     return (
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-      <Group position='left'>
-      {res.map((item, index) => {
-            <ActionIcon key={index} >
-              <CircleCheck size={13} />
-            </ActionIcon>
-          })}
-      </Group>
       <Group position='right' mb={10}>
-      {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
+      {polyline.length > 1 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}>{!locked ? <Lock color='red' size={30} /> : <LockOpen color='red' />}</ActionIcon>
+  : null} 
+        {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps color='green' /></ActionIcon> : null}
       </Group>
       <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
       <Grid columns={12}>
         <Grid.Col span={3}>
           <Group direction='column'>
-          <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
+          <Group>
+          {polyline.map((item, index) => {
+            <ActionIcon key={index} >
+              <CircleCheck size={13} />
+            </ActionIcon>
+          })}
+        </Group>
+            <TextInput disabled={locked} value={lat1} onChange={(e) => {setLat1(e.currentTarget.value)}} size='sm' label='Latitude' />
             <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
             <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
             <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
@@ -980,20 +974,23 @@ const RenderQuestions = () => {
       height: '100%',
       width: '100%'
     }}
-    zoom={lat1 !== null ? [20] : [0]}
-    center={lat1 !== null ? [lng1, lat1] : center}
+    zoom={polyline.length > 0 ? [20] : [0]}
+    center={[lng1, lat1]}
+    onClick={(event) => {
+      console.log(event);
+    }}
   >
-  {res.map((item, index) => {
+  {polyline.length > 0 ? polyline.map((item, index) => {
     return (
       <Marker
             key={`marker-${index}`}
-            coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
+            coordinates={[parseFloat(item.longitude), parseFloat(item.latitude)]}
             anchor="bottom"
           >
             <Pin />
           </Marker>
     )
-  })}
+  }) : null}
   </Map>      </Grid.Col>
       </Grid>
       </MediaQuery>
@@ -1004,7 +1001,7 @@ const RenderQuestions = () => {
             <TextInput disabled={locked}  value={lng1} onChange={(e) => {setLng1(e.currentTarget.value)}} size='sm' label='Longitude' />
             <TextInput disabled={locked} value={alt1} onChange={(e) => {setAlt1(e.currentTarget.value)}}  size='sm' label="Altitude" />
             <TextInput disabled={locked} value={acc1} onChange={(e) => {setAcc1(e.currentTarget.value)}}  size='sm' label="Accuracy" />
-          </Group>
+       </Group>
       </MediaQuery>
     </InputWrapper>
     )
@@ -1025,10 +1022,10 @@ const RenderQuestions = () => {
       accessToken: accessToken,
     });
   
-    const [lat1, setLat1] = useState('');
-    const [lng1, setLng1] = useState('');
-    const [acc1, setAcc1] = useState('');
-    const [alt1, setAlt1] = useState('');
+    const [lat1, setLat1] = useState(-1.234);
+    const [lng1, setLng1] = useState(36.567);
+    const [acc1, setAcc1] = useState(0);
+    const [alt1, setAlt1] = useState(0);
     const [locked, setLocked] = useState(false);
   
     const [res, setRes] = useState([]);
@@ -1039,6 +1036,7 @@ const RenderQuestions = () => {
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
   
+    let arr = [];
   
     const handleGPS = () => {
       if(navigator.geolocation){
@@ -1050,10 +1048,11 @@ const RenderQuestions = () => {
   
           let chunk = [parseFloat(position.coords.longitude), parseFloat(position.coords.latitude)];
           setCoords(prevArr => [...prevArr, chunk]);
-  
-          setPolygon(prevArr => [...prevArr, position]);
+          let chunk2 = {latitude: parseFloat(position.coords.latitude), longitude: parseFloat(position.coords.longitude), accuracy: parseFloat(position.coords.accuracy), altitude: position.coords.altitude }
+          setPolygon(prevArr => [...prevArr, chunk2]);
   
           savePoint(position);
+          arr.push(chunk);
   
         }, (error) => {showNotification({
           title: 'Check your location settings',
@@ -1072,26 +1071,21 @@ const RenderQuestions = () => {
       let chunk = {latitude: pos.coords.latitude, longitude: pos.coords.longitude, accuracy: pos.coords.accuracy, altitude: pos.coords.altitude};
       setRes(chunk);
     }, []);
-  
-    const savePoint2 = useCallback(() => {
-      let idx = answers.findIndex((obj => obj.id == id));
-      let item = answers[idx];
-      item.response = polygon;
-      console.log(coords);
-    }, []);
-  
+
   
     const lockCoordinate = () => {
       setLocked(!locked);
-      savePoint2();
+      let idx = answers.findIndex((obj => obj.id == id));
+      let item = answers[idx];
+      item.response = polygon;
     }
   
     return (
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
-        {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
-        {polygon.length > 2 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}>{!locked ? <Lock size={30} /> : <LockOpen />}</ActionIcon>
+      {polygon.length > 2 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}>{!locked ? <Lock color='red' size={30} /> : <LockOpen color='red' />}</ActionIcon>
   : null} 
+        {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps color='green' /></ActionIcon> : null}
       </Group>
       <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
       <Grid columns={12}>
@@ -1118,8 +1112,8 @@ const RenderQuestions = () => {
       height: '100%',
       width: '100%'
     }}
-    zoom={lat1 !== null ? [20] : [0]}
-    center={lat1 !== null ? [lng1, lat1] : center}
+    zoom={polygon.length > 0 ? [20] : [0]}
+    center={[lng1, lat1]}
     onClick={(event) => {
       console.log(event);
     }}
@@ -1128,7 +1122,7 @@ const RenderQuestions = () => {
     return (
       <Marker
             key={`marker-${index}`}
-            coordinates={[parseFloat(item.coords.longitude), parseFloat(item.coords.latitude)]}
+            coordinates={[parseFloat(item.longitude), parseFloat(item.latitude)]}
             anchor="bottom"
           >
             <Pin />
@@ -1188,8 +1182,8 @@ const RenderQuestions = () => {
 
 const submitAnswers = async (e) => {
 
-  console.log(answers)
-   const body = {
+
+  const body = {
     response: answers,
     response_id: uuid(),
     form_id: pid

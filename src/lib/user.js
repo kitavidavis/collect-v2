@@ -76,3 +76,15 @@ export async function findUserByUsername({username}){
         })
     })
 }
+
+export async function getAllUsers(){
+    return new Promise((resolve, reject) => {
+        User.getAllUsers(function(err, users){
+            if(err) throw err;
+
+            if(users){
+                resolve({users: users.length})
+            }
+        })
+    })
+}
