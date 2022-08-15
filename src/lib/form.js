@@ -50,6 +50,16 @@ export async function findSpecificUserForm({ form_id }) {
     })
 }
 
+export async function fetchSpecificUserForms({username}){
+    return new Promise((resolve, reject) => {
+        Form.fetchFormsByUsername(username, function(err, forms){
+            if(err) throw err;
+            console.log(forms)
+            resolve({forms: forms});
+        })
+    })
+}
+
 export async function findSpecificUserForms({ user_id }) {
     return new Promise((resolve, reject) => {
         Form.getFormByUsername(user_id, function(err, forms) {

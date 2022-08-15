@@ -110,6 +110,12 @@ module.exports.getFormByUsername = function(user_id, cb) {
     Form.find(query, cb);
 };
 
+module.exports.fetchFormsByUsername = function(username, cb){
+    console.log(3)
+    var query = {username: username};
+    Form.find(query, cb);
+}
+
 module.exports.deleteForm = function(form_id, cb) {
     var query = {form_id: form_id};
     Form.deleteOne(query, cb);
