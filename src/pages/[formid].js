@@ -936,7 +936,7 @@ const RenderQuestions = () => {
 
   
     const lockCoordinate = () => {
-      setLocked(!locked);
+      setLocked(true);
       let idx = answers.findIndex((obj => obj.id == id));
       let item = answers[idx];
       item.response = polyline;
@@ -945,7 +945,7 @@ const RenderQuestions = () => {
     return (
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
-      {polyline.length > 1 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}>{!locked ? <Lock color='red' size={30} /> : <LockOpen color='red' />}</ActionIcon>
+      {polyline.length > 1 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}><Lock color='red' size={30} /></ActionIcon>
   : null} 
         {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps color='green' /></ActionIcon> : null}
       </Group>
@@ -1074,7 +1074,7 @@ const RenderQuestions = () => {
 
   
     const lockCoordinate = () => {
-      setLocked(!locked);
+      setLocked(true);
       let idx = answers.findIndex((obj => obj.id == id));
       let item = answers[idx];
       item.response = polygon;
@@ -1083,7 +1083,7 @@ const RenderQuestions = () => {
     return (
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
-      {polygon.length > 2 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}>{!locked ? <Lock color='red' size={30} /> : <LockOpen color='red' />}</ActionIcon>
+      {polygon.length > 2 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}><Lock color='red' size={30} /></ActionIcon>
   : null} 
         {!locked ? <ActionIcon onClick={() => {handleGPS()}} ><Gps color='green' /></ActionIcon> : null}
       </Group>

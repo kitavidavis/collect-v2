@@ -577,7 +577,7 @@ function Dashboard(){
       return (
         <Text size='xs' >
           [
-       {res.map((item, index) => {
+       {res !== null && res.map((item, index) => {
           return (
             <span key={index} >{JSON.stringify(item)},</span>
           )
