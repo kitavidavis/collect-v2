@@ -25,7 +25,7 @@ export default nextConnect()
       // session is the payload to save in the token, it may contain basic info about the user
       const session = {username: user.data.username, id: user.data._id};
       await setLoginSession(res, session)
-      return res.status(200).send({ done: true })
+      return res.status(200).send({ done: true, user:user })
       } else {
         return res.status(500).send({ msg: 'Invalid email or password' })
       }

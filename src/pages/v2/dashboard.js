@@ -1323,7 +1323,7 @@ function Dashboard(){
                       {sortArr(item.response).map((item, index) => {
                           return (
                             item.questionType === 'Point' || item.questionType === 'Polyline' || item.questionType === 'Polygon' ? (
-                              <div style={{marginLeft: 20}}>
+                              <div key={index} style={{marginLeft: 20}}>
                                                   <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}} >{'ObjectId("'+item.id+'")'}</span></Text>
                                                   <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
                                                   <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
@@ -1331,7 +1331,7 @@ function Dashboard(){
                                                   <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.questionType === 'Point' ? JSON.stringify(item.response) : handleItemResponse(item.response)}</span></Text>
                                                   </div>
                             ) : (
-                              <div style={{marginLeft: 20}}>
+                              <div key={index} style={{marginLeft: 20}}>
                                                   <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
                                                   <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
                                                   <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
@@ -1361,11 +1361,15 @@ function Dashboard(){
     }
 
     const preferredColorScheme = useColorScheme();
-    const [colorScheme, setColorScheme] = useState('dark');
+    const [colorScheme, setColorScheme] = useState(preferredColorScheme);
     const toggleColorScheme = (value) =>
       setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
   
       
+    React.useEffect(() => {
+      setColorScheme(preferredColorScheme)
+    }, [preferredColorScheme])
+    
     return (
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
