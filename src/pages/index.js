@@ -13,23 +13,19 @@ import LoaderCard from 'components/loaders/bolt';
 import { Hero } from 'sections/hero';
 import { Statistics } from 'sections/statistics';
 import FAQ from 'sections/frquently-asked-questions';
+import Features from 'sections/UFeatures';
+import { HeroImageBackground } from 'sections/hero2';
 
 export default function IndexPage() {
-  useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
+  useUser({redirectTo: '/v2/', redirectIfFound: true});
   return (
       <ThemeProvider theme={theme}>
-      <TopBar />
       <Layout>
-        <Header />
         <SEO
           title="GeoPsy Collect"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
-        <Banner />
-        <Hero />
-        <Statistics />
-        <UltimateFeatures />
-        <Footer />
+        <HeroImageBackground />
       </Layout>
     </ThemeProvider>
   );

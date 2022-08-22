@@ -10,7 +10,7 @@ import { Register } from 'sections/register';
 import { useUser } from 'lib/hooks';
 
 export default function IndexPage(){
-  useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
+  useUser({redirectTo: '/v2/', redirectIfFound: true});
     return (
         <ThemeProvider theme={theme}>
         <Layout>

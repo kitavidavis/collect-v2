@@ -55,40 +55,7 @@ export default function Header() {
               isMobile={state.isMobileMenu}
               handleCloseMenu={handleCloseMenu}
             />
-            <Flex sx={styles.buttonGroup}>
-              <a style={{textDecoration: 'none'}} href='/auth/login'>
-              <Button
-                variant="text"
-                sx={{
-                  ...styles.login,
-                  color: 'white',
-                }}
-              >
-                <LockIcon fill='white' />
-                Login
-              </Button>
-              </a>
 
-              <a style={{textDecoration: 'none'}} href='/auth/register'>
-              <Button
-                variant="text"
-                sx={{
-                  ...styles.joinCommunity,
-                  backgroundColor: 'white',
-                  color: 'primary',
-                }}
-              >
-                Join Community
-              </Button>
-              </a>
-            </Flex>
-
-            <HamburgerMenu
-              sx={styles.hamburger}
-              isSticky={state.isSticky}
-              isOpen={state.isMobileMenu}
-              toggleMobileMenu={toggleMobileMenu}
-            />
           </Container>
         </Box>
       </Sticky>
@@ -102,12 +69,13 @@ const styles = {
     left: 0,
     right: 0,
     py: 4,
+    backgroundColor: '#000',
     transition: 'all 0.3s ease-in-out 0s',
     '&.is-sticky': {
-      backgroundColor: '#3929CB',
+      backgroundColor: '#000',
       boxShadow: '0 6px 13px rgba(38,78,118,0.1)',
-      paddingTop: '15px',
-      paddingBottom: '15px',
+      paddingTop: '5px',
+      paddingBottom: '5px',
     },
     '&.is-mobile-menu': {
       backgroundColor: 'white',

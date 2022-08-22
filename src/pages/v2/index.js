@@ -78,6 +78,23 @@ const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFq
 export const useStyles = createStyles((theme, _params, getRef) => {
 const icon = getRef('icon');
 return {
+  root: {
+    position: 'relative',
+  },
+
+  input: {
+    height: 'auto',
+    paddingTop: 18,
+  },
+
+  label: {
+    position: 'absolute',
+    pointerEvents: 'none',
+    fontSize: theme.fontSizes.xs,
+    paddingLeft: theme.spacing.sm,
+    paddingTop: theme.spacing.sm / 2,
+    zIndex: 1,
+  },
         header: {
           paddingLeft: theme.spacing.md,
           paddingRight: theme.spacing.md,
@@ -219,29 +236,22 @@ return {
     padding: `8px ${theme.spacing.xs}px`,
     borderRadius: theme.radius.sm,
     fontWeight: 500,
-    color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
 
-    '&:hover': {
-      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-      color: theme.colorScheme === 'dark' ? theme.white : theme.black,
-    },
   },
 
   mainLinkInner: {
     display: 'flex',
     alignItems: 'center',
     flex: 1,
-    color: theme.colorScheme === 'dark' ? 'white' : 'dark',
 
   },
 
   mainLinkIcon: {
     marginRight: theme.spacing.sm,
-    color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[6],
   },
 
   mainLinkText: {
-    color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[6],
+
   },
 
   mainLinkBadge: {
@@ -354,11 +364,13 @@ function Dashboard(){
         form_id: '',
         state: false
       });
+
+      setActiveId(id);
     }
 
 
     const navlinks = [
-      { icon: Database, label: 'Forms', href: '/v2/dashboard', notifications: userforms.length },
+      { icon: Database, label: 'Forms', href: '/v2/', notifications: userforms.length },
       { icon: Tool, label: 'New Form',  href: '/v2/build/' },
       { icon: ChartBar, label: 'Charts', href: '/v2/create-charts/' },
       { icon: LayoutDashboard, label: 'Dashboards', href: '/v2/create-dashboards/'},
@@ -443,6 +455,7 @@ function Dashboard(){
         }).then( async function(res){
           if(res.status === 200){
             const data = await res.json();
+            console.log(data.response);
             setResponse(data.response);
           } 
         }).catch(function(error) {
@@ -536,11 +549,15 @@ function Dashboard(){
 
     const responseFileUpload = (res) => {
       return (
-        <Group position='center' >
-          <ActionIcon >
-          <ExternalLink color='green' />
-        </ActionIcon>
-        </Group>
+        <Text >
+            {res !== null ? res.map((item, index) => {
+              return (
+                <Anchor size='xs' key={index}>{item.path}</Anchor>
+              )
+            }) : (
+              <Text size='xs'>null</Text>
+            )}
+        </Text>
       )
     }
 
@@ -1018,7 +1035,7 @@ function Dashboard(){
         <AppShell
           styles={{
             main: {
-              background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : 'white',
+              background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
             },
           }}
           navbarOffsetBreakpoint="sm"
@@ -1076,11 +1093,6 @@ function Dashboard(){
                 </Group>
                 <Group>
                 <Group ml={50} spacing={5} className={classes.links}>
-                <MediaQuery smallerThan="md" styles={{ display: 'none' }}>
-            <Button onClick={() => {toggleColorScheme()}} leftIcon={theme.colorScheme === 'dark' ? <Sun /> : <Moon />} className={classes.headerLink} variant='white'  rightIcon={<ChevronDown size={15}  />}>
-              Toggle Theme
-            </Button>
-            </MediaQuery>
                 <MediaQuery smallerThan="md" styles={{ display: 'none' }}>
             <Button className={classes.headerLink} variant='white'  rightIcon={<ChevronDown size={15}  />}>
               Access Manager
@@ -1143,7 +1155,7 @@ function Dashboard(){
                                         }
                                       }).map((item, index) => {
                                         return (
-                                          <tr key={index} >
+                                          <tr title='Double click to open' onDoubleClick={() => {handleCluster(item.title, item.form_id)}}   key={index} >
                                             <td>{item.title}</td>
                                             <td>{item.description === 'Form description' ? 'N/A' : item.description}</td>
                                             <td>{item.active ? <Badge size='xs' >Active</Badge> : <Badge size='xs' color='red' >Inactive</Badge>}</td>
@@ -1286,23 +1298,15 @@ function Dashboard(){
       <Tabs.Tab label="Real Time">Real Time</Tabs.Tab>
       <Tabs.Tab label="Response" value={"Response"}>
         <Group mb={10} position='apart'>
-            <Text color='dimmed'>TOTAL DOCUMENTS:<strong>{response.length}</strong></Text>
-            <Select placeholder='Filter by:' data={[
-              {label: 'Position', value:'position'},
-              {label: 'Question Type', value: 'qtype'},
-              {label: 'Question', value: 'question'},
-              {label: 'Response', value: 'response'},
-              {label: 'All Categories', value: 'all'}
-            ]} />
-          <TextInput  placeholder='Search response' rightSection={<Search />} />
-          <Button variant='subtle'  leftIcon={<LayoutDashboard />}>Create Dashboard</Button>
-          <Button variant='subtle'  leftIcon={<ChartDonut />}>Create Chart</Button>
-          <Menu control={<Button compact variant='subtle' leftIcon={<Download />}>Export</Button>}>
+          <Group position='left'>
+          <Text color='dimmed'>TOTAL DOCUMENTS:<strong>{response.length}</strong></Text>
+          </Group>
+          <Group position='right'>
+          <Menu control={<Button disabled={response.length > 0 ? false : true} compact variant='subtle' leftIcon={<Download />}>Export</Button>}>
             <Menu.Item onClick={() => {downloadCSV()}}>CSV</Menu.Item>
             <Menu.Item onClick={() => {downloadJSON()}}>JSON</Menu.Item>
-            <Menu.Label>Others</Menu.Label>
-            <Menu.Item onClick={() => { downloadMinifiedJSON()}} >Minified JSON</Menu.Item>
           </Menu>
+          </Group>
         </Group>
         {!visopen ? (
                   <ScrollArea style={{height: height - 250  }} >
@@ -1330,6 +1334,14 @@ function Dashboard(){
                                                   <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
                                                   <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.questionType === 'Point' ? JSON.stringify(item.response) : handleItemResponse(item.response)}</span></Text>
                                                   </div>
+                            ) : item.questionType === 'File Upload' ? (
+                              <div key={index} style={{marginLeft: 20}}>
+                              <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
+                              <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
+                              <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
+                              <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
+                              <Text mb={10} size='xs'><strong>response: </strong> <span style={{color: "#339AF0"}} >{responseFileUpload(item.response)}</span></Text>
+                              </div>
                             ) : (
                               <div key={index} style={{marginLeft: 20}}>
                                                   <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
@@ -1359,20 +1371,10 @@ function Dashboard(){
         </AppShell>
       );
     }
-
-    const preferredColorScheme = useColorScheme();
-    const [colorScheme, setColorScheme] = useState(preferredColorScheme);
-    const toggleColorScheme = (value) =>
-      setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
-  
-      
-    React.useEffect(() => {
-      setColorScheme(preferredColorScheme)
-    }, [preferredColorScheme])
     
     return (
-      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-      <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
+      <ColorSchemeProvider colorScheme={'light'}>
+      <MantineProvider theme={{ colorScheme: 'light' }} withGlobalStyles withNormalizeCSS>
         <ThemeProvider theme={theme}>
         <SEO
           title="Forms | Cloud: GeoPsy Collect Cloud"

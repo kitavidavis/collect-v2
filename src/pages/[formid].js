@@ -62,6 +62,8 @@ import { UploadAudio, UploadVideo, UploadPresentation, UploadDocument, UploadSpr
 import 'mapbox-gl/dist/mapbox-gl.css';
 import Pin from 'components/pin';
 import { Helmet } from 'react-helmet';
+import { storeFiles } from 'lib/upload';
+import { filesArr } from 'lib/upload';
 import SuccessImage from 'assets/illustrations/success.png';
 import MapIcon from 'components/marker.gif'
 import { pointRadial, timeFormatDefaultLocale } from 'd3';
@@ -627,35 +629,35 @@ const RenderQuestions = () => {
     return (
       q.question.uploadSpecifics.document ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadDocument />
+        <UploadDocument position={item.position} />
         </InputWrapper>
       ) : q.question.uploadSpecifics.spreadshit ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadSpreadshit />
+        <UploadSpreadshit position={item.position} />
         </InputWrapper>
       ) : q.question.uploadSpecifics.pdf ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadPDF />
+        <UploadPDF position={item.position} />
         </InputWrapper>
       ) : q.question.uploadSpecifics.video ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadVideo />
+        <UploadVideo position={item.position} />
         </InputWrapper>
       ) : q.question.uploadSpecifics.audio ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadAudio />
+        <UploadAudio position={item.position} />
         </InputWrapper>
       ) : q.question.uploadSpecifics.presentation ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadPresentation />
+        <UploadPresentation position={item.position} />
         </InputWrapper>
       ) : q.question.uploadSpecifics.image ? (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadImage />
+        <UploadImage position={item.position} />
         </InputWrapper>
       ) : (
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-        <UploadAny />
+        <UploadAny position={item.position} />
         </InputWrapper>
       )
     )
@@ -1182,6 +1184,17 @@ const RenderQuestions = () => {
 
 const submitAnswers = async (e) => {
 
+  for(let i=0; i<filesArr.length; i++){
+    let item = filesArr[i];
+
+    let idx = answers.findIndex((obj => obj.position == item.position));
+    let obj = answers[idx];
+
+    obj.response = item.file;
+    
+  }
+
+  storeFiles();
 
   const body = {
     response: answers,

@@ -13,7 +13,8 @@ import {
   MediaQuery,
   Group,
   Divider,
-  Notification
+  Notification,
+  Container
 } from '@mantine/core';
 import { useViewportSize, useScrollLock, useWindowScroll } from '@mantine/hooks';
 import { GoogleButton, TwitterButton } from './SocialButtons';
@@ -64,7 +65,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export function Login() {
-  useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
+  useUser({redirectTo: '/v2/', redirectIfFound: true});
 
   const { classes } = useStyles();
   const [login, setLogin] = useState(false);
@@ -96,7 +97,7 @@ export function Login() {
 
   React.useEffect(() => {
     scrollTo({y: 0})
-    setScrollLocked(true);
+    //setScrollLocked(true);
   }, []);
 
   React.useEffect(() => {
@@ -173,7 +174,7 @@ export function Login() {
       }).then(function(res){
         setLoading(false);
         if(res.status === 200){
-          window.location = '/v2/dashboard'
+          window.location = '/v2/'
         } else {
           setInvalid({
             invalid: true,
@@ -257,11 +258,8 @@ export function Login() {
     </Grid>
     </MediaQuery>
     <MediaQuery largerThan={'md'} styles={{display: 'none'}}>
-    <Paper className={classes.form} radius={0} p={50}>
-        <Title order={2} className={classes.title} align="center" mt="md" mb={50}>
-          Login to your account
-        </Title>
-
+      <Container size={420} style={{height: height}} >
+      <Paper className={classes.form} mt={20} mb={20} radius='md' pt={30} withBorder p={10}>
         <Group grow direction='column' mb="md" mt="md">
         <GoogleButton radius="xl">Google</GoogleButton>
         <TwitterButton radius="xl">Twitter</TwitterButton>
@@ -276,22 +274,16 @@ export function Login() {
       ) : null}
 
         <TextInput value={email} error={error.email.error ? error.email.message : false} onChange={(e) => {handleInput(e.target.value, 'email')}} label="Email address" size="sm" />
-        {showpass ? (<PasswordInput label="Password" value={password} onChange={(e) => {handleInput(e.target.value, 'password')}} error={error.password.error ? error.password.message : false} mt="xs" size="sm" />) : null}
-        {showpass ? (<Checkbox label="Keep me logged in" onChange={() => {setChecked(!checked)}} checked={checked} mt="xl" size="sm" />) : null}
-        <Grid mt={30} columns={12}>
-            <Grid.Col span={5}>
-            <Button loading={loading} disabled={email === null || email === '' ? true : false} onClick={(e) => {showpass ? handleLogin(e) : setShowPass(true)}} fullWidth mt="xl" size="sm">
-         {showpass ? "Sign In" :  " Next"}
+        <PasswordInput label="Password" value={password} onChange={(e) => {handleInput(e.target.value, 'password')}} error={error.password.error ? error.password.message : false} mt="xs" size="sm" />
+        <Checkbox label="Keep me logged in" onChange={() => {setChecked(!checked)}} checked={checked} mt="xl" size="sm" />
+            <Button  loading={loading} onClick={(e) => {handleLogin(e)}} fullWidth mt="xl" size="sm">
+         Sign In
         </Button>
-            </Grid.Col>
-
-            <Grid.Col span={7} >
         <Text mt="xl" size='sm'>
           Don&apos;t have an account?{' '}<a href='/auth/register' style={{textDecoration: 'none', color: '#1864AB'}} >Register</a>
         </Text>
-            </Grid.Col>
-        </Grid>
       </Paper>
+      </Container>
     </MediaQuery>
     </>
   );

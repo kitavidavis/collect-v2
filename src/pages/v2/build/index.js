@@ -42,12 +42,13 @@ import {
   Modal,
   Image,
   ColorSchemeProvider,
+  Table,
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
-import { useBooleanToggle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
+import { useBooleanToggle, useColorScheme, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
 import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Minus, CircleMinus, Upload, Link } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, resetServerContext } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
 import { uuid } from 'uuidv4';
 import { useUser } from 'lib/hooks';
@@ -56,6 +57,7 @@ import { IoMdArrowDropdownCircle } from 'react-icons/io';
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { NotificationsProvider } from '@mantine/notifications';
 import { showNotification } from '@mantine/notifications'
+import { image } from 'd3';
 
 const colors = [ '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
 const color_strings = [ 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange'];
@@ -70,8 +72,9 @@ const useStyles = createStyles((theme) => ({
   wrapper: {
     borderRadius: theme.radius.md,
     marginBottom: 20,
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
     border: `1px solid ${
-      theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[3]
+      theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white
     }`,
 
     [`@media (max-width: ${theme.breakpoints.sm}px)`]: {
@@ -425,7 +428,7 @@ export function HeaderPage() {
             icon: <Check />,
           });
 
-          setTimeout(function(){window.location = '/v2/dashboard';}, 5000)
+          setTimeout(function(){window.location = '/v2/';}, 5000)
         } else {
           showNotification({
             title: 'Error!',
@@ -1568,18 +1571,52 @@ export default function AppShellDemo() {
     )
   }
 
+  const retrieveUploadSpecifics = (id) => {
+    let idx = forms.findIndex((obj => obj.id === id));
+    if(idx !== -1){
+      let q = forms[idx];
+      return q.question.uploadSpecifics;
+    } else {
+      return null;
+    }
+  }
+
   const fileUploadDetails = (id) => {
-    const [specific, setSpecific] = useState(false);
-    const [specifics, setSpecifics] = useState({
-      document: false,
-      spreadshit: false,
-      pdf: false,
-      video: false,
-      presentation: false,
-      drawing: false,
-      image: true,
-      audio: false
-    });
+    const [specific, setSpecific] = useState(true);
+    const [img, setImg] = useState(true);
+    const [doc, setDoc] = useState(false);
+    const [spreadshit, setSpreadshit] = useState(false);
+    const [pdf, setPDF] = useState(false);
+    const [video, setVideo] = useState(false);
+    const [presentation, setPresentation] = useState(false);
+    const [drawing, setDrawing] = useState(false);
+    const [audio, setAudio] = useState(false);
+
+    const specifics = {
+      document: doc,
+      spreadshit: spreadshit,
+      pdf: pdf,
+      video: video,
+      presentation: presentation,
+      drawing: drawing,
+      image: img,
+      audio: audio
+    };
+
+    React.useEffect(() => {
+      let oldData = retrieveUploadSpecifics(id);
+
+      if(oldData){
+        setImg(oldData.image);
+        setDoc(oldData.document);
+        setSpreadshit(oldData.spreadshit);
+        setPDF(oldData.pdf);
+        setVideo(oldData.video);
+        setPresentation(oldData.presentation);
+        setDrawing(oldData.drawing);
+        setAudio(oldData.audio);
+      }
+    }, []);
 
     const [maxSize, setMaxSize] = useState('10');
 
@@ -1595,26 +1632,27 @@ export default function AppShellDemo() {
       let q = forms[idx];
 
       q.question.uploadSpecifics = specifics;
-    }, [specifics]);
+      console.log(forms)
+    }, [doc, spreadshit, pdf, video, presentation, drawing, img, audio]);
 
 
     return (
       <Group direction='column' style={{width: '100%'}}>
         <Group position='apart'>
           <Text>Allow only specific file types</Text>
-          <Switch checked={specific} onChange={(e) => {setSpecific(e.currentTarget.checked)}} />
+          <Switch checked />
         </Group>
         {specific ? (
           <Group>
             <SimpleGrid cols={2}>
-              <MantineCheckbox checked={specifics.document} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, document: e.target.checked}))}} label="Document" />
-              <MantineCheckbox checked={specifics.spreadshit} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, spreadshit: e.target.checked}))}}  label="Spreadshit" />
-              <MantineCheckbox checked={specifics.pdf} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, pdf: e.target.checked}))}}  label="PDF" />
-              <MantineCheckbox checked={specifics.video} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, video: e.target.checked}))}}  label="Video" />
-              <MantineCheckbox checked={specifics.presentation} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, presentation: e.target.checked}))}}  label="Presentation" />
-              <MantineCheckbox checked={specifics.drawing} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, drawing: e.target.checked}))}}  label="Drawing" />
-              <MantineCheckbox checked={specifics.image} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, image: e.target.checked}))}}  label="Image" />
-              <MantineCheckbox checked={specifics.audio} onChange={(e) => {setSpecifics(prevSpecifics => ({...prevSpecifics, audio: e.target.checked}))}}  label="Audio" />
+              <MantineCheckbox checked={doc} onChange={(e) => {setDoc(e.target.checked)}} label="Document" />
+              <MantineCheckbox checked={spreadshit} onChange={(e) => {setSpreadshit(e.target.checked)}}  label="Spreadshit" />
+              <MantineCheckbox checked={pdf} onChange={(e) => {setPDF(e.target.checked)}}  label="PDF" />
+              <MantineCheckbox checked={video} onChange={(e) => {setVideo(e.target.checked)}}  label="Video" />
+              <MantineCheckbox checked={presentation} onChange={(e) => {setPresentation(e.target.checked)}}  label="Presentation" />
+              <MantineCheckbox checked={drawing} onChange={(e) => {setDrawing(e.target.checked)}}  label="Drawing" />
+              <MantineCheckbox checked={img} onChange={(e) => {setImg(e.target.checked)}}  label="Image" />
+              <MantineCheckbox checked={audio} onChange={(e) => {setAudio(e.target.checked)}}  label="Audio" />
             </SimpleGrid>
           </Group>
         ) : null}
@@ -1698,11 +1736,11 @@ export default function AppShellDemo() {
       </Group>
               <Group position='left'>
               <Text size='xs' color='gray'>{from}</Text>
-              <Text contentEditable onBlur={(e) => {handleBlur1(e.target.textContent)}} >{label1}</Text>
+              <Text contentEditable suppressContentEditableWarning={true} onBlur={(e) => {handleBlur1(e.target.textContent)}} >{label1}</Text>
             </Group>
             <Group position='left'>
               <Text size='xs' color='gray' >{to}</Text>
-              <Text contentEditable onBlur={(e) => {handleBlur2(e.target.textContent)}} >{label2}</Text>
+              <Text contentEditable suppressContentEditableWarning={true}  onBlur={(e) => {handleBlur2(e.target.textContent)}} >{label2}</Text>
             </Group>
             </>
     )
@@ -1854,7 +1892,7 @@ export default function AppShellDemo() {
 
         q.question.gridRadioColumn = [... new Set(tempArr)];
 
-        //setOpened2(false)
+        setOpened2(false)
       }
 
       return (
@@ -1877,7 +1915,7 @@ export default function AppShellDemo() {
             <Button onClick={() => {createOptions()}} type="button" size="sm">
               Apply
             </Button>
-            <Button onClick={() => {setOpened(false)}} type="button" size="sm">
+            <Button onClick={() => {setOpened2(false)}} type="button" size="sm">
               Close
             </Button>
           </Group>
@@ -1999,7 +2037,7 @@ export default function AppShellDemo() {
             <RadioGroup>
             {cols.map((item, index) => {
               return (
-                <Radio disabled value={index} label={item.label + (index+1)} />
+                <Radio disabled value={index} label={item.label} />
               )
             })}
             </RadioGroup>
@@ -2695,7 +2733,7 @@ export default function AppShellDemo() {
 
 
     return (
-      <Text size='xs' color='gray' contentEditable onBlur={() => {handleBlur()}} onInput={(e) => {setQuestion(e.currentTarget.textContent)}} >{questionVal}</Text>
+      <Text size='xs' color='gray' contentEditable onBlur={() => {handleBlur()}} suppressContentEditableWarning={true}  onInput={(e) => {setQuestion(e.currentTarget.textContent)}} >{questionVal}</Text>
     )
   }
 
@@ -2742,7 +2780,7 @@ export default function AppShellDemo() {
     }
 
     return (
-      <Text contentEditable onBlur={() => {handleBlur()}} onInput={(e) => {setQuestion(e.currentTarget.textContent)}} >{questionVal}</Text>
+      <Text contentEditable suppressContentEditableWarning={true}  onBlur={() => {handleBlur()}} onInput={(e) => {setQuestion(e.currentTarget.textContent)}} >{questionVal}</Text>
     )
   }
 
@@ -2787,7 +2825,7 @@ export default function AppShellDemo() {
     return (
       <>
       <Text contentEditable onBlur={(e) => {handleBlur1(e)}} >{ctitle}</Text>
-      <Text size='xs' color='gray' contentEditable onBlur={(e) => {handleBlur2(e)}}>{cdesc}</Text>
+      <Text size='xs' color='gray' contentEditable suppressContentEditableWarning={true}  onBlur={(e) => {handleBlur2(e)}}>{cdesc}</Text>
       </>
     )
 
@@ -2839,8 +2877,8 @@ export default function AppShellDemo() {
 
     return(
       <>
-      <Title order={3} contentEditable onBlur={(e) => {handleBlur1(e)}} >{stitle}</Title>
-      <Text size='xs' color='gray' contentEditable onBlur={(e) => {handleBlur2(e)}}>{sdesc}</Text>
+      <Title order={3} contentEditable suppressContentEditableWarning={true}  onBlur={(e) => {handleBlur1(e)}} >{stitle}</Title>
+      <Text size='xs' color='gray' contentEditable suppressContentEditableWarning={true}  onBlur={(e) => {handleBlur2(e)}}>{sdesc}</Text>
       </>
     )
   }
@@ -3200,15 +3238,24 @@ export default function AppShellDemo() {
     )
   });
 
+      const preferredColorScheme = useColorScheme();
+    const [colorScheme, setColorScheme] = useState(preferredColorScheme);
+    const toggleColorScheme = (value) =>
+      setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+  
+      
+    React.useEffect(() => {
+      setColorScheme(preferredColorScheme)
+    }, [preferredColorScheme])
     
   return (
     <FormContext.Provider value={{state, dispatch}}>
-      <ColorSchemeProvider colorScheme='dark'>
+      <ColorSchemeProvider colorScheme={'light'}>
       <MantineProvider
       withGlobalStyles
       withNormalizeCSS
       theme={{
-        colorScheme: 'dark',
+        colorScheme: 'light',
         other: {
           RobotoFamily: 'Roboto, sans-serif',
           SplashFamily: 'Splash, sans-serif',
@@ -3218,6 +3265,11 @@ export default function AppShellDemo() {
     >
     <NotificationsProvider position="top-right" zIndex={2077} >
     <AppShell
+    styles={{
+      main: {
+        background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[1],
+      },
+    }}
       navbarOffsetBreakpoint="sm"
       asideOffsetBreakpoint="sm"
       fixed
@@ -3550,6 +3602,16 @@ export default function AppShellDemo() {
           
         </Box>
           {forms.length > 0 && forms.map((item) => {
+            let cols = 0;
+            let rows = 0;
+            if(item.question.gridRadioColumn !== null){
+              cols = item.question.gridRadioColumn.length;
+            }
+
+            if(item.question.gridRadioRow !== null){
+              rows = item.question.gridRadioRow.length;
+            }
+
           return (
             item.type === 1 ? (
               item.question.questionType === 'Short Answer' ? (
@@ -3602,12 +3664,41 @@ export default function AppShellDemo() {
                   <Slider />
                 </InputWrapper>
               </Card>
-              ) : item.question.questionType === 'Multiple Choice Grid' ? (
+              ) : item.question.questionType === 'Multiple Choice Grid' && cols !== 0 && rows !== 0 ? (
                 <Card mt={20} >
                 <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-                  <TextInput />
+                <Table>
+                    <thead>
+                      <tr>
+                        <td></td>
+                        {item.question.gridRadioColumn.map((item1) => {
+                          return (
+                            <td key={item1.id} >{item1.label}</td>
+                          )
+                        })}
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {item.question.gridRadioRow.map((item2) => {
+                        return (
+                          <tr key={item2.id} >
+                            <td>
+                                {item2.label}
+                              </td>
+                              {item.question.gridRadioColumn.map((item3) => {
+                                return (
+                                  <td><Radio value={item3.label}  /></td>
+                                )
+                              })}
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </Table>
+
                 </InputWrapper>
-              </Card>
+                </Card>
               ) : item.question.questionType === 'Checkbox Grid' ? (
                 <Card mt={20} >
                 <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
@@ -3680,6 +3771,16 @@ export default function AppShellDemo() {
           <Text color='gray' style={{fontFamily: state.TextFont, fontSize: state.TextSize}} ml='md' mt='md' mb={20}>{formdesc}</Text>
         </Box>
           {forms.length > 0 && forms.map((item) => {
+          let cols = 0;
+          let rows = 0;
+
+          if(item.question.gridRadioColumn !== null){
+            cols = item.question.gridRadioColumn.length;
+          }
+
+          if(item.question.gridRadioRow !== null){
+            rows = item.question.gridRadioRow.length;
+          }
          return (
           item.type === 1 ? (
             item.question.questionType === 'Short Answer' ? (
@@ -3732,12 +3833,41 @@ export default function AppShellDemo() {
                 <Slider />
               </InputWrapper>
             </Card>
-            ) : item.question.questionType === 'Multiple Choice Grid' ? (
+            ) : item.question.questionType === 'Multiple Choice Grid' && cols !== 0 && rows !== 0 ? (
               <Card mt={20} >
               <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
-                <TextInput />
+              <Table>
+                  <thead>
+                    <tr>
+                      <td></td>
+                      {item.question.gridRadioColumn.map((item1) => {
+                        return (
+                          <td key={item1.id} >{item1.label}</td>
+                        )
+                      })}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {item.question.gridRadioRow.map((item2) => {
+                      return (
+                        <tr key={item2.id} >
+                          <td>
+                              {item2.label}
+                            </td>
+                            {item.question.gridRadioColumn.map((item3) => {
+                              return (
+                                <td><Radio value={item3.label}  /></td>
+                              )
+                            })}
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </Table>
+
               </InputWrapper>
-            </Card>
+              </Card>
             ) : item.question.questionType === 'Checkbox Grid' ? (
               <Card mt={20} >
               <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
@@ -3943,4 +4073,12 @@ export default function AppShellDemo() {
     </ColorSchemeProvider>
     </FormContext.Provider>
   );
+}
+
+export const getServerSideProps = async ({ query }) => {
+
+  resetServerContext()   // <-- CALL RESET SERVER CONTEXT, SERVER SIDE
+
+  return {props: { data : []}}
+
 }

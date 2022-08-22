@@ -5,13 +5,28 @@ export default [
         target: ''
       },
       {
-        path: 'https://oloo.co.ke/aceli/',
-        label: 'Case Study 1: Aceli Africa',
-        target: 'blank',
+        path: '/features/',
+        label: 'Features',
+        target: ''
       },
       {
-        path: 'https://cso.vercel.app',
-        label: 'Case Study 2: AICAS',
-        target: 'blank'
+        path: '/cases/case1',
+        label: 'Case Study: Aceli',
+        target: ''
+      },
+      {
+        path: '/cases/case2',
+        label: 'Case Study: AICAS',
+        target: ''
+      },
+      {
+        path: '/qgis-plugin/',
+        label: 'QGIS Plugin',
+        target: ''
+      },
+      {
+        path: '/developers/',
+        label: 'Developers',
+        target: ''
       },
 ];

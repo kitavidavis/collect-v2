@@ -2,6 +2,7 @@ import { Group, Button, Text, useMantineTheme, MantineTheme } from '@mantine/cor
 import { Upload, Photo, X, Icon as TablerIcon } from 'tabler-icons-react';
 import { Dropzone, DropzoneStatus, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { useRef } from 'react';
+import { uploadFile } from 'lib/upload';
 
 function getIconColor(status, theme) {
   return status.accepted
@@ -27,56 +28,58 @@ export const dropzoneChildren = (status, theme) => (
   </Group>
 );
 
-export function UploadImage() {
+export function UploadImage( props ) {
   const theme = useMantineTheme();
   const openRef = useRef();
+  console.log(props)
+  
   return (
     <>
     <Dropzone
         openRef={openRef}
-      onDrop={(files) => console.log('accepted files', files)}
+      onDrop={(files) => uploadFile(files, props.position)}
       onReject={(files) => console.log('rejected files', files)}
       maxSize={3 * 1024 ** 2}
-      accept={IMAGE_MIME_TYPE}
     >
       {(status) => dropzoneChildren(status, theme)}
     </Dropzone>
     <Group position="center" mt="md">
-        <Button onClick={() => openRef.current()}>Select files</Button>
+    <input type='file' onClick={() => openRef.current()} accept="image/jpeg,image/gif,image/png"  />
       </Group>
     </>
   );
 }
 
-export function UploadPDF() {
+export function UploadPDF( props ) {
     const theme = useMantineTheme();
     const openRef = useRef();
+    console.log(props)
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
-        accept={PDF_MIME_TYPE}
       >
         {(status) => dropzoneChildren(status, theme)}
       </Dropzone>
       <Group position="center" mt="md">
-          <Button onClick={() => openRef.current()}>Select files</Button>
+      <input type='file' onClick={() => openRef.current()} accept="application/pdf"  />
         </Group>
       </>
     );
   }
 
-  export function UploadSpreadshit() {
+  export function UploadSpreadshit(props) {
     const theme = useMantineTheme();
     const openRef = useRef();
+    console.log(props)
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
         accept={MS_EXCEL_MIME_TYPE}
@@ -90,14 +93,14 @@ export function UploadPDF() {
     );
   }
 
-  export function UploadDocument() {
+  export function UploadDocument(props) {
     const theme = useMantineTheme();
     const openRef = useRef();
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
         accept={MS_WORD_MIME_TYPE}
@@ -111,14 +114,14 @@ export function UploadPDF() {
     );
   }
 
-  export function UploadPresentation() {
+  export function UploadPresentation(props) {
     const theme = useMantineTheme();
     const openRef = useRef();
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
         accept={MS_POWERPOINT_MIME_TYPE}
@@ -132,14 +135,14 @@ export function UploadPDF() {
     );
   }
 
-  export function UploadVideo() {
+  export function UploadVideo(props) {
     const theme = useMantineTheme();
     const openRef = useRef();
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
         accept={[MIME_TYPES.mp4]}
@@ -153,14 +156,14 @@ export function UploadPDF() {
     );
   }
 
-  export function UploadAudio() {
+  export function UploadAudio(props) {
     const theme = useMantineTheme();
     const openRef = useRef();
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
         accept={[MIME_TYPES.mp3]}
@@ -174,14 +177,14 @@ export function UploadPDF() {
     );
   }
 
-  export function UploadAny() {
+  export function UploadAny(props) {
     const theme = useMantineTheme();
     const openRef = useRef();
     return (
       <>
       <Dropzone
           openRef={openRef}
-        onDrop={(files) => console.log('accepted files', files)}
+        onDrop={(files) => uploadFile(files, props.position)}
         onReject={(files) => console.log('rejected files', files)}
         maxSize={3 * 1024 ** 2}
       >

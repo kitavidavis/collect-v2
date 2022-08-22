@@ -12,7 +12,7 @@ import { useUser } from 'lib/hooks';
 import { useViewportSize, useScrollLock } from '@mantine/hooks';
 
 export default function IndexPage(){
-  useUser({redirectTo: '/v2/dashboard', redirectIfFound: true});
+  useUser({redirectTo: '/v2/', redirectIfFound: true});
   const { height, width } = useViewportSize();
     return (
         <ThemeProvider theme={theme}>

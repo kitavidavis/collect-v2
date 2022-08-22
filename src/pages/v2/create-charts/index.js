@@ -17,7 +17,7 @@ import { Moon, Sun, ChevronDown, ChartBar, Plus} from 'tabler-icons-react';
 import theme from 'theme';
 import SEO from 'components/seo';
 import { useColorScheme } from '@mantine/hooks';
-import { useStyles } from '../dashboard';
+import { useStyles } from '..';
 import { useUser } from 'lib/hooks';
 
  function AppShellDemo() {
