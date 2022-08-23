@@ -573,9 +573,9 @@ export default function AppShellDemo() {
    * @param {*} id 
    */
 
-  const handleMenuClick = (id) => {
+  const handleMenuClick = (id, state) => {
     setMenuId(id);
-    setHandler(!handler)
+    setHandler(state)
   }
 
   /**
@@ -583,9 +583,9 @@ export default function AppShellDemo() {
    * @param {*} id 
    */
 
-  const handleMenuClickXS = (id) => {
+  const handleMenuClickXS = (id, state) => {
     setMenuId(id);
-    setHandlerXS(!handlerxs)
+    setHandlerXS(state)
   }
 
   const makeQuestionsRequiredByDefault = (e) => {
@@ -2911,7 +2911,7 @@ export default function AppShellDemo() {
                           {questionDetails(item.question.questionType, item.id)}
                         </Group>
                       <Group position='right'>
-                        <Menu  onClick={() => {handleMenuClickXS(item.id)}} opened={handlerxs} position='right' control={<UnstyledButton
+                        <Menu onClose={() => {handleMenuClickXS('', false)}}  onClick={() => {handleMenuClickXS(item.id)}} opened={handlerxs} position='right' control={<UnstyledButton
                     sx={(theme) => ({
                       display: 'block',
                       width: '100%',
@@ -2945,10 +2945,7 @@ export default function AppShellDemo() {
                                 <Menu.Item onClick={() => {handleDropdown(menuid)}} icon={<IoMdArrowDropdownCircle />}>Dropdown</Menu.Item>
                                 <Divider />
                                 <Menu.Item onClick={() => {handleFileUpload(menuid)}} icon={<FileUpload />}>File Upload</Menu.Item>
-                                <Divider />
                                 <Menu.Item  onClick={() => {handleLinearScale(menuid)}} icon={<SliderIcon />}>Linear Scale</Menu.Item>
-                                <Menu.Item  onClick={() => {handleMultipleChoiceGrid(menuid)}} icon={<GridDots />}>Multiple Choice Grid</Menu.Item>
-                                <Menu.Item  onClick={() => {handleCheckboxGrid(menuid)}} icon={ <LayoutGrid />}>Checkbox Grid</Menu.Item>
                                 <Divider />
                                 <Menu.Item  onClick={() => {handleDate(menuid)}} icon={<Calendar />}>Date</Menu.Item>
                                 <Menu.Item  onClick={() => {handleTime(menuid)}} icon={<Clock />}>Time</Menu.Item>
@@ -3071,7 +3068,7 @@ export default function AppShellDemo() {
                           {questionDetails(item.question.questionType, item.id)}
                         </Group>
                       <Group position='right'>
-                        <Menu  onClick={() => {handleMenuClick(item.id)}} opened={handler} position='right' control={<UnstyledButton
+                        <Menu onClose={() => {handleMenuClick('', false)}}  onClick={() => {handleMenuClick(item.id, true)}} opened={handler} position='right' control={<UnstyledButton
                     sx={(theme) => ({
                       display: 'block',
                       width: '100%',
@@ -3105,10 +3102,7 @@ export default function AppShellDemo() {
                                 <Menu.Item onClick={() => {handleDropdown(menuid)}} icon={<IoMdArrowDropdownCircle />}>Dropdown</Menu.Item>
                                 <Divider />
                                 <Menu.Item onClick={() => {handleFileUpload(menuid)}} icon={<FileUpload />}>File Upload</Menu.Item>
-                                <Divider />
                                 <Menu.Item  onClick={() => {handleLinearScale(menuid)}} icon={<SliderIcon />}>Linear Scale</Menu.Item>
-                                <Menu.Item  onClick={() => {handleMultipleChoiceGrid(menuid)}} icon={<GridDots />}>Select One Grid</Menu.Item>
-                                <Menu.Item  onClick={() => {handleCheckboxGrid(menuid)}} icon={ <LayoutGrid />}>Select Multiple Grid</Menu.Item>
                                 <Divider />
                                 <Menu.Item  onClick={() => {handleDate(menuid)}} icon={<Calendar />}>Date</Menu.Item>
                                 <Menu.Item  onClick={() => {handleTime(menuid)}} icon={<Clock />}>Time</Menu.Item>
