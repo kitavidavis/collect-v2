@@ -710,6 +710,7 @@ function Dashboard(){
       const [geommodal, setGeomModal] = useState(false);
       const [geomtype, setGeomType] = useState('');
       const [coords, setCoords] = useState(null);
+      const [center, setCenter] = useState([])
       const { colorScheme, toggleColorScheme } = useMantineColorScheme();
       const Map = ReactMapboxGl({
         accessToken: accessToken,
@@ -753,9 +754,12 @@ function Dashboard(){
             points.push(point);
           }
           setCoords(points)
+          setCenter(points[0]);
         } else {
-          setCoords(coords)
+          setCoords(x)
+          setCenter([x.longitude, x.latitude])
         }
+
 
         setTimeout(function(){setGeomModal(true)}, 1000)
       }
@@ -1441,48 +1445,28 @@ function Dashboard(){
 
                           <Modal  opened={geommodal} onClose={() => {hideMap()}} size='100%' >
                           {coords !== null ? 
-                            geomtype === 'Point' ? (
                               <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
                                 height: height * 0.7,
                                 width: width * 0.95
                               }}
-                              center={[coords.longitude, coords.latitude]}
+                              center={center}
                               zoom={[16]}
                               
                               >
-                                <Marker coordinates={[coords.longitude, coords.latitude]}>
-                                  <Pin />
-                                </Marker>
-                              </Map>
-                            ) : geomtype === 'Polyline' ? (
-                              <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
-                                height: height * 0.7,
-                                width: width * 0.95
-                              }}
-                              center={coords[0]}
-                              zoom={[16]}
-                              
-                              >
-
-                                <Layer type='line' layout={lineLayout} paint={linePaint}>
+                                {geomtype === 'Point' ? (
+                                    <Marker coordinates={[coords.longitude, coords.latitude]}>
+                                    <Pin />
+                                  </Marker>
+                                ) : geomtype === 'Polyline' ? (
+                                  <Layer type='line' layout={lineLayout} paint={linePaint}>
                                   <Feature coordinates={coords} />
                                 </Layer>
-
-                              </Map>
-                            ) : geomtype === 'Polygon' ? (
-                              <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
-                                height: height * 0.7,
-                                width: width * 0.95
-                              }}
-                              center={coords[0]}
-                              zoom={[16]}
-                              
-                              >
-                                <Layer type="fill" paint={polygonPaint}>
+                                ) : (
+                                  <Layer type="fill" paint={polygonPaint}>
                                   <Feature coordinates={[[coords]]} />
                                 </Layer>
+                                )}
                               </Map>
-                            ) : null
                            : null}
                           </Modal>
                         
