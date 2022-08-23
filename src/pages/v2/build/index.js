@@ -573,7 +573,7 @@ export default function AppShellDemo() {
    * @param {*} id 
    */
 
-  const handleMenuClick = (id, state) => {
+  const handleMenuClick = (id) => {
     setMenuId(id);
     setHandler(!handler)
   }
@@ -583,7 +583,7 @@ export default function AppShellDemo() {
    * @param {*} id 
    */
 
-  const handleMenuClickXS = (id, state) => {
+  const handleMenuClickXS = (id) => {
     setMenuId(id);
     setHandlerXS(!handlerxs)
   }
@@ -2939,7 +2939,7 @@ export default function AppShellDemo() {
                           {questionDetails(item.question.questionType, item.id)}
                         </Group>
                       <Group position='right'>
-                        <Menu onClose={() => {handleMenuClickXS('', false)}}  onClick={() => {handleMenuClickXS(item.id)}} opened={handlerxs} position='right' control={<UnstyledButton
+                        <Menu  onClick={() => {handleMenuClickXS(item.id)}} opened={handlerxs} position='right' control={<UnstyledButton
                     sx={(theme) => ({
                       display: 'block',
                       width: '100%',
@@ -3096,7 +3096,7 @@ export default function AppShellDemo() {
                           {questionDetails(item.question.questionType, item.id)}
                         </Group>
                       <Group position='right'>
-                        <Menu onClose={() => {handleMenuClick('', false)}}  onClick={() => {handleMenuClick(item.id, true)}} opened={handler} position='right' control={<UnstyledButton
+                        <Menu onClick={() => {handleMenuClick(item.id)}} opened={handler} position='right' control={<UnstyledButton
                     sx={(theme) => ({
                       display: 'block',
                       width: '100%',
