@@ -29,65 +29,44 @@ export const dropzoneChildren = (status, theme) => (
 );
 
 export function UploadImage( props ) {
-  const theme = useMantineTheme();
-  const openRef = useRef();
-  console.log(props)
+  const handleFileInput = (e) => {
+    console.log(e.target.files[0])
+    uploadFile(e.target.files[0], props.position)
+}
   
   return (
     <>
-    <Dropzone
-        openRef={openRef}
-      onDrop={(files) => uploadFile(files, props.position)}
-      onReject={(files) => console.log('rejected files', files)}
-      maxSize={3 * 1024 ** 2}
-    >
-      {(status) => dropzoneChildren(status, theme)}
-    </Dropzone>
     <Group position="center" mt="md">
-    <input type='file' onClick={() => openRef.current()} accept="image/jpeg,image/gif,image/png"  />
+    <input type='file' onChange={handleFileInput} accept="image/jpeg,image/gif,image/png"  />
       </Group>
     </>
   );
 }
 
 export function UploadPDF( props ) {
-    const theme = useMantineTheme();
-    const openRef = useRef();
-    console.log(props)
+    const handleFileInput = (e) => {
+      console.log(e.target.files[0])
+      uploadFile(e.target.files[0], props.position)
+  }
+    
     return (
       <>
-      <Dropzone
-          openRef={openRef}
-        onDrop={(files) => uploadFile(files, props.position)}
-        onReject={(files) => console.log('rejected files', files)}
-        maxSize={3 * 1024 ** 2}
-      >
-        {(status) => dropzoneChildren(status, theme)}
-      </Dropzone>
       <Group position="center" mt="md">
-      <input type='file' onClick={() => openRef.current()} accept="application/pdf"  />
+      <input type='file' onChange={handleFileInput} accept="application/pdf application/vnd.ms-excel"  />
         </Group>
       </>
     );
   }
 
   export function UploadSpreadshit(props) {
-    const theme = useMantineTheme();
-    const openRef = useRef();
-    console.log(props)
+    const handleFileInput = (e) => {
+      uploadFile(e.target.files[0], props.position)
+  }
+    
     return (
       <>
-      <Dropzone
-          openRef={openRef}
-        onDrop={(files) => uploadFile(files, props.position)}
-        onReject={(files) => console.log('rejected files', files)}
-        maxSize={3 * 1024 ** 2}
-        accept={MS_EXCEL_MIME_TYPE}
-      >
-        {(status) => dropzoneChildren(status, theme)}
-      </Dropzone>
       <Group position="center" mt="md">
-          <Button onClick={() => openRef.current()}>Select files</Button>
+      <input type='file' onChange={handleFileInput} accept="application/vnd.ms-excel"  />
         </Group>
       </>
     );

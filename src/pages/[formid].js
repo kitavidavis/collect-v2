@@ -1190,7 +1190,7 @@ const submitAnswers = async (e) => {
     let idx = answers.findIndex((obj => obj.position == item.position));
     let obj = answers[idx];
 
-    obj.response = item.file;
+    obj.response = item.file.name;
     
   }
 
@@ -1201,6 +1201,8 @@ const submitAnswers = async (e) => {
     response_id: uuid(),
     form_id: pid
   };
+
+  console.log(body);
 
    try {
     await fetch('/api/createresponse', {

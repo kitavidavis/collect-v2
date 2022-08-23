@@ -71,6 +71,7 @@ var BarChart = require('react-d3-components').BarChart;
 var PieChart = require('react-d3-components').PieChart;
 import 'mapbox-gl/dist/mapbox-gl.css';
 import LoaderCard from 'components/loaders/bolt';
+import Pin from 'components/pin';
 
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 
@@ -455,7 +456,6 @@ function Dashboard(){
         }).then( async function(res){
           if(res.status === 200){
             const data = await res.json();
-            console.log(data.response);
             setResponse(data.response);
           } 
         }).catch(function(error) {
@@ -705,9 +705,89 @@ function Dashboard(){
       const { classes } = useStyles();
       const [opened, setOpened] = useState(false);
       const [drawer, setDrawer] = useState(false);
+      const [image, setImage] = useState('');
+      const [imagemodal, setImageModal] = useState(false);
+      const [geommodal, setGeomModal] = useState(false);
+      const [geomtype, setGeomType] = useState('');
+      const [coords, setCoords] = useState(null);
       const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+      const Map = ReactMapboxGl({
+        accessToken: accessToken,
+      });
+
+      const lineLayout = {
+        'line-cap': 'round',
+        'line-join': 'round'
+      };
+      
+      const linePaint = {
+        'line-color': '#4790E5',
+        'line-width': 12
+      };
+
+      const polygonPaint = {
+        'fill-color': '#6F788A',
+        'fill-opacity': 0.7
+      };
 
       const w = 200;
+
+      const showImage = (img) => {
+        setImage("https://geopsycollect.s3.us-east-2.amazonaws.com/"+img);
+        setImageModal(true);
+
+      }
+
+      const hideImage = () => {
+        setImage("")
+        setImageModal(false);
+      }
+
+      const handleGeom = (geometryType, x) => {
+        setGeomType(geometryType);
+        if(geometryType === 'Polyline' || geometryType === 'Polygon'){
+          let points = [];
+          
+          for(let i=0; i<x.length; i++){
+            let point = [x[i].longitude, x[i].latitude];
+            points.push(point);
+          }
+          setCoords(points)
+        } else {
+          setCoords(coords)
+        }
+
+        setTimeout(function(){setGeomModal(true)}, 1000)
+      }
+
+      const hideMap = () => {
+        setGeomModal(false);
+        setGeomType('');
+        setCoords(null);
+      }
+
+      const HandleCoords = (props) => {
+
+        switch(props.type){
+          case 'Point':
+            return (
+              <Map style="mapbox://styles/mapbox/dark-v10" containerStyle={{
+                height: '100%',
+                width: '100%'
+              }}
+              center={[props.coords.longitude, props.coords.latitude]}
+              zoom={[20]}
+              >
+                <Marker coordinates={[props.coords.longitude, props.coords.latitude]}>
+                  <Pin />
+                </Marker>
+              </Map>
+            );
+
+          default:
+            return null;
+        }
+      }
 
       const createReadWriteGraph = async () => {
         let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
@@ -1332,27 +1412,79 @@ function Dashboard(){
                                                   <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
                                                   <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
                                                   <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.questionType === 'Point' ? JSON.stringify(item.response) : handleItemResponse(item.response)}</span></Text>
+                                                  <Text size='xs'><strong>More: </strong> <Anchor size='xs' href='#' onClick={() => {handleGeom(item.questionType, item.response)}} style={{color: "#339AF0"}} >View on map</Anchor></Text>
+                                                  <Text mb={10} size='xs'><strong>response: </strong> <span style={{color: "#339AF0"}} >{item.questionType === 'Point' ? JSON.stringify(item.response) : handleItemResponse(item.response)}</span></Text>
                                                   </div>
                             ) : item.questionType === 'File Upload' ? (
                               <div key={index} style={{marginLeft: 20}}>
-                              <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
-                              <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
-                              <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
-                              <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                              <Text mb={10} size='xs'><strong>response: </strong> <span style={{color: "#339AF0"}} >{responseFileUpload(item.response)}</span></Text>
-                              </div>
+                                                  <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
+                                                  <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
+                                                  <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
+                                                  <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
+                                                  <Text mb={10} size='xs'><strong>response: </strong> <Anchor size='xs' onClick={() => {showImage(item.response)}} href="#" style={{color: "#339AF0"}} >{item.response}</Anchor></Text>
+                                                  </div>
                             ) : (
                               <div key={index} style={{marginLeft: 20}}>
                                                   <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
                                                   <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
                                                   <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
                                                   <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable style={{color: "#339AF0"}} >{item.response}</span></Text>
+                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable suppressContentEditableWarning style={{color: "#339AF0"}} >{item.response}</span></Text>
                                                   </div>
                             )
                           )
                         })}
+
+                        <Modal opened={imagemodal} onClose={() => {hideImage()}} centered withCloseButton={false}>
+                            <img src={image} width='100%' height='100%' />
+                        </Modal>
+
+                          <Modal  opened={geommodal} onClose={() => {hideMap()}} size='100%' >
+                          {coords !== null ? 
+                            geomtype === 'Point' ? (
+                              <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
+                                height: height * 0.7,
+                                width: width * 0.95
+                              }}
+                              center={[coords.longitude, coords.latitude]}
+                              zoom={[16]}
+                              
+                              >
+                                <Marker coordinates={[coords.longitude, coords.latitude]}>
+                                  <Pin />
+                                </Marker>
+                              </Map>
+                            ) : geomtype === 'Polyline' ? (
+                              <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
+                                height: height * 0.7,
+                                width: width * 0.95
+                              }}
+                              center={coords[0]}
+                              zoom={[16]}
+                              
+                              >
+
+                                <Layer type='line' layout={lineLayout} paint={linePaint}>
+                                  <Feature coordinates={coords} />
+                                </Layer>
+
+                              </Map>
+                            ) : geomtype === 'Polygon' ? (
+                              <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
+                                height: height * 0.7,
+                                width: width * 0.95
+                              }}
+                              center={coords[0]}
+                              zoom={[16]}
+                              
+                              >
+                                <Layer type="fill" paint={polygonPaint}>
+                                  <Feature coordinates={[[coords]]} />
+                                </Layer>
+                              </Map>
+                            ) : null
+                           : null}
+                          </Modal>
                         
                       </Paper>
                     )
