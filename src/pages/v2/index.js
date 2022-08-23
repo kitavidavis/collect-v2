@@ -65,7 +65,7 @@ import serverRack from 'assets/images/blue-logo.png';
 import Image  from 'components/image';
 import { Bar } from 'react-chartjs-2';
 import { TableIcon } from '@modulz/radix-icons';
-import ReactMapboxGl, { Layer, Feature, Marker, Source } from 'react-mapbox-gl';
+import ReactMapboxGl, { Layer, Feature, Marker, Source, GeoJSONLayer } from 'react-mapbox-gl';
 import { showNotification } from '@mantine/notifications';
 var BarChart = require('react-d3-components').BarChart;
 var PieChart = require('react-d3-components').PieChart;
@@ -715,6 +715,22 @@ function Dashboard(){
       const Map = ReactMapboxGl({
         accessToken: accessToken,
       });
+
+      const geojson = {
+        type: "FeatureCollection",
+        features: [{
+          "type": "Feature",
+          "properties": {
+            "form_id":activeid 
+          },
+          "geometry": {
+            "type": "Polygon",
+            "coordinates":[[
+              coords
+            ]]
+          }
+        }]
+      }
 
       const lineLayout = {
         'line-cap': 'round',
@@ -1458,13 +1474,21 @@ function Dashboard(){
                                     <Pin />
                                   </Marker>
                                 ) : geomtype === 'Polyline' ? (
-                                  <Layer type='line' layout={lineLayout} paint={linePaint}>
-                                  <Feature coordinates={coords} />
-                                </Layer>
+                                  coords.map((item, index) => {
+                                    return (
+                                      <Marker key={index} coordinates={item}>
+                                      <Pin />
+                                    </Marker>
+                                    )
+                                  })
                                 ) : (
-                                  <Layer type="fill" paint={polygonPaint}>
-                                  <Feature coordinates={[[coords]]} />
-                                </Layer>
+                                  coords.map((item, index) => {
+                                    return (
+                                      <Marker key={index} coordinates={item}>
+                                      <Pin />
+                                    </Marker>
+                                    )
+                                  })
                                 )}
                               </Map>
                            : null}
