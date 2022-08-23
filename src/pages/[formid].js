@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Head from 'next/head'
 import {
   AppShell,
   Navbar,
@@ -1246,55 +1247,13 @@ const submitAnswers = async (e) => {
       >
 
           <>
-          <Helmet title = {obj === null ? "GeoPsy Collect Form" : obj.title}
-          htmlAttributes={{ lang: "en" }}
-          meta={[
-        {
-          name: `description`,
-          content: obj === null ? "Derive patterns and insights from complex data" : obj.description,
-        },
-        {
-          property: "og:url",
-          content: "https://collect-v2.vercel.app"
-        },
-        {
-          property: "og:type",
-          content: "website"
-        },
-        {
-          property: "og:title",
-          content: obj === null ? "GeoPsy Collect | Survey Form" : obj.title
-        },
-        {
-          property: "og:description",
-          content: obj === null ? "Derive patterns and insights from complex data with ease." : obj.description,
-        },
-        {
-          property: "og:image",
-          content: SuccessImage
-        }, 
-        {
-          property: "twitter:card",
-          content: "GeoPsy Collect | Derive insights and patterns from complex data with ease."
-        },
-        {
-          property: "twitter:creator",
-          content: "David Kitavi | GeoPsy Collect"
-        },
-        {
-          property: "twitter:title",
-          content: obj === null ? "GeoPsy Collect | Survey Form" : obj.title
-        },
-        {
-          property: "twitter:description",
-          content:  obj === null ? "Derive patterns and insights from complex data with ease." : obj.description,
-        },
-        {
-          property: "twitter:image",
-          content: SuccessImage
-        }
-      ]}
-   />
+          <Head>
+        <title>{obj === null ? "GeoPsy Collect Form" : obj.title}</title>
+        <meta
+          name="description"
+          content= {obj === null ? "Derive patterns and insights from complex data" : obj.description}
+        />
+      </Head>
           {done && !nullform && !submitted ? (
             <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
