@@ -10,6 +10,9 @@ export default class _Document extends Document {
     return (
       <Html>
                 <Head>
+                <meta name="description" content="__META_DESCRIPTION__"/>
+    <meta name="og:title" content="GeoPsy Collect:Cloud"/>
+    <meta name="og:description" content="Forms"/>
           <link
             href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=DM+Sans:wght@400;500;700&display=swap"
             rel="stylesheet"
