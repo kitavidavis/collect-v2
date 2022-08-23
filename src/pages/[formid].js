@@ -271,7 +271,7 @@ const prepareAnswerStore = () => {
     if(forms[i].type === 1){
       let qt = forms[i].question.questionType;
       let req = forms[i].question.required;
-      let chunk = {id:forms[i].id, required: req,  position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : qt === 'Date' || qt === 'Time' ? new Date() :  null };
+      let chunk = {id:forms[i].id, required: req, position: forms[i].position, questionType: qt, question: forms[i].question.defaultValue, response: qt === 'Short Answer' || qt === 'Paragraph' || qt === 'Multiple Choice' || qt === 'Dropdown' ? '' : qt === 'Checkbox'  ? [] : qt === 'Date' || qt === 'Time' ? new Date() :  null };
       arr.push(chunk);
     } else {
       continue;
@@ -1493,41 +1493,40 @@ const RenderQuestions = () => {
 }
 
 const submitAnswers = async (e) => {
-
   for(let i=0; i<filesArr.length; i++){
-    let item = filesArr[i];
-
-    let idx = answers.findIndex((obj => obj.position == item.position));
-    let obj = answers[idx];
-
-    obj.response = item.file.name;
-    
-  }
-
-  storeFiles();
-
-  const body = {
-    response: answers,
-    response_id: uuid(),
-    form_id: pid
-  };
-
-  console.log(body);
-
-   try {
-    await fetch('/api/createresponse', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(body),
-    }).then(function(res){
-      if(res.status == 200){
-        setSubmitted(true);
-      }
-    })
-  } catch(error){
-    console.log(error);
-  } 
-
+      let item = filesArr[i];
+  
+      let idx = answers.findIndex((obj => obj.position == item.position));
+      let obj = answers[idx];
+  
+      obj.response = item.file.name;
+      
+    }
+  
+    storeFiles();
+  
+    const body = {
+      response: answers,
+      response_id: uuid(),
+      form_id: pid
+    };
+  
+    console.log(body);
+  
+     try {
+      await fetch('/api/createresponse', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body),
+      }).then(function(res){
+        if(res.status == 200){
+          setSubmitted(true);
+        }
+      })
+    } catch(error){
+      console.log(error);
+    } 
+  
   
 }
     
