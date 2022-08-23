@@ -575,7 +575,7 @@ export default function AppShellDemo() {
 
   const handleMenuClick = (id, state) => {
     setMenuId(id);
-    setHandler(state)
+    setHandler(!handler)
   }
 
   /**
@@ -585,7 +585,7 @@ export default function AppShellDemo() {
 
   const handleMenuClickXS = (id, state) => {
     setMenuId(id);
-    setHandlerXS(state)
+    setHandlerXS(!handlerxs)
   }
 
   const makeQuestionsRequiredByDefault = (e) => {
@@ -676,11 +676,39 @@ export default function AppShellDemo() {
     setReadOnly(true);
   }
 
+  function shuffleArray(array) {
+    let curId = array.length;
+    // There remain elements to shuffle
+    while (0 !== curId) {
+      // Pick a remaining element
+      let randId = Math.floor(Math.random() * curId);
+      curId -= 1;
+      // Swap it with the current element.
+      let tmp = array[curId];
+      array[curId] = array[randId];
+      array[randId] = tmp;
+    }
+    return array;
+  }
+
+  function makeFormId(){
+    let length = 30;
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    let charactersLength = characters.length;
+
+    for(let i=0; i<length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    }
+
+    return result;
+  }
+
   React.useEffect(() => {
     const savedata = () => {
       let data = {
         title: state.FormName,
-        form_id: uuid(),
+        form_id: makeFormId(),
         user_id: user2.user?._id,
         description: formdesc,
         color: state.Color,
