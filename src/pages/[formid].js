@@ -46,7 +46,7 @@ import {
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
 import { useBooleanToggle, useDocumentTitle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
-import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck, Lock, LockOpen, AlertCircle } from 'tabler-icons-react';
+import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck, Lock, LockOpen, AlertCircle, Pinned } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
@@ -292,52 +292,65 @@ const submitAnotherResponse = () => {
   setSubmitted(false);
 }
 
+  /**
+   * THIS SECTION PROCESSES THE SKIP LOGIC FRONTEND
+   * ------BEGINNING ----
+   */
+
+   const skipShortAnswer = (parentID, parentTrueValue, required, question, description) => {
+    
+  }
+
+  /**
+   * ----END OF SKIP LOGIC ----
+   */
+
 const RenderQuestions = () => {
-  const handleQuestion = (q, id, parent) => {
+  const handleQuestion = (q, id, parent, v, pid) => {
     switch(q) {
       case 'Short Answer':
-        return handleShortAnswer(id, parent);
+        return handleShortAnswer(id, parent, v, pid);
   
       case 'Paragraph':
-        return handleParagraph(id, parseInt);
+        return handleParagraph(id, parent, v, pid);
   
   
       case 'Multiple Choice':
-        return handleMultipleChoice(id, parseInt);
+        return handleMultipleChoice(id, parent, v, pid);
   
   
       case 'Checkbox':
-        return handleCheckbox(id, parent);
+        return handleCheckbox(id, parent, v, pid);
   
       case 'Dropdown':
-        return handleDropdown(id, parent);
+        return handleDropdown(id, parent, v, pid);
   
       case 'File Upload':
-        return handleFileUpload(id, parent);
+        return handleFileUpload(id, parent, v, pid);
   
       case 'Linear Scale':
-        return handleLinearScale(id, parent);
+        return handleLinearScale(id, parent, v, pid);
   
       case 'Multiple Choice Grid':
-        return handleMultipleChoiceGrid(id, parent);
+        return handleMultipleChoiceGrid(id, parent, v, pid);
   
       case 'Checkbox Grid':
-        return handleCheckboxGrid(id, parent);
+        return handleCheckboxGrid(id, parent, v, Pinned);
   
       case 'Date':
-        return handleDate(id, parent);
+        return handleDate(id, parent, v, pid);
   
       case 'Time':
-        return handleTime(id, parent);
+        return handleTime(id, parent, v, pid);
   
       case 'Point':
-        return handlePoint(id, parent);
+        return handlePoint(id, parent, v, pid);
   
       case 'Polyline':
-        return handlePolyline(id, parent);
+        return handlePolyline(id, parent, v, pid);
   
       case 'Polygon':
-        return handlePolygon(id, parent);
+        return handlePolygon(id, parent, v, pid);
   
       default:
         console.log('undefined');
@@ -354,14 +367,35 @@ const RenderQuestions = () => {
     }
   }
   
-  const handleShortAnswer = (id, p) => {
+  const handleShortAnswer = (id, p, v, pid) => {
     const [text, setText] = useState('');
     const [error, setError] = useState(false);
     const [required, setRequired] = useState(false);
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
 
-  
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
+
     React.useEffect(() => {
       let ans = retrieveShortAns(id);
       if(ans !== null){
@@ -402,11 +436,13 @@ const RenderQuestions = () => {
   
 
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
     <InputWrapper error={error} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
   
   <TextInput error={error ? "The response for this question is required" : null} onFocus={() => {handleFocus()}} onBlur={(e) => {handleBlur(e.currentTarget.value)}} value={text} onChange={(e) => {handleChange(e.currentTarget.value)}} />
   
     </InputWrapper>
+    </Card>
       
     )
   }
@@ -421,11 +457,33 @@ const RenderQuestions = () => {
     }
   }
   
-  const handleParagraph = (id, p) => {
+  const handleParagraph = (id, p, v, pid) => {
     const [text, setText] = useState('');
     const [error, setError] = useState(false);
+    const [hidden, setHidden] = useState(p)
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
   
     React.useEffect(() => {
       let ans = retrieveParagraphAnsw(id);
@@ -468,11 +526,13 @@ const RenderQuestions = () => {
     }, []);
 
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
   
       <Textarea error={error ? "The response for this question is required" : null} value={text} onFocus={() => {handleFocus()}} onBlur={(e) => {handleBlur(e.currentTarget.value)}} onChange={(e) => {handleChange(e.currentTarget.value)}}  />
   
       </InputWrapper>
+      </Card>
     )
   }
   
@@ -486,11 +546,33 @@ const RenderQuestions = () => {
     }
   }
   
-  const handleMultipleChoice = (id, p) => {
+  const handleMultipleChoice = (id, p, v, pid) => {
     const [str, setStr] = useState('');
+    const [hidden, setHidden] = useState(p);
     const [error, setError] = useState(false);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
   
     React.useEffect(() => {
       let opt = retrieveMultipleChoiceAns(id);
@@ -533,6 +615,7 @@ const RenderQuestions = () => {
     }, []);
 
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <RadioGroup error={error} onFocus={() => {handleFocus()}} onBlur={() => {handleBlur()}} value={str} onChange={(val) => {handleChange(val)}} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
           {item.question.radioOptions.length > 0 && item.question.radioOptions.map((radio) => {
             return (
@@ -540,6 +623,7 @@ const RenderQuestions = () => {
             )
           })}
         </RadioGroup>
+        </Card>
     )
   }
   const retrieveCheckboxAnsw = (id) => {
@@ -551,10 +635,32 @@ const RenderQuestions = () => {
       return null;
     }
   }
-  const handleCheckbox = (id, p) => {
+  const handleCheckbox = (id, p, v, pid) => {
     const [str, setStr] = useState([]);
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
   
     React.useEffect(() => {
       let opts = retrieveCheckboxAnsw(id);
@@ -583,6 +689,7 @@ const RenderQuestions = () => {
     }, []);
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <CheckboxGroup value={str} onChange={handleChange} required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       {item.question.checkboxOptions.length > 0 && item.question.checkboxOptions.map((check) => {
         return (
@@ -590,13 +697,36 @@ const RenderQuestions = () => {
         )
       })}
     </CheckboxGroup>
+    </Card>
     )
   }
   
-  const handleDropdown = (id, p) => {
+  const handleDropdown = (id, p, v, pid) => {
     const [str, setStr] = useState('');
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
 
     const handleChange = (str) => {
       setStr(str);
@@ -616,59 +746,121 @@ const RenderQuestions = () => {
     }, []);
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <Select value={str} onChange={(val) => {handleChange(val)}} data={item.question.dropdownOptions} />
       </InputWrapper>
+      </Card>
     )
   }
   
-  const handleFileUpload = (id, p) => {
+  const handleFileUpload = (id, p, v, pid) => {
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let q = forms[idx];
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
     
     return (
       q.question.uploadSpecifics.document ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadDocument position={item.position} />
         </InputWrapper>
+        </Card>
       ) : q.question.uploadSpecifics.spreadshit ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadSpreadshit position={item.position} />
         </InputWrapper>
+        </Card>
       ) : q.question.uploadSpecifics.pdf ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadPDF position={item.position} />
         </InputWrapper>
+        </Card>
       ) : q.question.uploadSpecifics.video ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadVideo position={item.position} />
         </InputWrapper>
+        </Card>
       ) : q.question.uploadSpecifics.audio ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadAudio position={item.position} />
         </InputWrapper>
+        </Card>
       ) : q.question.uploadSpecifics.presentation ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadPresentation position={item.position} />
         </InputWrapper>
+        </Card>
       ) : q.question.uploadSpecifics.image ? (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadImage position={item.position} />
         </InputWrapper>
+        </Card>
       ) : (
+        <Card hidden={hidden} mt={20} shadow='sm' >
         <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
         <UploadAny position={item.position} />
         </InputWrapper>
+        </Card>
       )
     )
   }
   
-  const handleLinearScale = (id, p) => {
+  const handleLinearScale = (id, p, v, pid) => {
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
     const [value, setValue] = useState(item.question.linearFrom)
   
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
+
     const handleChange = (value) => {
       setValue(value);
 
@@ -687,18 +879,42 @@ const RenderQuestions = () => {
 
     }, []);
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
   
   <Slider value={value} min={item.question.linearFrom} max={item.question.linearTo}  onChange={(val) => {handleChange(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
   
       </InputWrapper>
+      </Card>
     )
   }
   
-  const handleDate = (id, p) => {
+  const handleDate = (id, p, v, pid) => {
     const [date, setDate] = useState(new Date());
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
 
     const handleChange = (date) => {
       setDate(date);
@@ -718,16 +934,40 @@ const RenderQuestions = () => {
     }, []);
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <DatePicker value={date} onChange={(val) => {handleChange(val)}} />
     </InputWrapper>
+    </Card>
     )
   }
   
-  const handleTime = (id, p) => {
+  const handleTime = (id, p, v, pid) => {
     const [time, setTime] = useState(new Date());
+    const [hidden, setHidden] = useState(p);
     let idx = forms.findIndex((obj => obj.id == id));
     let item = forms[idx];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
 
     const handleChange = (time) => {
       setTime(time);
@@ -747,9 +987,11 @@ const RenderQuestions = () => {
     }, []);
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
     <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <TimeInput value={time} onChange={(val) => {handleChange(val)}} />
     </InputWrapper>
+    </Card>
     )
   }
   
@@ -763,16 +1005,37 @@ const RenderQuestions = () => {
     }
   }
   
-  const handlePoint = (id) => {
+  const handlePoint = (id, p, v, pid) => {
     const Map = ReactMapboxGl({
       accessToken: accessToken,
     });
-  
+    const [hidden, setHidden] = useState(p);
     const [lat1, setLat1] = useState('');
     const [lng1, setLng1] = useState('');
     const [acc1, setAcc1] = useState('');
     const [alt1, setAlt1] = useState('');
     const [locked, setLocked] = useState(false);
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
   
     React.useEffect(() => {
       let itm = retrievePointLoc(id);
@@ -821,6 +1084,7 @@ const RenderQuestions = () => {
   
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
       {lat1 === '' ? <ActionIcon onClick={() => {handleGPS()}} ><Gps /></ActionIcon> : null}
@@ -866,6 +1130,7 @@ const RenderQuestions = () => {
           </Group>
       </MediaQuery>
     </InputWrapper>
+    </Card>
     )
   }
   
@@ -880,11 +1145,11 @@ const RenderQuestions = () => {
     }
   }
   
-  const handlePolyline = (id, p) => {
+  const handlePolyline = (id, p, v, pid) => {
     const Map = ReactMapboxGl({
       accessToken: accessToken,
     });
-  
+    const [hidden, setHidden] = useState(p);
     const [lat1, setLat1] = useState(-1.234);
     const [lng1, setLng1] = useState(36.754);
     const [acc1, setAcc1] = useState(0);
@@ -900,6 +1165,27 @@ const RenderQuestions = () => {
     let item = forms[idx];
   
     let arr = [];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
   
     const handleGPS = () => {
       if(navigator.geolocation){
@@ -946,6 +1232,7 @@ const RenderQuestions = () => {
     }
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
       {polyline.length > 1 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}><Lock color='red' size={30} /></ActionIcon>
@@ -1007,6 +1294,7 @@ const RenderQuestions = () => {
        </Group>
       </MediaQuery>
     </InputWrapper>
+    </Card>
     )
   }
   
@@ -1020,11 +1308,11 @@ const RenderQuestions = () => {
     }
   }
   
-  const handlePolygon = (id, p) => {
+  const handlePolygon = (id, p, v, pid) => {
     const Map = ReactMapboxGl({
       accessToken: accessToken,
     });
-  
+    const [hidden, setHidden] = useState(p);
     const [lat1, setLat1] = useState(-1.234);
     const [lng1, setLng1] = useState(36.567);
     const [acc1, setAcc1] = useState(0);
@@ -1040,6 +1328,27 @@ const RenderQuestions = () => {
     let item = forms[idx];
   
     let arr = [];
+
+    const skipCheck = () => {
+      if(p){
+        let idx = answers.findIndex((obj => obj.id === pid));
+        if(idx !== -1){
+          if(answers[idx].response === v){
+            setHidden(false);
+          } else {
+            setHidden(true);
+          }
+        }
+      }
+    }
+    React.useEffect(() => {
+      const timer = setInterval(function(){skipCheck()}, 500);
+
+      return () => {
+        clearInterval(timer);
+      }
+
+    }, []);
   
     const handleGPS = () => {
       if(navigator.geolocation){
@@ -1084,6 +1393,7 @@ const RenderQuestions = () => {
     }
   
     return (
+      <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
       <Group position='right' mb={10}>
       {polygon.length > 2 ? <ActionIcon title='Close Polygon' onClick={() => {lockCoordinate()}}><Lock color='red' size={30} /></ActionIcon>
@@ -1145,15 +1455,14 @@ const RenderQuestions = () => {
        </Group>
       </MediaQuery>
     </InputWrapper>
+    </Card>
     )
   }
 
   const items = forms.map((item, index) => (
-    <Card key={item.id} shadow='md' className={classes.maincard}>
+    <div  key={item.id} className={classes.maincard} >
       {item.type == 1 ? (
-        <Card>
-            {handleQuestion(item.question.questionType, item.id, item.parent)}
-        </Card>
+        handleQuestion(item.question.questionType, item.id, item.parent, item.parentValue, item.parentID)
       ) : item.type == 2 ? (
         <Card mt={20} style={{borderLeftWidth: 5, borderLeftColor: obj.Color}} >
                   <Text mb={10}>{item.question.title}</Text>
@@ -1173,7 +1482,7 @@ const RenderQuestions = () => {
             <Text color='gray' ml='md' mt='md' mb={20}>{item.description}</Text>
         </Card>
       )}
-    </Card>
+    </div>
   ));
 
   return (

@@ -788,16 +788,7 @@ export default function AppShellDemo() {
       polygonLastKnownLocation: false,
       polygonCustomTile: true
 
-    }, position: pos, linked:false, parent:link_id == null ? false : true, parentID: link_id, linked_parameters: null, linked_question: null, linked_position: null, type: 1};
-
-    if(link_id !== null && link_id !== undefined){
-      let idx = forms.findIndex((obj => obj.id == link_id));
-      let q = forms[idx];
-      
-      q.linked_question = id;
-      q.linked_parameters = params;
-      q.linked_position = pos;
-    }
+    }, position: pos, linked:false, parent:link_id == null ? false : true, parentID: link_id, parentValue: params, linked_parameters: null, linked_question: null, linked_position: null, type: 1};
     
     setForms(prevForms => [...prevForms, chunk]);
   }
@@ -814,14 +805,30 @@ export default function AppShellDemo() {
   }
 
   const linkControls = (id) => {
-    let option = linkedRadioOptions(id);
-    const [selected, setSelected] = useState('');
+    let option1 = linkedRadioOptions(id);
+    let option = []
+
+    if(option1.length > 0){
+      for(let i=0; i<option1.length; i++){
+        let chunk = {label: option1[i].label, value: option1[i].label}
+        option.push(chunk);
+      }
+    }
+    const [selected, setSelected] = useState(option[0].label);
 
     return (
           <>
-          <Text>Show a question if response is:</Text>
-          <Select value={selected} onChange={(val) => {setSelected(val)}}  data={option} />
-          <Button variant='subtle'  color='dark' onClick={() => {createNewQuestion(id, selected)}}>Create the question</Button>
+          <Group position='left'>
+          <Text>Create & show a question if response is:</Text>
+          </Group>
+            <Group position='center'>
+            <Select variant='unstyled' value={selected} onChange={(val) => {setSelected(val)}}  data={option} />
+            </Group>
+          <Group position='right'>
+          <ActionIcon  onClick={() => {createNewQuestion(id, selected)}} >
+            <CirclePlus size={40} color={state.Color} />
+          </ActionIcon>
+          </Group>
           </>
     )
   }
@@ -3142,7 +3149,7 @@ export default function AppShellDemo() {
                         </Group>
                         </Group>
                       </Card>
-            ): item.type == 2 ? (
+            ) : item.type == 2 ? (
               <Card className={classes.item} shadow={'sm'}>
                                         <div {...provided.dragHandleProps} className={classes.dragHandle}>
                           {state.length > 1 ? (<GripVertical size={18} />) : null}
@@ -3164,6 +3171,9 @@ export default function AppShellDemo() {
               <Card shadow={'sm'} >
 
               </Card>
+            ) : item.type == 6 ? (
+              <>
+              </>
             ) : (
               <Card className={classes.item} shadow={'sm'} >
                                         <div {...provided.dragHandleProps} className={classes.dragHandle}>
@@ -3177,7 +3187,7 @@ export default function AppShellDemo() {
           <Divider />
           {item.linked ? (
             <>
-            <Group style={{width: '100%'}}  my={20} mb={20} position='center' >
+            <Group style={{width: '100%'}}  my={20} mb={20} position='apart' >
            { linkControls(item.id) }
             </Group>
           <Divider />
