@@ -143,51 +143,6 @@ import { IconArrowLeft, IconArrowRight, IconHelp } from '@tabler/icons';
         id: 1,
         title: 'New',
         template: <NewTemplate />
-      },
-      {
-        id: 2,
-        title: 'H',
-        template: <NewTemplate />
-      },
-      {
-        id: 3,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 4,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 5,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 6,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 7,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 8,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 9,
-        title: 'New',
-        template: <NewTemplate />
-      },
-      {
-        id: 10,
-        title: 'New',
-        template: <NewTemplate />
       }
     ])
 

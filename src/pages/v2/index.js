@@ -47,6 +47,11 @@ import {
   ScrollArea,
   Card,
   Modal,
+  ThemeIcon,
+  JsonInput,
+  Center,
+  Popover,
+  CloseButton,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
 import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut } from 'tabler-icons-react';
@@ -72,6 +77,9 @@ var PieChart = require('react-d3-components').PieChart;
 import 'mapbox-gl/dist/mapbox-gl.css';
 import LoaderCard from 'components/loaders/bolt';
 import Pin from 'components/pin';
+import dynamic from "next/dynamic";
+
+const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false });
 
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 
@@ -346,6 +354,7 @@ function Dashboard(){
     const [item, setItems] = useState([]);
     const [visopen, setVisOpen] = useState(false);
     const [query2, setQuery2] = useState('');
+    const [paper, setPaper] = useState(true);
     const [menuopen, setMenuOpen] = useState({
       form_id: null,
       state: false
@@ -371,7 +380,7 @@ function Dashboard(){
 
 
     const navlinks = [
-      { icon: Database, label: 'Forms', href: '/v2/', notifications: userforms.length },
+      { icon: FileDatabase, label: 'Forms', href: '/v2/', notifications: userforms.length },
       { icon: Tool, label: 'New Form',  href: '/v2/build/' },
       { icon: ChartBar, label: 'Charts', href: '/v2/create-charts/' },
       { icon: LayoutDashboard, label: 'Dashboards', href: '/v2/create-dashboards/'},
@@ -397,7 +406,7 @@ function Dashboard(){
           <span className={classes.mainLinkText}>{link.label}</span>
         </div>
         {link.notifications && (
-          <Badge size="sm" variant="filled" className={classes.mainLinkBadge}>
+          <Badge size="sm" variant="filled" color='yellow' className={classes.mainLinkBadge}>
             {link.notifications}
           </Badge>
         )}
@@ -468,229 +477,6 @@ function Dashboard(){
       }
     }, [ctx]);
 
-    const handleResponse = (response, type) => {
-      switch(type){
-        case 'Short Answer':
-          return responseShortAnswer(response);
-
-        case 'Paragraph':
-          return responseParagraph(response);
-
-        case 'Multiple Choice':
-          return responseMultipleChoice(response);
-
-        case 'Checkbox':
-          return responseCheckbox(response);
-
-        case 'Dropdown':
-          return responseDropdown(response);
-
-        case 'File Upload':
-          return responseFileUpload(response);
-
-        case 'Linear Scale':
-          return responseLinearScale(response);
-
-        case 'Date':
-          return responseDate(response);
-
-        case 'Time':
-          return responseTime(response);
-
-        case 'Point':
-            return responsePoint(response);
-
-        case 'Polyline':
-            return responsePolyline(response);
-
-        case 'Polygon':
-            return responsePolygon(response);
-
-        default:
-          console.log('undefined');
-      }
-    }
-
-    const responseShortAnswer = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responseParagraph = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responseMultipleChoice = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responseDropdown = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responseCheckbox = (res) => {
-      return(
-        <Group grow>
-          {res.map((item, index) => {
-            return (
-              <Text align='center' key={index} >{item}</Text>
-            )
-          })}
-        </Group>
-      )
-    }
-
-    const responseFileUpload = (res) => {
-      return (
-        <Text >
-            {res !== null ? res.map((item, index) => {
-              return (
-                <Anchor size='xs' key={index}>{item.path}</Anchor>
-              )
-            }) : (
-              <Text size='xs'>null</Text>
-            )}
-        </Text>
-      )
-    }
-
-    const responseLinearScale = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responseDate = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responseTime = (res) => {
-      return (
-        <Text align='center'>{res}</Text>
-      )
-    }
-
-    const responsePoint = (item) => {
-      console.log(item);
-      if(item !== null ){
-        return (
-          <Group position='center' >
-          <Text>{item.latitude + ','+item.longitude}</Text>
-        </Group>
-        )
-      }
-    }
-
-    const handleItemResponse = (res) => {
-      return (
-        <Text size='xs' >
-          [
-       {res !== null && res.map((item, index) => {
-          return (
-            <span key={index} >{JSON.stringify(item)},</span>
-          )
-        })}
-          ]
-</Text>
-      )
-    }
-
-    const responsePolyline = (res) => {
-      return (
-        res.map((item, idx) => {
-          if(item.coords !== undefined){
-            return (
-              <div key={idx}>
-              <Text>{"Latitude:"+item.coords.latitude}</Text>
-              <Text>{"Longitude:"+item.coords.longitude}</Text>
-              <Text>{"Altitude:"+item.coords.altitude}</Text>
-              <Text>{"Accuracy:"+item.coords.accuracy}</Text>
-            </div>
-            )
-          }
-        })
-      )
-    }
-
-    const responsePolygon = (res) => {
-      return (
-        res.map((item, idx) => {
-          if(item.coords !== undefined){
-            return (
-              <div key={idx}>
-              <Text>{"Latitude:"+item.coords.latitude}</Text>
-              <Text>{"Longitude:"+item.coords.longitude}</Text>
-              <Text>{"Altitude:"+item.coords.altitude}</Text>
-              <Text>{"Accuracy:"+item.coords.accuracy}</Text>
-            </div>
-            )
-          }
-        })
-      )
-    }
-
-    const VisualizeGeometryData = () => {
-      const [data, setData] = useState([]);
-      const Map = ReactMapboxGl({
-        accessToken: accessToken,
-      });
-
-      useEffect(() => {
-        for(let i=0; i<response.length; i++){
-          let item = response[i];
-  
-          for(let k=0; k<item.response.length; k++){
-            let obj = item.response[k];
-  
-            if(obj.questionType === 'Point'){
-              let chunk = item.response[k].response;
-  
-              if(chunk !== null){
-                setData(prevData => [...prevData, chunk]);
-              }
-            }
-          }
-        }
-      }, []);
-
-      return (
-
-                <Map
-    style="mapbox://styles/mapbox/dark-v10"
-    containerStyle={{
-      height: height - 250,
-      width: width - 250
-    }}
-    center={data.length > 0 ? [data[0].longitude, data[0].latitude] : [36.567, -1.234]}
-    zoom={data.length > 0 ? [14] : [0]}
-  >
-
-    {data.length > 0 ? (
-      data.map((item, index) => {
-        return (
-          <Layer key={index} type='symbol'>
-          <Marker
-        coordinates={[item.longitude, item.latitude]}
-        anchor="bottom">
-          <p>Hello</p>
-      </Marker>
-          </Layer>
-        )
-      })
-    ) : null}
-
-  </Map> 
-      )
-    }
     const sortArr = (arr) => {
       return arr.sort((a, b) => {
         return a.position - b.position;
@@ -711,6 +497,14 @@ function Dashboard(){
       const [geomtype, setGeomType] = useState('');
       const [coords, setCoords] = useState(null);
       const [center, setCenter] = useState([])
+
+      const [datatheme, setDataTheme] = useState("threezerotwofour");
+      const [objectsize, setObjectSize] = useState(true);
+      const [editable, setEditable] = useState(true);
+      const [deletable, setDeletable] = useState(true);
+      const [clonable, setClonable] = useState(true);
+      const [collapsed, setCollapsed] = useState(true);
+      const [datatypes, setDatatypes] = useState(true);
       const { colorScheme, toggleColorScheme } = useMantineColorScheme();
       const Map = ReactMapboxGl({
         accessToken: accessToken,
@@ -749,220 +543,17 @@ function Dashboard(){
 
       const w = 200;
 
-      const showImage = (img) => {
-        setImage("https://geopsycollect.s3.us-east-2.amazonaws.com/"+img);
-        setImageModal(true);
-
-      }
-
       const hideImage = () => {
         setImage("")
         setImageModal(false);
       }
 
-      const handleGeom = (geometryType, x) => {
-        setGeomType(geometryType);
-        if(geometryType === 'Polyline' || geometryType === 'Polygon'){
-          let points = [];
-          
-          for(let i=0; i<x.length; i++){
-            let point = [x[i].longitude, x[i].latitude];
-            points.push(point);
-          }
-          setCoords(points)
-          setCenter(points[0]);
-        } else {
-          setCoords(x)
-          setCenter([x.longitude, x.latitude])
-        }
-
-
-        setTimeout(function(){setGeomModal(true)}, 1000)
-      }
 
       const hideMap = () => {
         setGeomModal(false);
         setGeomType('');
         setCoords(null);
       }
-
-      const HandleCoords = (props) => {
-
-        switch(props.type){
-          case 'Point':
-            return (
-              <Map style="mapbox://styles/mapbox/dark-v10" containerStyle={{
-                height: '100%',
-                width: '100%'
-              }}
-              center={[props.coords.longitude, props.coords.latitude]}
-              zoom={[20]}
-              >
-                <Marker coordinates={[props.coords.longitude, props.coords.latitude]}>
-                  <Pin />
-                </Marker>
-              </Map>
-            );
-
-          default:
-            return null;
-        }
-      }
-
-      const createReadWriteGraph = async () => {
-        let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
-        let parseTime = d3.timeParse("%Y-%m-%d");
-        data.forEach((d) => {
-          d.date = parseTime(d.date);
-          d.value = +d.value;
-        });
-
-        var margin = { top: 10, right: 10, bottom: 20, left: 20 },
-        width =  w - margin.left - margin.right,
-        height = 150 - margin.top - margin.bottom;
-
-        const svg1 = d3.select(".svg-read-write")
-        svg1.selectAll("*").remove()
-        var x = d3.scaleTime().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
-        x.domain(d3.extent(data, (d) => { return d.date; }));
-        y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg1.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x));
-
-        var valueLine = d3.line()
-        .x((d) => { return x(d.date); })
-        .y((d) => { return y(d.value); });
-        svg1.append("path")
-        .data([data])
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1.5)
-        .attr("d", valueLine)
-      }
-
-      const createConnectionsGraph = async () => {
-        d3.select("svg").remove();
-        let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
-        let parseTime = d3.timeParse("%Y-%m-%d");
-        data.forEach((d) => {
-          d.date = parseTime(d.date);
-          d.value = +d.value;
-        });
-
-        var margin = { top: 10, right: 10, bottom: 20, left: 20 },
-        width =  w - margin.left - margin.right,
-        height = 150 - margin.top - margin.bottom;
-
-        const svg2 = d3.select(".svg-connections")
-        svg2.selectAll("*").remove()
-
-        var x = d3.scaleTime().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
-        x.domain(d3.extent(data, (d) => { return d.date; }));
-        y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg2.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x));
-
-        var valueLine = d3.line()
-        .x((d) => { return x(d.date); })
-        .y((d) => { return y(d.value); });
-        svg2.append("path")
-        .data([data])
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1.5)
-        .attr("d", valueLine)
-      }
-
-      const createInOutGraph = async () => {
-        d3.select("svg").remove();
-        let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
-        let parseTime = d3.timeParse("%Y-%m-%d");
-        data.forEach((d) => {
-          d.date = parseTime(d.date);
-          d.value = +d.value;
-        });
-
-        var margin = { top: 10, right: 10, bottom: 20, left: 20 },
-        width =  w - margin.left - margin.right,
-        height = 150 - margin.top - margin.bottom;
-
-        const svg3 = d3.select(".svg-in-out")
-        svg3.selectAll("*").remove()
-
-        var x = d3.scaleTime().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
-        x.domain(d3.extent(data, (d) => { return d.date; }));
-        y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg3.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x));
-
-        var valueLine = d3.line()
-        .x((d) => { return x(d.date); })
-        .y((d) => { return y(d.value); });
-        svg3.append("path")
-        .data([data])
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1.5)
-        .attr("d", valueLine)
-      }
-
-      const createSizeGraph = async () => {
-        d3.select("svg").remove();
-        let data = await d3.csv('https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv')
-        let parseTime = d3.timeParse("%Y-%m-%d");
-        data.forEach((d) => {
-          d.date = parseTime(d.date);
-          d.value = +d.value;
-        });
-
-        var margin = { top: 10, right: 10, bottom: 20, left: 20 },
-        width =  w - margin.left - margin.right,
-        height = 150 - margin.top - margin.bottom;
-
-        const svg4 = d3.select(".svg-size")
-        svg4.selectAll("*").remove()
-
-        var x = d3.scaleTime().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
-        x.domain(d3.extent(data, (d) => { return d.date; }));
-        y.domain([0, d3.max(data, (d) => { return d.value; })]);
-        svg4.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x));
-
-        var valueLine = d3.line()
-        .x((d) => { return x(d.date); })
-        .y((d) => { return y(d.value); });
-        svg4.append("path")
-        .data([data])
-        .attr("class", "line")
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 1.5)
-        .attr("d", valueLine)
-      }
-
-      const clipboard = useClipboard({timeout: 2000});
-
-      const copyFormId = (id) => {
-        clipboard.copy("https://collect-v2.vercel.app/"+id);
-      }
-
-      React.useEffect(() => {
-        createReadWriteGraph();
-        createConnectionsGraph();
-        createInOutGraph();
-        createSizeGraph();
-      }, []);
 
       const parseArr = (arr) => {
         let parsedArr = [];
@@ -1013,15 +604,6 @@ function Dashboard(){
         downloadAnchorNode.remove();
       }
 
-      const downloadMinifiedJSON = () => {
-        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(response));
-        var downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href",     dataStr);
-        downloadAnchorNode.setAttribute("download", "GeoPsyCollect-"+new Date()+".json");
-        document.body.appendChild(downloadAnchorNode); // required for firefox
-        downloadAnchorNode.click();
-        downloadAnchorNode.remove();
-      }
 
       const deleteForm = async (form_id) => {
         const body = {
@@ -1142,18 +724,17 @@ function Dashboard(){
           asideOffsetBreakpoint="sm"
           fixed
           navbar={
-            <Navbar style={{left: 0}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 200}}>
-        <Navbar.Section className={classes.section}>
+            <Navbar style={{left: 0, top: 0, height: height}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 200}}>
+        <Navbar.Section className={classes.section} >
         <UnstyledButton className={classes.user}>
       <Group position='apart' >
         <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
 
         <div style={{ flex: 1 }}>
-          <Text size="sm" weight={500}>
-            {firstname + ' ' + lastname}
+        <Text mb={10} size="sm" weight={500}>
+            {firstname}
           </Text>
-
-            <Code>V1.0.0.0</Code>
+          <Badge color='red' >Beta Version</Badge>
         </div>
 
       </Group>
@@ -1166,18 +747,18 @@ function Dashboard(){
         onChange={(e) => {setQuery2(e.currentTarget.value)}}
         icon={<Search size={12} />}
         rightSectionWidth={70}
-        rightSection={<Code className={classes.searchCode}>Ctrl + K</Code>}
         styles={{ rightSection: { pointerEvents: 'none' } }}
+        rightSection={<Search />}
         mb="sm"
       />
-        <Navbar.Section className={classes.section}>
+        <Navbar.Section mt={20} className={classes.section}>
         <div className={classes.mainLinks}>{mainLinks}</div>
       </Navbar.Section>
             </Navbar>
           }
 
           header={
-            <Header className={classes.header}  height={50} p="md">
+            <Header className={classes.header} style={{left: 200,}}  height={50} p="md">
               <div className={classes.inner}>
               <Group>
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
@@ -1189,31 +770,13 @@ function Dashboard(){
                     mr="xl"
                   />
                 </MediaQuery>
-                <Image style={{height: 40}} src={serverRack} loading="lazy" alt="sever-rack" />
+                <Title color='white' order={4}>Collect&reg;</Title>
                 </Group>
                 <Group>
                 <Group ml={50} spacing={5} className={classes.links}>
-                <MediaQuery smallerThan="md" styles={{ display: 'none' }}>
-            <Button className={classes.headerLink} variant='white'  rightIcon={<ChevronDown size={15}  />}>
-              Access Manager
-            </Button>
-            </MediaQuery>
-            <MediaQuery smallerThan="md" styles={{ display: 'none' }}>
-            <Button className={classes.headerLink} variant='white' color={'dark'} >
-              Billing
-            </Button>
-            </MediaQuery>
-            <Menu onClose={() => {setDrawer(false)}} size='xl' control={<Button onClick={() => {setDrawer(!drawer)}} className={classes.headerLink} variant='white' color={'dark'} rightIcon={drawer ? <ChevronUp size={15}  /> : <ChevronDown size={15}  />}>
-              Account
-            </Button>}>
-            <Group direction='column' mt={20}>
-              <Text style={{marginLeft: 'auto', marginRight: 'auto'}}>{firstname + ' ' + lastname} </Text>
-              <Button mb={10} fullWidth color={theme.colors.gray[5]}>Manage your Collect account</Button>
-              <Text  size='xs' style={{marginLeft: 'auto', marginRight: 'auto'}}>OR </Text>
-              <Button component='a' href='/api/logout' variant='outline' mb={10} fullWidth color='red'>Sign Out</Button>
-            </Group>
-            </Menu>
-
+                    <Button color='yellow' onClick={() => {toggleColorScheme()}} size='xs' radius={40}>
+                      Toggle Theme
+                    </Button>
               </Group>
                 </Group>
               </div>
@@ -1223,10 +786,18 @@ function Dashboard(){
             {active === 'aggregate' ? (
               cluster === '' ? (
                 <>
-              <Group mt={10}>
+              <Group position='apart' mt={10}>
               <Title order={2} className={classes.title} align="center">
-               Form Clusters
+               Forms
             </Title>
+            <Group position='right' mb={10}>
+            <Button color='yellow'  component='a' href='/v2/build' title='Add New Form' radius={28}>
+                  <Plus />
+                </Button>
+                <Anchor href='#'>
+                  Learn more about XLSForms
+                </Anchor>
+            </Group>
               </Group>
               <Group mt={10} grow>
                 <TextInput onChange={(e) => {setQuery(e.currentTarget.value)}} value={query} placeholder='Search forms...' rightSection={<Search />} />
@@ -1236,6 +807,18 @@ function Dashboard(){
                               
                                  (
                                   <>
+                                      {paper ? (
+                                    <Paper mb={10} mt={20} ml="5%" mr={"5%"} shadow="xs" p="md">
+                                    <Group position='apart' mb={10}>
+                                    <Text color='yellow' >Google Earth Plugin</Text>
+                                    <CloseButton onClick={() => {setPaper(false)}} />
+                                    </Group>
+                                    <Text>
+                                      Hey there, we are rolling out Google Earth Engine plugin for Collect. <Anchor href='#'>Learn more about how researchers like
+                                      you are using GEE to perform real-time spatial analysis here.</Anchor>
+                                    </Text>
+                                  </Paper>
+                                  ) : null}
                                   <Table mt={20} highlightOnHover >
                                     <thead>
                                       <tr >
@@ -1303,207 +886,145 @@ function Dashboard(){
       </ActionIcon>
     </Group>
     <Group>
-    <Title order={2} className={classes.title} align="center">
+    <Title mb={20} order={2} className={classes.title} align="center">
     {cluster}
   </Title>
   </Group>
-    <Tabs active={activetab} onTabChange={setActiveTab} position='apart' mt={10} >
-      <Tabs.Tab label="Overview" value={"Overview"} >
-      <Paper radius={'lg'} style={{}} mt={20} shadow='md' p={'md'} >
-                                  <Group position='apart' className={classes.group} >
-                                  <Group position='left' mb={20} >
-                                    <Anchor size='xs'  href='#'>
-                                      {cluster}
-                                    </Anchor>
-                                    <Button onClick={() => {copyFormId(userforms[0].form_id)}} size='xs'  radius={20}  variant='outline'>
-                                      {clipboard.copied ? "Copied" : "Copy URL"}
-                                    </Button>
-                                    <Button onClick={() => {setActiveTab(2)}} size='xs'  radius={20} variant='outline'>
-                                      Browse Response
-                                    </Button>
-                                    <Button size='xs'  radius={20} variant='outline'>
-                                      <Menu control={<ActionIcon><Dots /></ActionIcon>} >
-                                        <Menu.Item component='a' href={`/${clusterid}`} target="_blank" >Open Form</Menu.Item>
-                                      </Menu>
-                                    </Button>
-                                    </Group>
-                                    <Group position='right' mb={20}>
-                                      <Badge>Shared with me</Badge>
-                                    </Group>
-                                  </Group>
-                                  <Group position='apart'>
-                                    <Group direction='column' >
-                                      <Group direction='row' position='apart'>
-                                      <Group position='left'>
-                                      <Text size='xs' >R: 0</Text>
-                                      </Group>
-                                      <Group position='right'>
-                                      <Tooltip label="GeoPsy Collect read and write operations to the cluster">
-                                        <ActionIcon>
-                                          <InfoCircle size={14} />
-                                        </ActionIcon>
-                                      </Tooltip>
-                                      </Group>
-                                      </Group>
-                                      <Text size='xs' >W: 0</Text>
-                                      <svg width="200px" height="150px" className="svg-read-write" />
-                                    </Group>
-                                   <Group direction='column'>
-                                    <Group mb={30} direction='row' position='apart'>
-                                    <Group position='left'>
-                                      <Text size='xs' >Connections: 0</Text>
-                                      </Group>
-                                      <Group position='right'>
-                                      <Tooltip label="The number of active connections to the cluster">
-                                        <ActionIcon>
-                                          <InfoCircle size={14} />
-                                        </ActionIcon>
-                                      </Tooltip>
-                                      </Group>
-                                    </Group>
-                                    <svg width="200px" height="150px" className="svg-connections" />
-                                   </Group>
-                                   <Group direction='column'>
-                                    <Group direction='column'>
-                                    <Group direction='row'>
-                                    <Text size='xs' >In: 0 b/s</Text>
-                                    <Tooltip label="Network bytes send to/from the cluster">
-                                        <ActionIcon>
-                                          <InfoCircle size={14} />
-                                        </ActionIcon>
-                                      </Tooltip>
-                                    </Group>
-                                    <Text size='xs' >Out: 0 b/s</Text>
-                                    </Group>
-                                    <svg width="200px" height="150px" className="svg-in-out" />
-                                   </Group>
-                                   <Group direction='column'>
-                                   <Group mb={30} direction='row' position='apart'>
-                                    <Group position='left'>
-                                      <Text size='xs' >Data Size: 0 MB</Text>
-                                      </Group>
-                                      <Group position='right'>
-                                      <Tooltip label="Logical disk size">
-                                        <ActionIcon>
-                                          <InfoCircle size={14} />
-                                        </ActionIcon>
-                                      </Tooltip>
-                                      </Group>
-                                    </Group>
-                                    <svg width="200px" height="150px" className="svg-size" />
-                                    </Group>
-                                  </Group>
-                                </Paper>
-      </Tabs.Tab>
-      <Tabs.Tab label="Real Time">Real Time</Tabs.Tab>
-      <Tabs.Tab label="Response" value={"Response"}>
-        <Group mb={10} position='apart'>
-          <Group position='left'>
-          <Text color='dimmed'>TOTAL DOCUMENTS:<strong>{response.length}</strong></Text>
-          </Group>
-          <Group position='right'>
-          <Menu control={<Button disabled={response.length > 0 ? false : true} compact variant='subtle' leftIcon={<Download />}>Export</Button>}>
-            <Menu.Item onClick={() => {downloadCSV()}}>CSV</Menu.Item>
-            <Menu.Item onClick={() => {downloadJSON()}}>JSON</Menu.Item>
-          </Menu>
+      {response.length > 0 ? (
+              <>
+                <Group mb={20} position='apart'>
+                <Group position='left'>
+                <Text color='dimmed'>Total:<strong>{response.length}</strong></Text>
+                </Group>
+                <Group position='right'>
+                  <Select data={[
+                    {label: 'Apathy', value: 'apathy'},
+                    {label: 'Apathy:inverted', value: 'apathy:inverted'},
+                    {label: 'Ashes', value: 'ashes'},
+                    {label: 'Bespin', value: 'bespin'},
+                    {label: 'brewer', value: 'brewer'},
+                    {label: 'bright', value: 'bright'},
+                    {label: 'bright:inverted', value: 'bright:inverted'},
+                    {label: 'chalk', value: 'chalk'},
+                    {label: 'codeschool', value: 'codeschool'},
+                    {label: 'colors', value: 'colors'},
+                    {label: 'eighties', value: 'eighties'},
+                    {label: 'embers', value: 'embers'},
+                    {label: 'flat', value: 'flat'},
+                    {label: 'google', value: 'google'},
+                    {label: 'grayscale', value: 'grayscale'},
+                    {label: 'grayscale:inverted', value: 'grayscale:inverted'},
+                    {label: 'greenscreen', value: 'greenscreen'},
+                    {label: 'harmonic', value: 'harmonic'},
+                    {label: 'hopscotch', value: 'hopscotch'},
+                    {label: 'isotope', value: 'isotope'},
+                    {label: 'marrakesh', value: 'marrakesh'},
+                    {label: 'mocha', value: 'mocha'},
+                    {label: 'monokai', value: 'monokai'},
+                    {label: 'ocean', value: 'ocean'},
+                    {label: 'paraiso', value: 'paraiso'},
+                    {label: 'pop', value: 'pop'},
+                    {label: 'railscasts', value: 'railscasts'},
+                    {label: 'default', value: 'rjv-default'},
+                    {label: 'shapeshifter', value: 'shapeshifter'},
+                    {label: 'shapeshifter:inverted', value: 'shapeshifter:inverted'},
+                    {label: 'solarized', value: 'solarized'},
+                    {label: 'summerfruit', value: 'summerfruit'},
+                    {label: 'summerfruit:inverted', value: 'summerfruit:inverted'},
+                    {label: 'threezerotwofour', value: 'threezerotwofour'},
+                    {label: 'tomorrow', value: 'tomorrow'},
+                    {label: 'tube', value: 'tube'},
+                    {label: 'twilight', value: 'twilight'}
+                  ]} value={datatheme} onChange={(val) => {setDataTheme(val)}} placeholder="Data Theme" />
+                <Checkbox checked={objectsize} onChange={(e) => {setObjectSize(e.currentTarget.checked)}} label="Display Object Size" />
+                <Checkbox checked={editable} onChange={(e) => {setEditable(e.currentTarget.checked)}} label="Editable" />
+                <Checkbox checked={deletable} onChange={(e) => {setDeletable(e.currentTarget.checked)}} label="Deletable" />
+                <Checkbox checked={clonable} onChange={(e) => {setClonable(e.currentTarget.checked)}} label="Clonable" />
+                <Checkbox checked={collapsed} onChange={(e) => {setCollapsed(e.currentTarget.checked)}} label="Collapsed" />
+                <Checkbox checked={datatypes} onChange={(e) => {setDatatypes(e.currentTarget.checked)}} label="Show Data types" />
+                <Menu control={<Button disabled={response.length > 0 ? false : true} compact variant='subtle'>Export</Button>}>
+                  <Menu.Item onClick={() => {downloadCSV()}}>CSV</Menu.Item>
+                  <Menu.Item onClick={() => {downloadJSON()}}>JSON</Menu.Item>
+                </Menu>
+                </Group>
+              </Group>
+              
+          <ScrollArea style={{height: height - 250  }} >
+          {response.map((item, index) => {
+            return (
+              <Paper p="md" ml="10%" mr="10%" mb={15} key={index}>
+                <Group mb={5} grow>
+                <Text size='xs' ><strong>Response Id:</strong> <span style={{color: '#D9480F'}}>{'ObjectId("'+item.response_id+'")'}</span></Text>
+                <Group position='right'>
+                <ActionIcon title='Copy response' >
+                  <Copy size={15} />
+                </ActionIcon>
+                <ActionIcon title='Delete response'>
+                  <Trash size={15} />
+                </ActionIcon>
+                </Group>
+                </Group>
+                <DynamicReactJson theme={datatheme} onAdd={(e) => {
+                  console.log(e);
+                }} onDelete={deletable ?  e => {
+                          console.log(e);
+                      } : false} onEdit={editable ?  e => {
+                          console.log(e);
+                      } : false} enableClipboard={clonable} indentWidth={10} collapseStringsAfterLength={20} collapsed={collapsed} displayDataTypes={datatypes} displayObjectSize={objectsize} iconStyle='circle' src={sortArr(item.response)} />
+      
+                <Modal opened={imagemodal} onClose={() => {hideImage()}} centered withCloseButton={false}>
+                    <img src={image} width='100%' height='100%' />
+                </Modal>
+      
+                  <Modal  opened={geommodal} onClose={() => {hideMap()}} size='100%' >
+                  {coords !== null ? 
+                      <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
+                        height: height * 0.7,
+                        width: width * 0.95
+                      }}
+                      center={center}
+                      zoom={[16]}
+                      
+                      >
+                        {geomtype === 'Point' ? (
+                            <Marker coordinates={[coords.longitude, coords.latitude]}>
+                            <Pin />
+                          </Marker>
+                        ) : geomtype === 'Polyline' ? (
+                          coords.map((item, index) => {
+                            return (
+                              <Marker key={index} coordinates={item}>
+                              <Pin />
+                            </Marker>
+                            )
+                          })
+                        ) : (
+                          coords.map((item, index) => {
+                            return (
+                              <Marker key={index} coordinates={item}>
+                              <Pin />
+                            </Marker>
+                            )
+                          })
+                        )}
+                      </Map>
+                    : null}
+                  </Modal>
+                
+              </Paper>
+            )
+          })}
+      
+          </ScrollArea>
+                </>
+      ) : (
+        <Group position='center' my={height * 0.15}>
+          <Group direction='column'>
+          <Text >You have <strong>0</strong> responses recorded.</Text>
+          <span style={{marginLeft: 'auto', marginRight: 'auto'}} ><Button color="yellow" leftIcon={<Plus />} component='a' href={`/${clusterid}`} target='_blank' >Create Response</Button></span>
           </Group>
         </Group>
-        {!visopen ? (
-                  <ScrollArea style={{height: height - 250  }} >
-                  {response.map((item, index) => {
-                    return (
-                      <Paper p="md" ml="10%" mr="10%" mb={15} key={index}>
-                       <Group mb={5} grow>
-                       <Text size='xs' ><strong>Response Id:</strong> <span style={{color: '#D9480F'}}>{'ObjectId("'+item.response_id+'")'}</span></Text>
-                       <Group position='right'>
-                        <ActionIcon title='Copy response' >
-                          <Copy size={15} />
-                        </ActionIcon>
-                        <ActionIcon title='Delete response'>
-                          <Trash size={15} />
-                        </ActionIcon>
-                       </Group>
-                       </Group>
-                      {sortArr(item.response).map((item, index) => {
-                          return (
-                            item.questionType === 'Point' || item.questionType === 'Polyline' || item.questionType === 'Polygon' ? (
-                              <div key={index} style={{marginLeft: 20}}>
-                                                  <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}} >{'ObjectId("'+item.id+'")'}</span></Text>
-                                                  <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
-                                                  <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
-                                                  <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                                  <Text size='xs'><strong>More: </strong> <Anchor size='xs' href='#' onClick={() => {handleGeom(item.questionType, item.response)}} style={{color: "#339AF0"}} >View on map</Anchor></Text>
-                                                  <Text mb={10} size='xs'><strong>response: </strong> <span style={{color: "#339AF0"}} >{item.questionType === 'Point' ? JSON.stringify(item.response) : handleItemResponse(item.response)}</span></Text>
-                                                  </div>
-                            ) : item.questionType === 'File Upload' ? (
-                              <div key={index} style={{marginLeft: 20}}>
-                                                  <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
-                                                  <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
-                                                  <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
-                                                  <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                                  <Text mb={10} size='xs'><strong>response: </strong> <Anchor size='xs' onClick={() => {showImage(item.response)}} href="#" style={{color: "#339AF0"}} >{item.response}</Anchor></Text>
-                                                  </div>
-                            ) : (
-                              <div key={index} style={{marginLeft: 20}}>
-                                                  <Text size='xs'><strong>id: </strong> <span style={{color: "#339AF0"}}>{'ObjectId("'+item.id+'")'}</span></Text>
-                                                  <Text size='xs'><strong>position: </strong> <span style={{color: "#339AF0"}} >{item.position}</span></Text>
-                                                  <Text size='xs'><strong>question type: </strong> <span style={{color: "#339AF0"}} >{item.questionType}</span></Text>
-                                                  <Text size='xs'><strong>question: </strong> <span style={{color: "#339AF0"}} >{item.question}</span></Text>
-                                                  <Text mb={10} size='xs'><strong>response: </strong> <span contentEditable suppressContentEditableWarning style={{color: "#339AF0"}} >{item.response}</span></Text>
-                                                  </div>
-                            )
-                          )
-                        })}
-
-                        <Modal opened={imagemodal} onClose={() => {hideImage()}} centered withCloseButton={false}>
-                            <img src={image} width='100%' height='100%' />
-                        </Modal>
-
-                          <Modal  opened={geommodal} onClose={() => {hideMap()}} size='100%' >
-                          {coords !== null ? 
-                              <Map style="mapbox://styles/mapbox/streets-v9" containerStyle={{
-                                height: height * 0.7,
-                                width: width * 0.95
-                              }}
-                              center={center}
-                              zoom={[16]}
-                              
-                              >
-                                {geomtype === 'Point' ? (
-                                    <Marker coordinates={[coords.longitude, coords.latitude]}>
-                                    <Pin />
-                                  </Marker>
-                                ) : geomtype === 'Polyline' ? (
-                                  coords.map((item, index) => {
-                                    return (
-                                      <Marker key={index} coordinates={item}>
-                                      <Pin />
-                                    </Marker>
-                                    )
-                                  })
-                                ) : (
-                                  coords.map((item, index) => {
-                                    return (
-                                      <Marker key={index} coordinates={item}>
-                                      <Pin />
-                                    </Marker>
-                                    )
-                                  })
-                                )}
-                              </Map>
-                           : null}
-                          </Modal>
-                        
-                      </Paper>
-                    )
-                  })}
-        
-                  </ScrollArea>
-        ) : (
-          <VisualizeGeometryData />
-        )}
-      </Tabs.Tab>
-          </Tabs>
+      )}
     </>
   )
             ) : null }
@@ -1511,10 +1032,19 @@ function Dashboard(){
         </AppShell>
       );
     }
+
+    const preferredColorScheme = useColorScheme();
+    const [colorScheme, setColorScheme] = useState(preferredColorScheme);
+
+    const toggleColorScheme = (value) => setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+
+    React.useEffect(() => {
+        setColorScheme(preferredColorScheme);
+    }, [preferredColorScheme]);
     
     return (
-      <ColorSchemeProvider colorScheme={'light'}>
-      <MantineProvider theme={{ colorScheme: 'light' }} withGlobalStyles withNormalizeCSS>
+      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+      <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
         <ThemeProvider theme={theme}>
         <SEO
           title="Forms | Cloud: GeoPsy Collect Cloud"

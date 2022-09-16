@@ -21,7 +21,7 @@ export const uploadFile = (file, key) => {
     filesArr.push({position: key, file: file})
 }
 
-export const storeFiles = () => {
+export const storeFiles = async () => {
     console.log(filesArr);
     if(filesArr.length > 0){
         for(let i=0; i<filesArr.length; i++){

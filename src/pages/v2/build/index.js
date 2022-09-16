@@ -61,7 +61,20 @@ import { image } from 'd3';
 
 const colors = [ '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
 const color_strings = [ 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange'];
-const backgrounds = [{label: 'Light', value: '#foebf8'}, {label: 'Medium', value: '#e1d8f1'}, {label: 'Dark', value: '#d1c4e9'}, {label: 'Gray', value: '#f6f6f6'}]
+const backgrounds = [{label: 'Light', value: '#foebf8'}, {label: 'Medium', value: '#e1d8f1'}, {label: 'Gray', value: '#f6f6f6'}, {label: 'Dark 0', value: '#d1c4e9'}, {label: 'Dark 8', value: '#141517'},
+{label: 'Red', value: '#E03131'},
+{label: 'Pink', value: '#C2255C'},
+{label: 'Grape', value: '#9C36B5'},
+{label: 'Violet', value: '#6741D9'}, 
+{label: 'Indigo', value: '#3B5BDB'},
+{label: 'Blue', value: '#1971C2'},
+{label: 'Cyan', value: '#0C8599'},
+{label: 'Teal', value: '#099268'},
+{label: 'Green', value: '#2F9E44'},
+{label: 'Lime', value: '#66A80F'},
+{label: 'Yellow', value: '#F08C00'},
+{label: 'Orange', value: '#E8590C'}
+]
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -694,7 +707,7 @@ export default function AppShellDemo() {
   function makeFormId(){
     let length = 30;
     let result = '';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz<';
     let charactersLength = characters.length;
 
     for(let i=0; i<length; i++) {
@@ -3265,7 +3278,7 @@ export default function AppShellDemo() {
   const bgSwatches = backgrounds.map((item) => {
     return (
       <ColorSwatch title={item.label + ' ' + item.value} component="button" onClick={() => handleBgColors(item.value)} key={item.value} color={item.value} >
-      {bgchecked === item.color ? <Check size={13}  /> : null}
+      {bgchecked === item.value ? <Check size={13}  /> : null}
     </ColorSwatch>
     )
   });
@@ -3299,7 +3312,7 @@ export default function AppShellDemo() {
     <AppShell
     styles={{
       main: {
-        background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[1],
+        background: state.Background,
       },
     }}
       navbarOffsetBreakpoint="sm"
@@ -3380,6 +3393,12 @@ export default function AppShellDemo() {
               <Text my={20} weight={500}>Color</Text>
               <Group>
               {swatches}
+              </Group>
+            </Group>
+            <Group mb={30} spacing='xs' direction='column' ml={20} mr={20} grow>
+              <Text my={20} weight={500}>Background Color</Text>
+              <Group>
+              {bgSwatches}
               </Group>
             </Group>
             </Aside.Section>

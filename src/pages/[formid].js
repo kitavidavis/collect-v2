@@ -46,7 +46,7 @@ import {
 } from '@mantine/core';
 import { createStyles, Autocomplete, Group, } from '@mantine/core';
 import { useBooleanToggle, useDocumentTitle, useFocusWithin, useMediaQuery, useScrollLock } from '@mantine/hooks';
-import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck, Lock, LockOpen, AlertCircle, Pinned } from 'tabler-icons-react';
+import { ColorPicker, FileText, Eye, Search, CircleDot, DotsVertical, Palette, X, Edit, CirclePlus, FileImport, ClearFormatting, Photo, Video, LayoutList, Check, Selector, ChevronDown, AlignCenter, Checkbox, GridPattern, GridDots, Calendar, Clock, Line, Polygon, FileUpload, Location, Copy, Trash, LayoutGrid, Plus, ChevronUp, ArrowBack, Send, Stack, Gps, CircleCheck, Lock, LockOpen, AlertCircle, Pinned, Download, Printer } from 'tabler-icons-react';
 import { useListState } from '@mantine/hooks';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { GripVertical } from 'tabler-icons-react';
@@ -70,10 +70,7 @@ import MapIcon from 'components/marker.gif'
 import { pointRadial, timeFormatDefaultLocale } from 'd3';
 const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 
- 
-const colors = ['#101113', '#212529', '#C92A2A', '#A61E4D', '#862E9C', '#5F3DC4', '#364FC7', '#1864AB', '#0B7285', '#087F5B', '#2B8A3E', '#5C940D', '#E67700', '#D9480F']
-const color_strings = ['dark', 'gray', 'red', 'pink', 'grape', 'violet', 'indigo', 'blue', 'cyan', 'teal', 'green', 'lime', 'yellow', 'orange'];
-const backgrounds = [{label: 'Light', value: '#foebf8'}, {label: 'Medium', value: '#e1d8f1'}, {label: 'Dark', value: '#d1c4e9'}, {label: 'Gray', value: '#f6f6f6'}]
+const ref = React.createRef();
 
 const useStyles = createStyles((theme) => ({
   header: {
@@ -882,7 +879,7 @@ const RenderQuestions = () => {
       <Card hidden={hidden} mt={20} shadow='sm' >
       <InputWrapper required={item.question.required} label={item.question.defaultValue} description={item.question.descriptionValue}>
   
-  <Slider value={value} min={item.question.linearFrom} max={item.question.linearTo}  onChange={(val) => {handleChange(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
+  <Slider value={value} min={item.question.linearFrom} max={item.question.linearTo}  onChangeEnd={(val) => {handleChange(val)}} marks={[{value: item.question.linearFrom, label: item.question.linearLabel1}, {value: item.question.linearTo, label: item.question.linearLabel2}]} />
   
       </InputWrapper>
       </Card>
@@ -1107,10 +1104,13 @@ const RenderQuestions = () => {
       height: '100%',
       width: '100%'
     }}
-    zoom={lat1 !== null ? [20] : [0]}
-    center={lat1 !== null ? [lng1, lat1] : center}
+    zoom={lat1 !== "" ? [20] : [0]}
+    center={lat1 !== "" ? [lng1, lat1] : center}
+    onClick={(e) => {
+      console.log(e);
+    }}
   >
-  {lat1 !== null ? (
+  {lat1 !== "" ? (
     <Marker
     coordinates={[lng1, lat1]}
     anchor="bottom">
@@ -1529,6 +1529,16 @@ const submitAnswers = async (e) => {
   
   
 }
+
+const printPage = () => {
+  var prtContent = document.getElementById("questions");
+  var WinPrint = window.open('', '', 'left=0,top=0,width=800,height=900,toolbar=0,scrollbars=0,status=0');
+  WinPrint.document.write(prtContent.innerHTML);
+  WinPrint.document.close();
+  WinPrint.focus();
+  WinPrint.print();
+  WinPrint.close();
+}
     
   return (
       <MantineProvider
@@ -1565,11 +1575,17 @@ const submitAnswers = async (e) => {
           {done && !nullform && !submitted ? (
             <>
             <MediaQuery smallerThan='lg' styles={{display: 'none'}}>
-            <div style={{marginRight: 300, marginLeft: 300}}>
+              <div class='no-print' >
+            <Group  mr="md" mt={20} mb={20} position="right">
+              <ActionIcon onClick={() => {window.print()}} title='Print' >
+                <Printer color={obj.background == "#141517" ? "white" : "black"} />
+              </ActionIcon>
+            </Group>
+            <div   style={{marginRight: 300, marginLeft: 300}}>
               <form onSubmit={(e) => {submitAnswers(e)}}  >
               {obj.header_image !== null && obj.header_image !== undefined ? ( 
                 <Card mt={20} shadow={'sm'} >
-                        <Image  height={400} src={obj.header_image} />
+                        <Image  src={obj.header_image} />
                 </Card>
                ) : null}
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
@@ -1589,11 +1605,14 @@ const submitAnswers = async (e) => {
 
           {forms.length > 0 && obj.active ? (
             <>
+              <Group  ml="md" mt={20} position="left">
+              <Text color={obj.background == "#141517" ? "white" : null} >Section <strong>1</strong> of <strong>1</strong></Text>
+            </Group>
             <Group  ml="md" mt={20} position="left">
-              <Text ><strong>Note: </strong>Do not submit your passwords or any other personal information.</Text>
+              <Text color={obj.background == "#141517" ? "white" : null} ><strong>Note: </strong>Do not submit your passwords or any other personal information.</Text>
             </Group>
             <Group  ml="md" position="left">
-              <Text >This form violates our <Anchor>Terms</Anchor>? Report <Anchor>here</Anchor></Text>
+              <Text color={obj.background == "#141517" ? "white" : null} >This form violates our <Anchor>Terms</Anchor>? Report <Anchor>here</Anchor></Text>
             </Group>
             <Group ml="md" mt={20} position='left'>
             <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color} >Submit</Button>
@@ -1602,9 +1621,10 @@ const submitAnswers = async (e) => {
             ) : null}
 
             </form>
+            </div>
           </div>
             </MediaQuery>
-            <MediaQuery largerThan='md' styles={{display: 'none'}}>
+            <MediaQuery largerThan='md' styles={{display: 'none', visibility: 'hidden'}}>
             <div style={{marginRight: '1%', marginLeft: '1%'}}>
               <form >
           <Box mt={20} className={classes.wrapper} style={{borderTopWidth: 10, borderTopColor: obj.color, borderLeftWidth: 5, borderLeftColor: '#2f5496'}} >
@@ -1625,10 +1645,10 @@ const submitAnswers = async (e) => {
           {forms.length > 0 && obj.active ? (
             <>
             <Group  ml="md" mt={20}>
-              <Text ><strong>Note: </strong>Do not submit your passwords or any other personal information.</Text>
+              <Text color={obj.background == "#141517" ? "white" : null}><strong>Note: </strong>Do not submit your passwords or any other personal information.</Text>
             </Group>
             <Group  ml="md">
-              <Text >This form violates our <Anchor>Terms</Anchor>? Report <Anchor>here</Anchor></Text>
+              <Text color={obj.background == "#141517" ? "white" : null} >This form violates our <Anchor>Terms</Anchor>? Report <Anchor>here</Anchor></Text>
             </Group>
             <Group ml="md" mt={20} position='center'>
             <Button onClick={() => {submitAnswers()}} style={{backgroundColor: obj.color}}  color={obj.color} >Submit</Button>

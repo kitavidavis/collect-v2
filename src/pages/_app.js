@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Router from 'next/router';
 import { initGA, logPageView } from 'analytics';
 import 'assets/css/react-slick.css';
+import 'assets/css/page.css';
 import { MantineProvider } from '@mantine/core';
 
 
