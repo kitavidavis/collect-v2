@@ -26,6 +26,7 @@ export default function IndexPage() {
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
         <HeroImageBackground />
+        <Footer />
       </Layout>
     </ThemeProvider>
   );

@@ -7,7 +7,7 @@ const useStyles = createStyles((theme) => ({
     paddingTop: 280,
     paddingBottom: 230,
     backgroundImage:
-      'url(https://images.unsplash.com/photo-1573164713988-8665fc963095?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=980&q=80)',
+      'url(https://cdn.pixabay.com/photo/2018/07/15/11/27/online-3539412__340.png)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
 
@@ -95,15 +95,16 @@ export function HeroImageBackground() {
   const { classes, cx } = useStyles();
 
   return (
-    <div className={classes.wrapper} style={{height: '100%'}}>
+    <div className={classes.wrapper}>
       <Overlay color="#000" opacity={0.65} zIndex={1} />
 
       <div className={classes.inner}>
         <Title className={classes.title}>
-          Automated data collection for{' '}
+          Automated {' '}
           <Text component="span" inherit className={classes.highlight}>
-            spatial research
+            Data
           </Text>
+          {' '}Collection
         </Title>
 
         <Container size={640}>

@@ -25,15 +25,21 @@ import {
   ActionIcon,
   Title,
   Code,
+  Menu,
+  Grid,
+  Tooltip,
 } from '@mantine/core';
 import { ThemeProvider } from 'theme-ui';
-import { Moon, Sun, ChevronDown, ChartBar, Plus, LayoutDashboard, ArrowRight} from 'tabler-icons-react';
+import { Moon, Sun, ChevronDown, ChartBar, Plus, LayoutDashboard, ArrowRight, Edit, Settings, Palette, Link, BrandAndroid, X, DotsVertical, Photo} from 'tabler-icons-react';
 import theme from 'theme';
 import SEO from 'components/seo';
 import { useColorScheme, useViewportSize } from '@mantine/hooks';
 import { useStyles } from '..';
 import { useUser } from 'lib/hooks';
 import { IconArrowLeft, IconArrowRight, IconHelp } from '@tabler/icons';
+import ReactMapboxGl, { Layer, Feature, Marker, Source, GeoJSONLayer } from 'react-mapbox-gl';
+
+const accessToken = 'pk.eyJ1IjoiZGF2aXNraXRhdmkiLCJhIjoiY2w0c2x2NjNwMGRvbDNrbGFqYW9na2NtaSJ9.q5rs7WMJE8oaBQdO4zEAcg';
 
  function AppShellDemo() {
   const user = useUser({ redirectTo: "/auth/login"})
@@ -47,6 +53,10 @@ import { IconArrowLeft, IconArrowRight, IconHelp } from '@tabler/icons';
   const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   const {height, width} = useViewportSize();
+
+  const Map = ReactMapboxGl({
+    accessToken: accessToken,
+  });
 
   // dashboard details
   const [db, setDB] = useState({
@@ -134,176 +144,19 @@ import { IconArrowLeft, IconArrowRight, IconHelp } from '@tabler/icons';
     fetchResponse()
   }, [db.form_id])
 
-  const NewChart = () => {
-    const [title, setTitle] = useState('')
-    const [desc, setDesc] = useState('')
-    const [form_id, setFormId] = useState('');
-    const [templates, setTemplates] = useState([
-      {
-        id: 1,
-        title: 'New',
-        template: <NewTemplate />
-      }
-    ])
-
-    const NewTemplate = () => {
-      return (
-        <Card shadow='sm' p='lg' radius='md' withBorder>
-            <Card.Section>
-          </Card.Section>
-    
-          <Button leftIcon={<Plus />} variant="light" color="blue" fullWidth mt="md" radius="md">
-            Blank template
-          </Button>
-                </Card> 
-      )
-    }
-
-    const [step, setStep] = useState(1)
-
-    const storeData = () => {
-      setStep(1);
-    }
-
-
-    return (
-      step === 0 ? (
-        <Container size={width > 1000 ? width * 0.6 : width} my={10} >
-        <Anchor href="/v2/create-dashboards/">
-          <Center inline>
-            <IconArrowLeft size={14} />
-            <Box ml={5}>Back to main page</Box>
-          </Center>
-        </Anchor>
-        <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <Title
-        align="center"
-        sx={(theme) => ({ fontFamily: `Greycliff CF, ${theme.fontFamily}`, fontWeight: 900 })}
-      >
-        Dashboard details
-      </Title>
-      <Text color="dimmed" size="sm" align="center" mt={5} mb={10}>
-        Fill out the basic information below to get started.
-      </Text>
-        <TextInput label="Dashboard title" placeholder="" classNames={classes} value={title} onChange={(e) => {setTitle(e.currentTarget.value)}} required />
-
-        <TextInput style={{marginTop: 20}} label="Description" placeholder="optional" classNames={classes} value={desc} onChange={(e) => {setDesc(e.currentTarget.value)}} />
-
-        <Select
-        style={{ marginTop: 20, zIndex: 2 }}
-        data={forms}
-        value={form_id}
-        onChange={(val) => {setFormId(val)}}
-        placeholder="Pick one"
-        label="Source of data"
-        classNames={classes}
-        required
-      />
-
-      <Group position='right'>
-      <Button disabled={title == '' || form_id == '' ? true : false} onClick={() => {storeData()}}  mt="xl">
-        Continue
-      </Button>
-      </Group>
-      </Paper>
-      </Container>
-      ) : step === 1 ? (
-        <>
-        <MediaQuery smallerThan={'lg'} styles={{display: 'none'}}>
-        <SimpleGrid cols={4}>
-          {templates.map((item, index) => {
-            return <NewTemplate key={index} />
-          })}
-        </SimpleGrid>
-        </MediaQuery>
-
-          <MediaQuery largerThan={'md'} styles={{display: 'none'}}>
-          <SimpleGrid cols={2}>
-          {templates.map((item, index) => {
-            return <NewTemplate key={index} />
-          })}
-        </SimpleGrid>
-          </MediaQuery>
-          </>
-      ) : (
-        <Container>
-
-        </Container>
-      )
-    )
-  }
-
-  const ExistingCharts = () => {
-    return (
-      dashboards.length === 0 ? (
-        <>
-      <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-        <Title
-        align="center"
-        sx={(theme) => ({ fontFamily: `Greycliff CF, ${theme.fontFamily}`, fontWeight: 900 })}
-      >
-        You have 0 Dashboards
-      </Title>
-      <Text color="dimmed" size="sm" align="center" mt={5} mb={10}>
-        Dashboards are intuitive, visual means of displaying complex data. They narrate amazing stories 
-        curated by data scientists using charts, maps, and pictures. Click the button below to create
-        your first dashboard.
-        <Anchor href="#" size="sm" onClick={(event) => event.preventDefault()}>
-          Learn more about good dashboard designs
-        </Anchor>
-      </Text>
-      <Group my={50} position='center'><Button color='orange' onClick={() => {setNewCharts(true)}} leftIcon={<Plus />}>New Dashboard</Button></Group>
-
-      </Paper>
-        </>
-      ) : (
-        <SimpleGrid cols={4}>
-          {dashboards.map((dashboard, index) => {
-            return (
-              <Card key={index} shadow='sm' p='lg' radius='md' withBorder>
-              <Card.Section>
-            <Image
-              src="https://images.unsplash.com/photo-1527004013197-933c4bb611b3?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=720&q=80"
-              height={160}
-              alt="Norway"
-            />
-          </Card.Section>
-    
-          <Group position="apart" mt="md" mb="xs">
-            <Text weight={500}>Norway Fjord Adventures</Text>
-            <Badge color="pink" variant="light">
-              On Sale
-            </Badge>
-          </Group>
-    
-          <Text size="sm" color="dimmed">
-            With Fjord Tours you can explore more of the magical fjord landscapes with tours and
-            activities on and around the fjords of Norway
-          </Text>
-    
-          <Button variant="light" color="blue" fullWidth mt="md" radius="md">
-            Book classic tour now
-          </Button>
-                </Card> 
-            )
-          })}
-        </SimpleGrid>
-      )
-    )
-  }
 
   return (
     <AppShell
       styles={{
         main: {
-          background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+          background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : "white",
         },
       }}
       navbarOffsetBreakpoint="sm"
       asideOffsetBreakpoint="sm"
       fixed
       header={
-        <Header className={classes.header}  height={50} p="md">
+        <Header className={classes.header}  height={70} p="md">
               <div className={classes.inner}>
               <Group>
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
@@ -315,20 +168,19 @@ import { IconArrowLeft, IconArrowRight, IconHelp } from '@tabler/icons';
                     mr="xl"
                   />
                 </MediaQuery>
-                <LayoutDashboard className={classes.mainLinkIcon} />
-                <Text className={classes.mainLinkText} >Dashboard</Text>
+                <Title><Center><Box>Untitled Dashboard </Box><ActionIcon><Edit on size={15} /></ActionIcon></Center></Title>
                 </Group>
                 <Group>
-                <Group ml={50} spacing={5} className={classes.links}>
-                <MediaQuery smallerThan="md" styles={{ display: 'none' }}>
-            <Button onClick={() => {toggleColorScheme()}} leftIcon={theme.colorScheme === 'dark' ? <Sun /> : <Moon />} className={classes.headerLink} variant='white'  >
-              Toggle Theme
-            </Button>
-            </MediaQuery>
-
-            <ActionIcon>
-              <IconHelp  color='orange'/>
-            </ActionIcon>
+                <Group spacing={5} className={classes.links}>
+                <Menu size='xl' control={<ActionIcon>
+              <DotsVertical size={15} />
+            </ActionIcon>}>
+              <Menu.Item icon={<Palette />} >Change colors</Menu.Item>
+              <Menu.Item icon={<Link />} >Add nav links</Menu.Item>
+              <Menu.Item icon={<Photo />} >Add logo</Menu.Item>
+              <Menu.Item onClick={() => {toggleColorScheme()}} icon={theme.colorScheme === "dark" ? <Sun /> : <Moon />}>Toggle colorScheme</Menu.Item>
+              <Menu.Item icon={<X />} >Remove header</Menu.Item>
+            </Menu>
 
               </Group>
                 </Group>
@@ -337,8 +189,134 @@ import { IconArrowLeft, IconArrowRight, IconHelp } from '@tabler/icons';
       }
     >
     
-      {newcharts ? <NewChart /> :   <ExistingCharts />}
-      
+      <Grid columns={24}>
+        {/* ----- First panel, shows basic summary information in text form ---- */}
+        <Grid.Col span={4}>
+          <Box sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
+        padding: theme.spacing.xl,
+        borderRadius: theme.radius.md,
+        height: height - 100,
+      })} >
+        <Group position='apart'>
+          <Group position='left'>
+
+          </Group>
+          <Group position='right'>
+            <Tooltip label="Customize this panel">
+            <Menu control={<ActionIcon><DotsVertical size={15} /></ActionIcon>}>
+              <Menu.Item>Add Title</Menu.Item>
+              <Menu.Item>Add Description</Menu.Item>
+              <Menu.Item>Add Item</Menu.Item>
+              <Menu.Item>Remove this panel</Menu.Item>
+            </Menu>
+            </Tooltip>
+          </Group>
+        </Group>
+          </Box>
+        </Grid.Col>
+        {/*-----End of first panel --------------------*/}
+
+        {/*-----Second panel, map information and some statistical data ------*/}
+        <Grid.Col span={16}>
+        <Box  sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
+        padding: 0,
+        borderRadius: theme.radius.md,
+        height: (height - 100) * 0.7,
+      })}  >
+        <Map
+    style={theme.colorScheme ==="dark" ? "mapbox://styles/mapbox/dark-v10" :"mapbox://styles/mapbox/streets-v9"}
+    containerStyle={{
+      height: '100%',
+      width: '100%'
+    }}
+    zoom={[0]}
+    center={[36.768, -1.2345]}
+  >
+  </Map>
+        </Box>
+        <Group grow>
+        <Box  sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
+        padding: theme.spacing.xl,
+        borderRadius: theme.radius.md,
+        height: (height - 100) * 0.3,
+        marginTop: 10,
+        marginRight: 1
+      })}  >
+
+      <Group position='apart'>
+          <Group position='left'>
+            
+          </Group>
+          <Group position='right'>
+            <Tooltip label="Customize this panel">
+            <Menu control={<ActionIcon >
+              <DotsVertical size={15} />
+            </ActionIcon>}>
+              <Menu.Item>Remove this panel</Menu.Item>
+            </Menu>
+            </Tooltip>
+          </Group>
+        </Group>
+        </Box>
+
+        <Box  sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
+        padding: theme.spacing.xl,
+        borderRadius: theme.radius.md,
+        height: (height - 100) * 0.3,
+        marginTop: 10,
+        marginLeft: 1,
+      })}  >
+
+      <Group position='apart'>
+          <Group position='left'>
+            
+          </Group>
+          <Group position='right'>
+            <Tooltip label="Customize this panel">
+            <Menu control={<ActionIcon >
+              <DotsVertical size={15} />
+            </ActionIcon>}>
+              <Menu.Item>Remove this panel</Menu.Item>
+            </Menu>
+            </Tooltip>
+          </Group>
+        </Group>
+        </Box>
+        </Group>
+        </Grid.Col>
+      {/*-------End of second panel -------*/}
+
+
+        {/*---------------Start of the third panel, statistical data and some charts ----------------------*/}
+        <Grid.Col span={4}>
+        <Box  sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1],
+        padding: theme.spacing.xl,
+        borderRadius: theme.radius.md,
+        height: height - 100,
+      })}  >
+
+      <Group position='apart'>
+          <Group position='left'>
+            
+          </Group>
+          <Group position='right'>
+            <Tooltip label="Customize this panel">
+            <Menu control={<ActionIcon><DotsVertical size={15} /></ActionIcon>}>
+              <Menu.Item>Add Item</Menu.Item>
+              <Menu.Item>Remove this panel</Menu.Item>
+            </Menu>
+            </Tooltip>
+          </Group>
+        </Group>
+        </Box>
+        </Grid.Col>
+        {/*----------------------End of the third panel -----------------------*/}
+      </Grid>
     </AppShell>
   );
 }

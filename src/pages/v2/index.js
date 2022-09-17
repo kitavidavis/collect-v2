@@ -53,8 +53,8 @@ import {
   Popover,
   CloseButton,
 } from '@mantine/core';
-import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard } from '@mantine/hooks';
-import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut } from 'tabler-icons-react';
+import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard, randomId } from '@mantine/hooks';
+import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut, Settings, Books } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import AvaterImage from 'assets/illustrations/215.png'
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
@@ -78,6 +78,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import LoaderCard from 'components/loaders/bolt';
 import Pin from 'components/pin';
 import dynamic from "next/dynamic";
+import { IoMdSync } from 'react-icons/io';
 
 const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false });
 
@@ -110,7 +111,7 @@ return {
         },
       
         inner: {
-          height: 24,
+          height: 34,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -353,7 +354,6 @@ function Dashboard(){
     const [activeid, setActiveId] = useState('');
     const [item, setItems] = useState([]);
     const [visopen, setVisOpen] = useState(false);
-    const [query2, setQuery2] = useState('');
     const [paper, setPaper] = useState(true);
     const [menuopen, setMenuOpen] = useState({
       form_id: null,
@@ -382,37 +382,15 @@ function Dashboard(){
     const navlinks = [
       { icon: FileDatabase, label: 'Forms', href: '/v2/', notifications: userforms.length },
       { icon: Tool, label: 'New Form',  href: '/v2/build/' },
-      { icon: ChartBar, label: 'Charts', href: '/v2/create-charts/' },
       { icon: LayoutDashboard, label: 'Dashboards', href: '/v2/create-dashboards/'},
-      { icon: ShieldCheck, label: 'Security', href: '#' },
-      { icon: FileDatabase, label: 'Database Access', href: '#' },
-      { icon: Network, label: 'Network access', href: '#' },
-      { icon: BrandCodesandbox, label: 'Sandbox', href: '#'},
-      { icon: Help, label: 'Help', href: '#' },
+      { icon: ChartBar, label: 'Charts', href: '/v2/create-charts/' },
+      { icon: Network, label: 'Data Stream', href: '#' },
+      { icon: FileDatabase, label: 'UAVs', href: '#' },
+      { icon: BrandCodesandbox, label: 'Developer Platform', href: '#'},
+      { icon: Settings, label: 'Settings', href: '#' },
+      { icon: Books, label: 'Resources', href: '#' },
       { icon: Logout, label: 'Logout', href: '/api/logout' },
     ];
-
-
-    const mainLinks = navlinks.filter(item => {
-      if(query2 === '') {
-        return item;
-      } else if(item.label.toLocaleLowerCase().includes(query2.toLocaleLowerCase())){
-        return item;
-      }
-    }).map((link) => (
-      <UnstyledButton mt={10} onClick={() => {setLinkActive(link.label)}} component="a" href={link.href} key={link.label} className={classes.mainLink}>
-        <div className={classes.mainLinkInner}>
-        <link.icon size={20} color={theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black} className={classes.mainLinkIcon} />
-          <span className={classes.mainLinkText}>{link.label}</span>
-        </div>
-        {link.notifications && (
-          <Badge size="sm" variant="filled" color='yellow' className={classes.mainLinkBadge}>
-            {link.notifications}
-          </Badge>
-        )}
-      </UnstyledButton>
-    ));
-
 
     React.useEffect(() => {
       setDone(false);
@@ -447,6 +425,10 @@ function Dashboard(){
 
         fetchdata();
     }, [user2]);
+
+    React.useEffect(()=> {
+      setHash("app/instanceid?"+randomId().split("").splice(8).join(""))
+    }, [])
 
     React.useEffect(() => {
       const fetchdata = async () => {
@@ -488,6 +470,7 @@ function Dashboard(){
     const Layout = () => {
       const theme = useMantineTheme();
       const [query, setQuery] = useState('');
+      const [query2, setQuery2] = useState('');
       const { classes } = useStyles();
       const [opened, setOpened] = useState(false);
       const [drawer, setDrawer] = useState(false);
@@ -498,7 +481,7 @@ function Dashboard(){
       const [coords, setCoords] = useState(null);
       const [center, setCenter] = useState([])
 
-      const [datatheme, setDataTheme] = useState("threezerotwofour");
+      const [datatheme, setDataTheme] = useState(theme.colorScheme === "dark" ? "threezerotwofour" : "bright:inverted");
       const [objectsize, setObjectSize] = useState(true);
       const [editable, setEditable] = useState(true);
       const [deletable, setDeletable] = useState(true);
@@ -506,42 +489,30 @@ function Dashboard(){
       const [collapsed, setCollapsed] = useState(true);
       const [datatypes, setDatatypes] = useState(true);
       const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+
+      const mainLinks = navlinks.filter(item => {
+        if(query2 === '') {
+          return item;
+        } else if(item.label.toLocaleLowerCase().includes(query2.toLocaleLowerCase())){
+          return item;
+        }
+      }).map((link) => (
+        <UnstyledButton mt={10} onClick={() => {setLinkActive(link.label)}} component="a" href={link.href} key={link.label} className={classes.mainLink}>
+          <div className={classes.mainLinkInner}>
+          <link.icon size={20} color={theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black} className={classes.mainLinkIcon} />
+            <span className={classes.mainLinkText}>{link.label}</span>
+          </div>
+          {link.notifications && (
+            <Badge size="sm" variant="filled" color='yellow' className={classes.mainLinkBadge}>
+              {link.notifications}
+            </Badge>
+          )}
+        </UnstyledButton>
+      ));
+
       const Map = ReactMapboxGl({
         accessToken: accessToken,
       });
-
-      const geojson = {
-        type: "FeatureCollection",
-        features: [{
-          "type": "Feature",
-          "properties": {
-            "form_id":activeid 
-          },
-          "geometry": {
-            "type": "Polygon",
-            "coordinates":[[
-              coords
-            ]]
-          }
-        }]
-      }
-
-      const lineLayout = {
-        'line-cap': 'round',
-        'line-join': 'round'
-      };
-      
-      const linePaint = {
-        'line-color': '#4790E5',
-        'line-width': 12
-      };
-
-      const polygonPaint = {
-        'fill-color': '#6F788A',
-        'fill-opacity': 0.7
-      };
-
-      const w = 200;
 
       const hideImage = () => {
         setImage("")
@@ -724,17 +695,19 @@ function Dashboard(){
           asideOffsetBreakpoint="sm"
           fixed
           navbar={
-            <Navbar style={{left: 0, top: 0, height: height}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 200}}>
+            <Navbar style={{left: 0, top: 0, height: height}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
         <Navbar.Section className={classes.section} >
         <UnstyledButton className={classes.user}>
       <Group position='apart' >
         <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
 
         <div style={{ flex: 1 }}>
-        <Text mb={10} size="sm" weight={500}>
-            {firstname}
+        <Text align='center' mb={10} weight={500}>
+            {email}
           </Text>
-          <Badge color='red' >Beta Version</Badge>
+          <Center>
+          <Badge  color='yellow' size='xs' style={{textTransform: 'lowercase'}} >Beta release</Badge>
+          </Center>
         </div>
 
       </Group>
@@ -747,8 +720,6 @@ function Dashboard(){
         onChange={(e) => {setQuery2(e.currentTarget.value)}}
         icon={<Search size={12} />}
         rightSectionWidth={70}
-        styles={{ rightSection: { pointerEvents: 'none' } }}
-        rightSection={<Search />}
         mb="sm"
       />
         <Navbar.Section mt={20} className={classes.section}>
@@ -758,7 +729,7 @@ function Dashboard(){
           }
 
           header={
-            <Header className={classes.header} style={{left: 200,}}  height={50} p="md">
+            <Header className={classes.header} style={{left: 250,}}  height={70} p="md">
               <div className={classes.inner}>
               <Group>
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
@@ -774,9 +745,12 @@ function Dashboard(){
                 </Group>
                 <Group>
                 <Group ml={50} spacing={5} className={classes.links}>
-                    <Button color='yellow' onClick={() => {toggleColorScheme()}} size='xs' radius={40}>
-                      Toggle Theme
-                    </Button>
+                  <ActionIcon >
+                    <Help color='yellow' />
+                  </ActionIcon>
+                  <ActionIcon onClick={() => {toggleColorScheme()}} >
+                    {theme.colorScheme === "dark" ? <Sun /> : <Moon />}
+                  </ActionIcon>
               </Group>
                 </Group>
               </div>
@@ -955,14 +929,6 @@ function Dashboard(){
               <Paper p="md" ml="10%" mr="10%" mb={15} key={index}>
                 <Group mb={5} grow>
                 <Text size='xs' ><strong>Response Id:</strong> <span style={{color: '#D9480F'}}>{'ObjectId("'+item.response_id+'")'}</span></Text>
-                <Group position='right'>
-                <ActionIcon title='Copy response' >
-                  <Copy size={15} />
-                </ActionIcon>
-                <ActionIcon title='Delete response'>
-                  <Trash size={15} />
-                </ActionIcon>
-                </Group>
                 </Group>
                 <DynamicReactJson theme={datatheme} onAdd={(e) => {
                   console.log(e);
