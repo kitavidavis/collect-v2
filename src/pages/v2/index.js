@@ -52,9 +52,10 @@ import {
   Center,
   Popover,
   CloseButton,
+  Indicator,
 } from '@mantine/core';
 import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard, randomId } from '@mantine/hooks';
-import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut, Settings, Books } from 'tabler-icons-react';
+import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut, Settings, Books, Crosshair, Drone, Tools } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import AvaterImage from 'assets/illustrations/215.png'
 import { MantineProvider, ColorSchemeProvider, ColorScheme } from '@mantine/core';
@@ -164,7 +165,7 @@ return {
           color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
       
           '&:hover': {
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+            backgroundColor: 'transparent'
           },
         },
       
@@ -258,10 +259,11 @@ return {
 
   mainLinkIcon: {
     marginRight: theme.spacing.sm,
+    color: "white"
   },
 
   mainLinkText: {
-
+    color: "white"
   },
 
   mainLinkBadge: {
@@ -381,14 +383,14 @@ function Dashboard(){
 
     const navlinks = [
       { icon: FileDatabase, label: 'Forms', href: '/v2/', notifications: userforms.length },
-      { icon: Tool, label: 'New Form',  href: '/v2/build/' },
-      { icon: LayoutDashboard, label: 'Dashboards', href: '/v2/create-dashboards/'},
-      { icon: ChartBar, label: 'Charts', href: '/v2/create-charts/' },
-      { icon: Network, label: 'Data Stream', href: '#' },
-      { icon: FileDatabase, label: 'UAVs', href: '#' },
-      { icon: BrandCodesandbox, label: 'Developer Platform', href: '#'},
+      { icon: LayoutDashboard, label: 'Dashboards and Charts', href: '#'},
+      { icon: Crosshair, label: 'Survey Automation', href: '#' },
+      { icon: Drone, label: 'UAV Data', href: '#' },
+      { icon: BrandCodesandbox, label: 'API keys', href: '#'},
+      { icon: Tools, label: "Configure", href: "#" },
       { icon: Settings, label: 'Settings', href: '#' },
-      { icon: Books, label: 'Resources', href: '#' },
+      { icon: Books, label: 'Documentation', href: 'https://geopsy-collect.gitbook.io/home/', target: "_blank" },
+      { icon: User, label: "Account", href: "#"},
       { icon: Logout, label: 'Logout', href: '/api/logout' },
     ];
 
@@ -497,9 +499,9 @@ function Dashboard(){
           return item;
         }
       }).map((link) => (
-        <UnstyledButton mt={10} onClick={() => {setLinkActive(link.label)}} component="a" href={link.href} key={link.label} className={classes.mainLink}>
+        <UnstyledButton mt={10} onClick={() => {setLinkActive(link.label)}} component="a" href={link.href} target={link.target? link.target : "_parent"} key={link.label} className={classes.mainLink}>
           <div className={classes.mainLinkInner}>
-          <link.icon size={20} color={theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black} className={classes.mainLinkIcon} />
+          <link.icon size={20} className={classes.mainLinkIcon} />
             <span className={classes.mainLinkText}>{link.label}</span>
           </div>
           {link.notifications && (
@@ -695,14 +697,17 @@ function Dashboard(){
           asideOffsetBreakpoint="sm"
           fixed
           navbar={
-            <Navbar style={{left: 0, top: 0, height: height}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
+              <>
+              <MediaQuery largerThan="md" styles={{display: 'none'}}>
+                <Drawer onClose={() => {setOpened(false)}} opened={opened}>
+                <Navbar style={{left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
         <Navbar.Section className={classes.section} >
-        <UnstyledButton className={classes.user}>
-      <Group position='apart' >
+        <UnstyledButton style={{backgroundColor: 'transparent'}} className={classes.user}>
+      <Group  position='apart' >
         <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
 
         <div style={{ flex: 1 }}>
-        <Text align='center' mb={10} weight={500}>
+        <Text className={classes.mainLinkText} align='center' mb={10} weight={500}>
             {email}
           </Text>
           <Center>
@@ -720,16 +725,55 @@ function Dashboard(){
         onChange={(e) => {setQuery2(e.currentTarget.value)}}
         icon={<Search size={12} />}
         rightSectionWidth={70}
+        styles={{input: {backgroundColor: 'white', color: 'black'}}}
         mb="sm"
       />
-        <Navbar.Section mt={20} className={classes.section}>
+        <Navbar.Section className={classes.section}>
         <div className={classes.mainLinks}>{mainLinks}</div>
       </Navbar.Section>
             </Navbar>
+                </Drawer>
+              </MediaQuery>
+
+              <MediaQuery smallerThan="md" styles={{display: 'none'}}>
+              <Navbar style={{left: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
+        <Navbar.Section className={classes.section} >
+        <UnstyledButton style={{backgroundColor: 'transparent'}} className={classes.user}>
+      <Group  position='apart' >
+        <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
+
+        <div style={{ flex: 1 }}>
+        <Text className={classes.mainLinkText} align='center' mb={10} weight={500}>
+            {email}
+          </Text>
+          <Center>
+          <Badge  color='yellow' size='xs' style={{textTransform: 'lowercase'}} >Beta release</Badge>
+          </Center>
+        </div>
+
+      </Group>
+    </UnstyledButton>
+      </Navbar.Section>
+        <TextInput
+        placeholder="Search"
+        size="xs"
+        value={query2}
+        onChange={(e) => {setQuery2(e.currentTarget.value)}}
+        icon={<Search size={12} />}
+        rightSectionWidth={70}
+        styles={{input: {backgroundColor: 'white', color: 'black'}}}
+        mb="sm"
+      />
+        <Navbar.Section className={classes.section}>
+        <div className={classes.mainLinks}>{mainLinks}</div>
+      </Navbar.Section>
+            </Navbar>
+              </MediaQuery>
+              </>
           }
 
           header={
-            <Header className={classes.header} style={{left: 250,}}  height={70} p="md">
+            <Header className={classes.header} style={{ backgroundColor: "#002244"}} height={60} p="md">
               <div className={classes.inner}>
               <Group>
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
@@ -741,15 +785,14 @@ function Dashboard(){
                     mr="xl"
                   />
                 </MediaQuery>
-                <Title color='white' order={4}>Collect&reg;</Title>
                 </Group>
                 <Group>
-                <Group ml={50} spacing={5} className={classes.links}>
-                  <ActionIcon >
-                    <Help color='yellow' />
-                  </ActionIcon>
-                  <ActionIcon onClick={() => {toggleColorScheme()}} >
-                    {theme.colorScheme === "dark" ? <Sun /> : <Moon />}
+                <Group ml={50} spacing="lg" className={classes.links}>
+                  <Indicator color="yellow" label={3} overflowCount={10} inline size={22}>
+                    <Bell color='white' />
+                  </Indicator>
+                  <ActionIcon style={{backgroundColor: 'transparent'}} onClick={() => {toggleColorScheme()}} >
+                    {theme.colorScheme === "dark" ? <Sun color='white' /> : <Moon color='white' />}
                   </ActionIcon>
               </Group>
                 </Group>
@@ -760,6 +803,7 @@ function Dashboard(){
             {active === 'aggregate' ? (
               cluster === '' ? (
                 <>
+
               <Group position='apart' mt={10}>
               <Title order={2} className={classes.title} align="center">
                Forms
@@ -768,7 +812,7 @@ function Dashboard(){
             <Button color='yellow'  component='a' href='/v2/build' title='Add New Form' radius={28}>
                   <Plus />
                 </Button>
-                <Anchor href='#'>
+                <Anchor target="_blank" href='https://geopsy-collect.gitbook.io/home/forms'>
                   Learn more about XLSForms
                 </Anchor>
             </Group>
@@ -784,12 +828,11 @@ function Dashboard(){
                                       {paper ? (
                                     <Paper mb={10} mt={20} ml="5%" mr={"5%"} shadow="xs" p="md">
                                     <Group position='apart' mb={10}>
-                                    <Text color='yellow' >Google Earth Plugin</Text>
+                                    <Text color='yellow' >QGIS Plugin</Text>
                                     <CloseButton onClick={() => {setPaper(false)}} />
                                     </Group>
                                     <Text>
-                                      Hey there, we are rolling out Google Earth Engine plugin for Collect. <Anchor href='#'>Learn more about how researchers like
-                                      you are using GEE to perform real-time spatial analysis here.</Anchor>
+                                      Hey there, we are rolling out QGIS plugin for Collect. <Anchor href='#'>Learn more.</Anchor>
                                     </Text>
                                   </Paper>
                                   ) : null}
