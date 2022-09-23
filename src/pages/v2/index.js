@@ -697,44 +697,6 @@ function Dashboard(){
           asideOffsetBreakpoint="sm"
           fixed
           navbar={
-              <>
-              <MediaQuery largerThan="md" styles={{display: 'none'}}>
-                <Drawer onClose={() => {setOpened(false)}} opened={opened}>
-                <Navbar style={{left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
-        <Navbar.Section className={classes.section} >
-        <UnstyledButton style={{backgroundColor: 'transparent'}} className={classes.user}>
-      <Group  position='apart' >
-        <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
-
-        <div style={{ flex: 1 }}>
-        <Text className={classes.mainLinkText} align='center' mb={10} weight={500}>
-            {email}
-          </Text>
-          <Center>
-          <Badge  color='yellow' size='xs' style={{textTransform: 'lowercase'}} >Beta release</Badge>
-          </Center>
-        </div>
-
-      </Group>
-    </UnstyledButton>
-      </Navbar.Section>
-        <TextInput
-        placeholder="Search"
-        size="xs"
-        value={query2}
-        onChange={(e) => {setQuery2(e.currentTarget.value)}}
-        icon={<Search size={12} />}
-        rightSectionWidth={70}
-        styles={{input: {backgroundColor: 'white', color: 'black'}}}
-        mb="sm"
-      />
-        <Navbar.Section className={classes.section}>
-        <div className={classes.mainLinks}>{mainLinks}</div>
-      </Navbar.Section>
-            </Navbar>
-                </Drawer>
-              </MediaQuery>
-
               <MediaQuery smallerThan="md" styles={{display: 'none'}}>
               <Navbar style={{left: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
         <Navbar.Section className={classes.section} >
@@ -769,7 +731,6 @@ function Dashboard(){
       </Navbar.Section>
             </Navbar>
               </MediaQuery>
-              </>
           }
 
           header={
@@ -800,6 +761,49 @@ function Dashboard(){
             </Header>
           }
         >
+                <Drawer onClose={() => {setOpened(false)}} opened={opened}>
+                <Navbar style={{left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
+        <Navbar.Section className={classes.section} >
+        <UnstyledButton style={{backgroundColor: 'transparent'}} className={classes.user}>
+      <Group  position='apart' >
+          <Group>
+          <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
+
+        <div style={{ flex: 1 }}>
+        <Text className={classes.mainLinkText} align='center' mb={10} weight={500}>
+            {email}
+          </Text>
+          <Center>
+          <Badge  color='yellow' size='xs' style={{textTransform: 'lowercase'}} >Beta release</Badge>
+          </Center>
+        </div>
+        </Group>
+
+        <Group position='right'>
+          <ActionIcon onClick={() => {setOpened(false)}} >
+            <X />
+          </ActionIcon>
+        </Group>
+
+      </Group>
+    </UnstyledButton>
+      </Navbar.Section>
+        <TextInput
+        placeholder="Search"
+        size="xs"
+        value={query2}
+        onChange={(e) => {setQuery2(e.currentTarget.value)}}
+        icon={<Search size={12} />}
+        rightSectionWidth={70}
+        styles={{input: {backgroundColor: 'white', color: 'black'}}}
+        mb="sm"
+      />
+        <Navbar.Section className={classes.section}>
+        <div className={classes.mainLinks}>{mainLinks}</div>
+      </Navbar.Section>
+            </Navbar>
+                </Drawer>
+
             {active === 'aggregate' ? (
               cluster === '' ? (
                 <>
@@ -836,6 +840,7 @@ function Dashboard(){
                                     </Text>
                                   </Paper>
                                   ) : null}
+                                  <div style={{overflowX: 'auto'}}>
                                   <Table mt={20} highlightOnHover >
                                     <thead>
                                       <tr >
@@ -879,6 +884,7 @@ function Dashboard(){
                                       })}
                                     </tbody>
                                   </Table>
+                                  </div>
                                 </>
                                 )
                                : (
