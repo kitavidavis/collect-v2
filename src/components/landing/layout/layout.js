@@ -19,7 +19,7 @@ export function Layout({children, noHeader = false}) {
   const router = useRouter();
   const [colorScheme, setColorScheme] = useLocalStorage({
     key: THEME_KEY,
-    defaultValue: 'dark',
+    defaultValue: 'light',
     getInitialValueInEffect: true,
   });
 
