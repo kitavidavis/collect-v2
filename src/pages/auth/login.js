@@ -3,7 +3,7 @@ import { ThemeProvider } from 'theme-ui';
 import Router from 'next/dist/next-server/server/router';
 import theme from 'theme';
 import SEO from 'components/seo';
-import Layout from 'components/layout';
+import { Layout } from 'components/landing/layout/layout';
 import Footer from 'components/footer/footer';
 import Support from 'sections/support';
 import Header from 'components/header/header';

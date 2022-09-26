@@ -14,7 +14,8 @@ import {
   Group,
   Divider,
   Notification,
-  Container
+  Container,
+  SimpleGrid
 } from '@mantine/core';
 import { useViewportSize, useScrollLock, useWindowScroll } from '@mantine/hooks';
 import { GoogleButton, TwitterButton } from './SocialButtons';
@@ -26,6 +27,8 @@ import { useUser } from 'lib/hooks';
 import { setLoginSession } from 'lib/auth';
 import { LogoBlue } from 'components/logo';
 const axios = require('axios');
+import { HEADER_HEIGHT } from 'components/landing/layout/header/header.style';
+import Link from 'next/link';
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -61,6 +64,26 @@ const useStyles = createStyles((theme) => ({
     display: 'block',
     marginLeft: 'auto',
     marginRight: 'auto',
+  },
+
+  image: {
+    minHeight: 700,
+    width: 800,
+    flex: 1,
+    backgroundImage: `url(assets/images/auntum.svg)`,
+    backgroundSize: 'auto 60%',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right',
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 0,
+    display: theme.dir === 'rtl' ? 'none' : undefined,
+
+    '@media (max-width: 1230px)': {
+      display: 'none',
+    },
   },
 }));
 
@@ -190,20 +213,18 @@ export function Login() {
   }
 
   return (
-    <>
+    <div style={{backgroundColor: "#F1F3F5"}} >
     {!online ? <InternetBar /> : null}
-    <MediaQuery smallerThan={'md'} styles={{display: 'none'}}>
-            <Grid columns={12}>
-        <Grid.Col span={4}>
-        <Paper className={classes.form} radius={0} p={50}>
-        <Group position='center' mb={25} mt={25}>
-        <LogoBlue />
-        </Group>
-        <Group grow direction='column' mb="md" mt="md">
-        <GoogleButton onClick={() => signIn("google")} radius="xl">Google</GoogleButton>
-      </Group>
-
-      <Divider label="Or" labelPosition="center" my="lg" />
+    <SimpleGrid
+      cols={2}
+      spacing="lg"
+      breakpoints={[
+        { maxWidth: 980, cols: 2, spacing: 'md' },
+        { maxWidth: 755, cols: 1, spacing: 'sm' },
+        { maxWidth: 600, cols: 1, spacing: 'sm' },
+      ]}
+    >
+        <Paper radius={0} p={50}>
 
       {invalid.invalid ? (
         <Notification mb={5} onClose={() => {setInvalid({invalid: false, message: null})}} closeButtonProps={{ 'aria-label': 'Hide notification' }} color="red" title="Error!">
@@ -217,33 +238,29 @@ export function Login() {
       </Notification>
       ) : null}
 
-        <TextInput value={email} error={error.email.error ? error.email.message : false} onChange={(e) => {handleInput(e.target.value.toLowerCase(), 'email')}} label="Email address" size="sm" />
-        {showpass ? (<PasswordInput label="Password" value={password} onChange={(e) => {handleInput(e.target.value, 'password')}} error={error.password.error ? error.password.message : false} mt="xs" size="sm" />) : null}
-        {showpass ? (<Checkbox label="Keep me logged in" onChange={() => {setChecked(!checked)}} checked={checked} mt="xl" size="sm" />) : null}
-        <Grid mt={30} columns={12}>
-            <Grid.Col span={5}>
-            <Button loading={loading} disabled={email === null || email === '' ? true : false} onClick={(e) => {showpass ? handleLogin(e) : setShowPass(true)}} fullWidth mt="xl" size="sm">
-         {showpass ? "Sign In" :  " Next"}
+        <TextInput required value={email} error={error.email.error ? error.email.message : false} onChange={(e) => {handleInput(e.target.value.toLowerCase(), 'email')}} label="Email address" size="sm" />
+        <PasswordInput required label="Password" value={password} onChange={(e) => {handleInput(e.target.value, 'password')}} error={error.password.error ? error.password.message : false} mt="xs" size="sm" />
+        <Checkbox label="Keep me logged in" onChange={() => {setChecked(!checked)}} checked={checked} mt="xl" size="sm" />
+            <Button loading={loading} disabled={email === null || email === '' ? true : false} onClick={(e) => {handleLogin(e)}} fullWidth mt="xl" size="sm">
+         Sign In
         </Button>
-            </Grid.Col>
-
-            <Grid.Col span={7} >
         <Text mt="xl" size='sm'>
-          Don&apos;t have an account?{' '}<a href='/auth/register' style={{textDecoration: 'none', color: '#1864AB'}} >Register</a>
+          Don&apos;t have an account?{' '}<Link href='/auth/register' passHref >Register</Link>
         </Text>
-            </Grid.Col>
-        </Grid>
       </Paper>
-        </Grid.Col>
-        <Grid.Col       sx={(theme) => ({
+
+        <Box   sx={(theme) => ({
+        [theme.fn.smallerThan('md')]: { display: 'none' },
         backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
         backgroundSize: 'cover',
+        height: (height - HEADER_HEIGHT),
+        backgroundRepeat: 'no-repeat',
         backgroundImage:
       `url(${require ('assets/images/auntum.svg')})`,
         bottom: 0,
         borderRadius: theme.radius.md,
         cursor: 'pointer',
-
+        padding: 0,
         '&:hover': {
           backgroundColor:
             theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
@@ -253,38 +270,9 @@ export function Login() {
         <Title order={2} pt={100} ml={50} className={classes.bannerTitle} style={{color: 'white'}}>Collect Quality Data Easily<br /> With GeoPsy Collect</Title>
         <Text mt={30} ml={50} size='lg' color='white' >Build rich location-linked forms and collect <br />quality data from extreme environments <br /> without using internet.</Text>
     
-        <Text mt={30} ml={50} size="lg" > <a style={{color: '#37B24D'}}  href='#'>Explore Tutorials <BsArrowRight style={{marginTop: 10,}} /></a> </Text>
-        </Grid.Col>
-    </Grid>
-    </MediaQuery>
-    <MediaQuery largerThan={'md'} styles={{display: 'none'}}>
-      <Container size={420} style={{height: height}} >
-      <Paper className={classes.form} mt={20} mb={20} radius='md' pt={30} withBorder p={10}>
-        <Group grow direction='column' mb="md" mt="md">
-        <GoogleButton radius="xl">Google</GoogleButton>
-        <TwitterButton radius="xl">Twitter</TwitterButton>
-      </Group>
-
-      <Divider label="Or" labelPosition="center" my="lg" />
-
-      {invalid.invalid ? (
-        <Notification mb={5} onClose={() => {setInvalid({invalid: false, message: null})}} closeButtonProps={{ 'aria-label': 'Hide notification' }} color="red" title="Error!">
-        Your email or password is invalid.
-      </Notification>
-      ) : null}
-
-        <TextInput value={email} error={error.email.error ? error.email.message : false} onChange={(e) => {handleInput(e.target.value, 'email')}} label="Email address" size="sm" />
-        <PasswordInput label="Password" value={password} onChange={(e) => {handleInput(e.target.value, 'password')}} error={error.password.error ? error.password.message : false} mt="xs" size="sm" />
-        <Checkbox label="Keep me logged in" onChange={() => {setChecked(!checked)}} checked={checked} mt="xl" size="sm" />
-            <Button  loading={loading} onClick={(e) => {handleLogin(e)}} fullWidth mt="xl" size="sm">
-         Sign In
-        </Button>
-        <Text mt="xl" size='sm'>
-          Don&apos;t have an account?{' '}<a href='/auth/register' style={{textDecoration: 'none', color: '#1864AB'}} >Register</a>
-        </Text>
-      </Paper>
-      </Container>
-    </MediaQuery>
-    </>
+        <Text mt={30} ml={50} size="lg" > <a style={{color: '#37B24D'}} target="_blank"  href='https://geopsy-collect.gitbook.io/home/'>Explore Tutorials <BsArrowRight style={{marginTop: 10,}} /></a> </Text>
+        </Box>
+        </SimpleGrid>
+    </div>
   );
 }

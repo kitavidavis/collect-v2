@@ -54,7 +54,7 @@ import {
   CloseButton,
   Indicator,
 } from '@mantine/core';
-import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard, randomId } from '@mantine/hooks';
+import { useViewportSize, useHash, useWindowScroll, useScrollIntoView, useClipboard, useLocalStorage, randomId } from '@mantine/hooks';
 import { Activity, ChevronRight, Bulb,User, Search, ChevronDown, Friends, Bell, LayoutDashboard, Folder, DotsVertical, Database, DeviceLaptop, ShieldLock, UserCircle, Plus, Point, InfoCircle, DotsCircleHorizontal, Dots, Strikethrough, ClearFormatting, Numbers, Selector, Checklist, Clock, Calendar, Star, Photo, Speakerphone, Video, Location, Line, Polygon, Calculator, Edit, Copy, Trash, ArrowBack, AdjustmentsHorizontal, Microphone, File, Check, UserCheck, ShieldCheck, CircleCheck, ColorPicker, Signature, Adjustments, ChartBar, FileDatabase, Network, Help, Logout, UserPlus, Tool, Sun, Moon, ChevronUp, BrandCodesandbox, X, TableExport, Filter, Eye, ExternalLink, Download, Refresh, ChartArea, ArrowLeft, AlertTriangle, ChartDonut, Settings, Books, Crosshair, Drone, Tools } from 'tabler-icons-react';
 import { ThemeProvider } from 'theme-ui';
 import AvaterImage from 'assets/illustrations/215.png'
@@ -832,7 +832,7 @@ function Dashboard(){
                                       {paper ? (
                                     <Paper mb={10} mt={20} ml="5%" mr={"5%"} shadow="xs" p="md">
                                     <Group position='apart' mb={10}>
-                                    <Text color='yellow' >QGIS Plugin</Text>
+                                    <Text color='yellow'>QGIS Plugin</Text>
                                     <CloseButton onClick={() => {setPaper(false)}} />
                                     </Group>
                                     <Text>
@@ -1048,14 +1048,15 @@ function Dashboard(){
       );
     }
 
-    const preferredColorScheme = useColorScheme();
-    const [colorScheme, setColorScheme] = useState(preferredColorScheme);
+    const THEME_KEY = 'geopsy-collect-color-scheme';
+
+    const [colorScheme, setColorScheme] = useLocalStorage({
+      key: THEME_KEY,
+      defaultValue: 'dark',
+      getInitialValueInEffect: true,
+    });
 
     const toggleColorScheme = (value) => setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
-
-    React.useEffect(() => {
-        setColorScheme(preferredColorScheme);
-    }, [preferredColorScheme]);
     
     return (
       <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>

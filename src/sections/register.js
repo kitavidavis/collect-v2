@@ -16,6 +16,9 @@ import {
   Group,
   Progress, 
   Popover,
+  SimpleGrid,
+  Stepper,
+  Anchor
 } from '@mantine/core';
 import { useViewportSize, useScrollLock } from '@mantine/hooks';
 import { GoogleButton, TwitterButton } from './SocialButtons';
@@ -24,6 +27,10 @@ import { PasswordRequirement } from 'components/password-requirements';
 import { getStrength } from 'components/password-requirements';
 import { useRouter } from 'next/router';
 import { LogoBlue } from 'components/logo';
+import { StyledStepper } from 'components/StyledStepper';
+import { HEADER_HEIGHT } from 'components/landing/layout/header/header.style';
+import { ChevronLeft, ChevronRight } from 'tabler-icons-react';
+import Link from 'next/link';
 const KenyaCounties = require('kenyacounties');
 
 const useStyles = createStyles((theme) => ({
@@ -47,6 +54,10 @@ const useStyles = createStyles((theme) => ({
 
   title: {
     color: '#37B24D',
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+  },
+
+  bannerTitle: {
     fontFamily: `Greycliff CF, ${theme.fontFamily}`,
   },
 
@@ -80,6 +91,7 @@ export function Register() {
   const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
   const [privacyCheck, setPrivacyCheck] = useState(false);
+  const [active, setActive] = useState(0);
   const { height, width } = useViewportSize();
   const [scrollLocked, setScrollLocked] = useScrollLock(false);
   const counties = KenyaCounties.getAll().sort(SortCounties);
@@ -91,10 +103,7 @@ export function Register() {
   const [errorMSG, setErrorMsg] = useState('');
 
   const requirements = [
-    { re: /[0-9]/, label: 'Includes number' },
-    { re: /[a-z]/, label: 'Includes lowercase letter' },
-    { re: /[A-Z]/, label: 'Includes uppercase letter' },
-    { re: /[$&+,:;=?@#|'<>.^*()%!-]/, label: 'Includes special symbol' },
+
   ];
 
   
@@ -145,57 +154,52 @@ const handleSubmit = async (e) => {
       if(res.status === 200){
         Router.push('/auth/login')
       } else {
-        alert("User exists");
+        setErrorMsg("User exists!");
       }
     }).catch(function(err){
-      console.log(err);
+      setErrorMsg(err.message);
     })
 } catch(error){
-  console.log(error);
+  setErrorMsg(err.message);
 }
 
 }
   return (
-    < >
-    <MediaQuery smallerThan={'md'} styles={{display: 'none'}}>
-            <Grid columns={12}>
-            <Grid.Col span={4}>
+    <SimpleGrid
+      cols={2}
+      spacing="lg"
+      breakpoints={[
+        { maxWidth: 980, cols: 2, spacing: 'md' },
+        { maxWidth: 755, cols: 1, spacing: 'sm' },
+        { maxWidth: 600, cols: 1, spacing: 'sm' },
+      ]}
+    >
         <Box
       sx={(theme) => ({
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+        [theme.fn.smallerThan('md')]: { display: 'none' },
         backgroundSize: 'cover',
+        height: (height - HEADER_HEIGHT),
+        backgroundRepeat: 'no-repeat',
         backgroundImage:
-      `url(${require ('assets/images/auntum2.svg')})`,
-        textAlign: 'center',
-        height: '100%',
-        width: '100%',
+      `url(${require ('assets/images/auntum.svg')})`,
+        bottom: 0,
         borderRadius: theme.radius.md,
         cursor: 'pointer',
-
-        '&:hover': {
-          backgroundColor:
-            theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-        },
+        padding: 0,
       })}
     >
+      <Title order={2} pt={100} ml={50} className={classes.bannerTitle} style={{color: 'white'}}>Collect Quality Data Easily<br /> With GeoPsy Collect</Title>
+        <Text mt={30} ml={50} size='lg' color='white' >Build rich location-linked forms and collect <br />quality data from extreme environments <br /> without using internet.</Text>
+    
+        <Text mt={30} ml={50} size="lg" > <a style={{color: '#37B24D'}} target="_blank"  href='https://geopsy-collect.gitbook.io/home/'>Explore Tutorials</a> </Text>
+
     </Box>
-        </Grid.Col>
-        <Grid.Col span={8}>
-        <Paper className={classes.form} radius={0} p={10}>
-        <Group position='center' mb={25} mt={25}>
-        <LogoBlue />
-        </Group>
-        
-        <Group grow direction='column' mb="md" mt="md">
-        <GoogleButton radius="xl">Google</GoogleButton>
-        <TwitterButton radius="xl">Twitter</TwitterButton>
-      </Group>
+        <Paper radius={0} p={10}>
 
-      <Divider label="Or" labelPosition="center" my="lg" />
-
+        <StyledStepper active={active} onStepClick={setActive}>
+        <Stepper.Step label="Step 1" description="Login Details">
+          <Title mb={20} style={{fontWeight: 300}} >Login Details</Title>
         <TextInput value={email} onChange={(e) => {setEmail(e.target.value.toLowerCase())} } label="Email address" mt="xs" size="sm" />
-        <TextInput value={firstname} onChange={(e) => {setFirstname(e.target.value)}} label="First Name" size='sm' mt={'xs'} />
-        <TextInput value={lastname} onChange={(e) => {setLastname(e.target.value)}} label="Last Name" size='sm' mt={'xs'} />
         <Popover
       opened={popoverOpened}
       position="bottom"
@@ -223,9 +227,24 @@ const handleSubmit = async (e) => {
       <PasswordRequirement label="Includes at least 6 characters" meets={value.length > 5} />
       {checks}
     </Popover>
-        <TextInput value={phone} onChange={(e) => {setPhone(e.target.value)}} label="Phone Number" mt="xs" size="sm" />
-        <TextInput value={company} onChange={(e) => {setCompany(e.target.value)}} label="Company Name" size='sm' mt={'xs'} />
-        <Select value={job} onChange={(val) => {setJob(val)}} searchable label="Job Function" size='sm' mt={'xs'} data={[
+
+    <Button disabled={email === "" || value === ""} mt={30} onClick={() => {setActive(1)}} rightIcon={<ChevronRight />}>Continue</Button>
+        </Stepper.Step>
+        <Stepper.Step label="Step 2" description="Personal Details" >
+        <Title mb={20} style={{fontWeight: 300}} >Personal Details</Title>
+        <TextInput placeholder='John' required value={firstname} onChange={(e) => {setFirstname(e.target.value)}} label="First Name" size='sm' mt={'xs'} />
+        <TextInput placeholder='Doe' required value={lastname} onChange={(e) => {setLastname(e.target.value)}} label="Last Name" size='sm' mt={'xs'} />
+        <TextInput placeholder='07000000' required value={phone} onChange={(e) => {setPhone(e.target.value)}} label="Phone Number" mt="xs" size="sm" />
+    
+        <Group mt={30} position='left'>
+        <Button onClick={() => {setActive(0)}} variant="subtle" color="gray" leftIcon={<ChevronLeft />} >Back</Button>
+        <Button disabled={firstname === "" || lastname === "" || phone === ""} onClick={() => {setActive(2)}} rightIcon={<ChevronRight />}>Continue</Button>
+        </Group>
+        </Stepper.Step>
+        <Stepper.Step label="Step 3" description="Other Details" >
+        <Title mb={20} style={{fontWeight: 300}} >Other Details</Title>
+        <TextInput description="Institution where you work(optional)" value={company} onChange={(e) => {setCompany(e.target.value)}} label="Company Name" size='sm' mt={'xs'} />
+        <Select required description="Your current role" value={job} onChange={(val) => {setJob(val)}} searchable label="Job Function" size='sm' mt={'xs'} data={[
             {label: 'Student', value: 'Student'},
             {label: 'Software Developer/Engineer', value: 'Software Developer'},
             {label: 'GIS Technician', value: 'GIS Technician'},
@@ -233,84 +252,35 @@ const handleSubmit = async (e) => {
             {label: 'IT Executive(CIO, CTO, VP Engineering)', value: 'IT Executive'},
             {label: 'Business Executive(CEO, COO, CMO)', value: 'Business Executive'}
         ]} />
-        <Select value={country} onChange={(val) => {setCountry(val)}} searchable label="Country" size='sm' mt={'xs'} data={countries} />
-        <Checkbox  value={privacyCheck} onChange={() => {setPrivacyCheck(!privacyCheck)}}  label="I accept the privacy policy and terms of service." mt="xl" size="sm" />
-        <Button disabled={!privacyCheck || email === '' || value === ''} type='submit' onClick={(e) => {handleSubmit(e)}} fullWidth mt="xl" size="md">
+        <Select required value={country} description="Country of residence" onChange={(val) => {setCountry(val)}} searchable label="Country" size='sm' mt={'xs'} data={countries} />
+        <Checkbox  value={privacyCheck} checked={privacyCheck} onChange={() => {setPrivacyCheck(!privacyCheck)}} label={
+        <>
+          Accepts{' '}
+          <Anchor size="sm" href="/" target="_blank">
+            terms and conditions
+          </Anchor>
+        </>
+      } mt="xl" size="sm" />
+        <Group mt={30} position='left'>
+        <Button onClick={() => {setActive(1)}} variant="subtle" color="gray" leftIcon={<ChevronLeft />} >Back</Button>
+        <Button disabled={!privacyCheck || email === '' || value === ''} type='submit' onClick={(e) => {handleSubmit(e)}}>
           Sign Up
         </Button>
+        </Group>
 
+        </Stepper.Step>
+        </StyledStepper>
+
+        {errorMSG !== "" ? (
+        <Text color="red" align="center" mt="md">
+        {errorMSG}
+      </Text>
+        ) : null}
         <Text align="center" mt="md">
-          Already have an account?{' '}<a href='/auth/login' style={{textDecoration: 'none', color: '#1864AB'}} >Sign In now</a>
+          Already have an account?{' '}<Link href='/auth/login' passHref >Sign In now</Link>
         </Text>
       </Paper>
-        </Grid.Col>
-    </Grid>
-    </MediaQuery>
-    <MediaQuery largerThan={'md'} styles={{display: 'none'}}>
-    <Paper className={classes.form} radius={0} p={10}>
-        <Title order={2} align='center' className={classes.title} mt="md" mb={30}>
-          Create your account
-        </Title>
-
-        
-        <Group grow direction='column' mb="md" mt="md">
-        <GoogleButton radius="xl">Google</GoogleButton>
-        <TwitterButton radius="xl">Twitter</TwitterButton>
-      </Group>
-
-      <Divider label="Or" labelPosition="center" my="lg" />
-
-        <TextInput value={email} onChange={(e) => {setEmail(e.target.value)} } label="Email address" mt="xs" size="sm" />
-        <TextInput label="First Name" size='sm' mt={'xs'} />
-        <TextInput label="Last Name" size='sm' mt={'xs'} />
-        <Popover
-      opened={popover2Opened}
-      position="bottom"
-      placement="start"
-      withArrow
-      mt={'xs'}
-      styles={{ popover: { width: '100%' } }}
-      trapFocus={false}
-      transition="pop-top-left"
-      onFocusCapture={() => setPopover2Opened(true)}
-      onBlurCapture={() => setPopover2Opened(false)}
-      target={
-        <PasswordInput
-          required
-          size='sm'
-          label="Password"
-          placeholder=""
-          description="Strong password should include letters in lower and uppercase, at least 1 number, at least 1 special symbol"
-          value={value}
-          onChange={(event) => setValue(event.currentTarget.value)}
-        />
-      }
-    >
-      <Progress color={color} value={strength} size={5} style={{ marginBottom: 10 }} />
-      <PasswordRequirement label="Includes at least 6 characters" meets={value.length > 5} />
-      {checks}
-    </Popover>
-        <TextInput label="Phone Number" mt="xs" size="sm" />
-        <TextInput label="Company Name" size='sm' mt={'xs'} />
-        <Select searchable label="Job Function" size='sm' mt={'xs'} data={[
-            {label: 'Student', value: 'Student'},
-            {label: 'Software Developer/Engineer', value: 'Software Developer'},
-            {label: 'GIS Technician', value: 'GIS Technician'},
-            {label: 'Product Manager', value: 'Product Manager'},
-            {label: 'IT Executive(CIO, CTO, VP Engineering)', value: 'IT Executive'},
-            {label: 'Business Executive(CEO, COO, CMO)', value: 'Business Executive'}
-        ]} />
-        <Select searchable label="Country" size='sm' mt={'xs'} data={countries} />
-        <Checkbox label="I accept the privacy policy and terms of service." mt="xl" size="sm" checked={privacyCheck} onChange={() => {setPrivacyCheck(!privacyCheck)}} />
-        <Button disabled={!privacyCheck} fullWidth mt="xl" size="md">
-          Sign Up
-        </Button>
-
-        <Text align="center" mt="md">
-          Already have an account?{' '}<a href='/auth/login' style={{textDecoration: 'none', color: '#1864AB'}} >Sign In now</a>
-        </Text>
-      </Paper>
-    </MediaQuery>
-    </>
+    </SimpleGrid>
+    
   );
 }

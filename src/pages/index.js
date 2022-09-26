@@ -2,7 +2,7 @@ import React, {useState, useEffect, createContext, useContext, useReducer} from 
 import { ThemeProvider } from 'theme-ui';
 import theme from 'theme';
 import SEO from 'components/seo';
-import Layout from 'components/layout';
+import { Layout } from 'components/landing/layout/layout';
 import Banner from 'sections/banner';
 import Header from 'components/header/header';
 import TopBar from 'components/topbar';
@@ -15,6 +15,7 @@ import { Statistics } from 'sections/statistics';
 import FAQ from 'sections/frquently-asked-questions';
 import Features from 'sections/UFeatures';
 import { HeroImageBackground } from 'sections/hero2';
+import { HomePage } from 'components/landing/homepage/homepage';
 
 export default function IndexPage() {
   useUser({redirectTo: '/v2/', redirectIfFound: true});
@@ -25,8 +26,7 @@ export default function IndexPage() {
           title="GeoPsy Collect"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
-        <HeroImageBackground />
-        <Footer />
+        <HomePage />
       </Layout>
     </ThemeProvider>
   );
