@@ -80,6 +80,7 @@ import LoaderCard from 'components/loaders/bolt';
 import Pin from 'components/pin';
 import dynamic from "next/dynamic";
 import { IoMdSync } from 'react-icons/io';
+import { Layout as PageLayout } from 'components/landing/layout/layout';
 
 const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false });
 
@@ -498,10 +499,10 @@ function Dashboard(){
         } else if(item.label.toLocaleLowerCase().includes(query2.toLocaleLowerCase())){
           return item;
         }
-      }).map((link) => (
+      }).map((link, index) => (
         <UnstyledButton mt={10} onClick={() => {setLinkActive(link.label)}} component="a" href={link.href} target={link.target? link.target : "_parent"} key={link.label} className={classes.mainLink}>
           <div className={classes.mainLinkInner}>
-          <link.icon size={20} className={classes.mainLinkIcon} />
+          <link.icon size={20} className={classes.mainLinkIcon}/>
             <span className={classes.mainLinkText}>{link.label}</span>
           </div>
           {link.notifications && (
@@ -1047,29 +1048,15 @@ function Dashboard(){
         </AppShell>
       );
     }
-
-    const THEME_KEY = 'geopsy-collect-color-scheme';
-
-    const [colorScheme, setColorScheme] = useLocalStorage({
-      key: THEME_KEY,
-      defaultValue: 'dark',
-      getInitialValueInEffect: true,
-    });
-
-    const toggleColorScheme = (value) => setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
     
     return (
-      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-      <MantineProvider theme={{ colorScheme }} withGlobalStyles withNormalizeCSS>
-        <ThemeProvider theme={theme}>
+        <PageLayout>
         <SEO
           title="Forms | Cloud: GeoPsy Collect Cloud"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
           <Layout />
-        </ThemeProvider>
-        </MantineProvider>
-        </ColorSchemeProvider>
+        </PageLayout>
     )
 }
 

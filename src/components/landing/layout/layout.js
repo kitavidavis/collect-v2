@@ -45,8 +45,8 @@ export function Layout({children, noHeader = false}) {
           withGlobalStyles
           withNormalizeCSS
         >
-            <Header />
-            <main style={{ paddingTop: HEADER_HEIGHT }}>{children}</main>
+            {router.pathname === "/" || router.pathname === "/auth/login" || router.pathname === "/auth/register" ? <Header /> : null}
+            <main style={{ paddingTop: router.pathname === "/" || router.pathname === "/auth/login" || router.pathname === "/auth/register" ? HEADER_HEIGHT : 0 }}>{children}</main>
            {router.pathname === "/" ?  <Footer /> : null}
         </MantineProvider>
       </ColorSchemeProvider>

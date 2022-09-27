@@ -15,7 +15,8 @@ import {
   Divider,
   Notification,
   Container,
-  SimpleGrid
+  SimpleGrid,
+  useMantineColorScheme
 } from '@mantine/core';
 import { useViewportSize, useScrollLock, useWindowScroll } from '@mantine/hooks';
 import { GoogleButton, TwitterButton } from './SocialButtons';
@@ -89,11 +90,10 @@ const useStyles = createStyles((theme) => ({
 
 export function Login() {
   useUser({redirectTo: '/v2/', redirectIfFound: true});
-
-  const { classes } = useStyles();
+  const theme = useMantineColorScheme();
   const [login, setLogin] = useState(false);
-  const [email, setEmail] = useState('demo@gmail.com');
-  const [password, setPassword] = useState('12345678');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showpass, setShowPass] = useState(false);
   const [checked, setChecked] = useState(true);
   const [online, setOnline] = useState(true);
@@ -267,7 +267,7 @@ export function Login() {
         },
       })}  span={8}>
 
-        <Title order={2} pt={100} ml={50} className={classes.bannerTitle} style={{color: 'white'}}>Collect Quality Data Easily<br /> With GeoPsy Collect</Title>
+        <Title order={2} pt={100} ml={50} style={{color: 'white'}}>Collect Quality Data Easily<br /> With GeoPsy Collect</Title>
         <Text mt={30} ml={50} size='lg' color='white' >Build rich location-linked forms and collect <br />quality data from extreme environments <br /> without using internet.</Text>
     
         <Text mt={30} ml={50} size="lg" > <a style={{color: '#37B24D'}} target="_blank"  href='https://geopsy-collect.gitbook.io/home/'>Explore Tutorials <BsArrowRight style={{marginTop: 10,}} /></a> </Text>
