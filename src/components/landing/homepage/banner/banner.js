@@ -63,7 +63,7 @@ export function Banner() {
               href='https://geopsy-collect.gitbook.io/home/'
               target="_blank"
             >
-              Documentation
+              Documentation & Tutorials
             </Button>
             <Button
               className={cx(classes.control, classes.controlSecondary)}

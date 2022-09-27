@@ -81,6 +81,7 @@ import Pin from 'components/pin';
 import dynamic from "next/dynamic";
 import { IoMdSync } from 'react-icons/io';
 import { Layout as PageLayout } from 'components/landing/layout/layout';
+import { UserInfo } from 'components/userInfo';
 
 const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false });
 
@@ -349,6 +350,8 @@ function Dashboard(){
     const [firstname, setFirstname] = useState('');
     const [lastname, setLastName] = useState('');
     const [email, setEmail] = useState('');
+    const [utitle, setUtitle] = useState("");
+    const [phone, setPhone] = useState("");
     const [active, setActive] = useState('aggregate');
     const [cluster, setCluster] = useState('');
     const [clusterid, setClusterID] = useState('');
@@ -384,10 +387,9 @@ function Dashboard(){
 
     const navlinks = [
       { icon: FileDatabase, label: 'Forms', href: '/v2/', notifications: userforms.length },
-      { icon: LayoutDashboard, label: 'Dashboards and Charts', href: '#'},
-      { icon: Crosshair, label: 'Survey Automation', href: '#' },
-      { icon: Drone, label: 'UAV Data', href: '#' },
-      { icon: BrandCodesandbox, label: 'API keys', href: '#'},
+      { icon: LayoutDashboard, label: 'Data Visualization', href: '#'},
+      { icon: Crosshair, label: 'Survey Computations', href: '#' },
+      { icon: BrandCodesandbox, label: 'API Integration', href: '#'},
       { icon: Tools, label: "Configure", href: "#" },
       { icon: Settings, label: 'Settings', href: '#' },
       { icon: Books, label: 'Documentation', href: 'https://geopsy-collect.gitbook.io/home/', target: "_blank" },
@@ -417,6 +419,8 @@ function Dashboard(){
               setFirstname(user2.user.firstname);
               setLastName(user2.user.lastname)
               setEmail(user2.user.username)
+              setUtitle(user2.user.job);
+              setPhone(user2.user.phone);
             }
             setUserForms(data.forms.reverse());
             setDone(true);
@@ -686,6 +690,7 @@ function Dashboard(){
         });
         setActiveId(id);
       }
+
      
       return (
         <AppShell
@@ -699,23 +704,10 @@ function Dashboard(){
           fixed
           navbar={
               <MediaQuery smallerThan="md" styles={{display: 'none'}}>
-              <Navbar style={{left: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
+              <Navbar sx={(theme) => ({left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"})} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
         <Navbar.Section className={classes.section} >
-        <UnstyledButton style={{backgroundColor: 'transparent'}} className={classes.user}>
-      <Group  position='apart' >
-        <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
 
-        <div style={{ flex: 1 }}>
-        <Text className={classes.mainLinkText} align='center' mb={10} weight={500}>
-            {email}
-          </Text>
-          <Center>
-          <Badge  color='yellow' size='xs' style={{textTransform: 'lowercase'}} >Beta release</Badge>
-          </Center>
-        </div>
-
-      </Group>
-    </UnstyledButton>
+        <UserInfo avatar= "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" name={firstname + " " + lastname} title={utitle} phone={phone} email={email} />
       </Navbar.Section>
         <TextInput
         placeholder="Search"
@@ -727,7 +719,7 @@ function Dashboard(){
         styles={{input: {backgroundColor: 'white', color: 'black'}}}
         mb="sm"
       />
-        <Navbar.Section className={classes.section}>
+        <Navbar.Section grow component={ScrollArea} className={classes.section}>
         <div className={classes.mainLinks}>{mainLinks}</div>
       </Navbar.Section>
             </Navbar>
@@ -749,8 +741,8 @@ function Dashboard(){
                 </MediaQuery>
                 </Group>
                 <Group>
-                <Group ml={50} spacing="lg" className={classes.links}>
-                  <Indicator color="yellow" label={3} overflowCount={10} inline size={22}>
+                <Group ml={50} spacing="lg">
+                  <Indicator color="yellow" label={3} overflowcount={10} inline size={22}>
                     <Bell color='white' />
                   </Indicator>
                   <ActionIcon style={{backgroundColor: 'transparent'}} onClick={() => {toggleColorScheme()}} >
@@ -763,31 +755,9 @@ function Dashboard(){
           }
         >
                 <Drawer onClose={() => {setOpened(false)}} opened={opened}>
-                <Navbar style={{left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"}} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
+                <Navbar height={height} sx={(theme) => ({left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"})} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
         <Navbar.Section className={classes.section} >
-        <UnstyledButton style={{backgroundColor: 'transparent'}} className={classes.user}>
-      <Group  position='apart' >
-          <Group>
-          <Avatar src={"https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} radius="xl" />
-
-        <div style={{ flex: 1 }}>
-        <Text className={classes.mainLinkText} align='center' mb={10} weight={500}>
-            {email}
-          </Text>
-          <Center>
-          <Badge  color='yellow' size='xs' style={{textTransform: 'lowercase'}} >Beta release</Badge>
-          </Center>
-        </div>
-        </Group>
-
-        <Group position='right'>
-          <ActionIcon onClick={() => {setOpened(false)}} >
-            <X />
-          </ActionIcon>
-        </Group>
-
-      </Group>
-    </UnstyledButton>
+        <UserInfo avatar= "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" name={firstname + " " + lastname} title={utitle} phone={phone} email={email} />
       </Navbar.Section>
         <TextInput
         placeholder="Search"
@@ -799,7 +769,7 @@ function Dashboard(){
         styles={{input: {backgroundColor: 'white', color: 'black'}}}
         mb="sm"
       />
-        <Navbar.Section className={classes.section}>
+        <Navbar.Section grow component={ScrollArea} className={classes.section}>
         <div className={classes.mainLinks}>{mainLinks}</div>
       </Navbar.Section>
             </Navbar>

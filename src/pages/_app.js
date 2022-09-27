@@ -6,8 +6,11 @@ import { initGA, logPageView } from 'analytics';
 import 'assets/css/react-slick.css';
 import 'assets/css/page.css';
 import Head from 'next/head';
-import { MantineProvider } from '@mantine/core';
-import { useLocalStorage } from '@mantine/hooks';
+import {
+  MantineProvider,
+  ColorSchemeProvider,
+} from '@mantine/core';
+import { useLocalStorage, useHotkeys } from '@mantine/hooks';
 
 const THEME_KEY = 'geopsy-collect-color-scheme';
 
@@ -19,6 +22,14 @@ export default function CustomApp(props) {
     defaultValue: 'light',
     getInitialValueInEffect: true,
   });
+
+  const toggleColorScheme = (value) =>
+  setColorScheme(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+
+
+  useHotkeys([
+    ['mod+J', () => toggleColorScheme()],
+  ]);
 
    useEffect(() => {
      initGA();
@@ -33,16 +44,16 @@ export default function CustomApp(props) {
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       </Head>
 
+      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
       <MantineProvider
-        withGlobalStyles
-        withNormalizeCSS
-        theme={{
-          /** Put your mantine theme override here */
-          colorScheme: colorScheme,
-        }}
-      >
+          theme={{ colorScheme, primaryColor: "blue", primaryShade: 9 }}
+          withGlobalStyles
+          withNormalizeCSS
+        >
+
         <Component {...pageProps} />
       </MantineProvider>
+      </ColorSchemeProvider>
     </>
   );
 }

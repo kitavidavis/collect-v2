@@ -18,7 +18,6 @@ import { HeroImageBackground } from 'sections/hero2';
 import { HomePage } from 'components/landing/homepage/homepage';
 
 export default function IndexPage() {
-  useUser({redirectTo: '/v2/', redirectIfFound: true});
   return (
       <ThemeProvider theme={theme}>
       <Layout>
