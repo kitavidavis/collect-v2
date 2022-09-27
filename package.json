@@ -74,6 +74,7 @@
     "react-router-dom": "^6.3.0",
     "react-scroll": "^1.8.1",
     "react-slick": "^0.27.12",
+    "react-spinners": "^0.13.4",
     "react-stickynode": "^3.0.3",
     "react-to-pdf": "^0.0.14",
     "react-tsparticles": "^2.2.0",

@@ -82,6 +82,7 @@ import dynamic from "next/dynamic";
 import { IoMdSync } from 'react-icons/io';
 import { Layout as PageLayout } from 'components/landing/layout/layout';
 import { UserInfo } from 'components/userInfo';
+import AppLayout from 'components/AppLayout';
 
 const DynamicReactJson = dynamic(import('react-json-view'), { ssr: false });
 
@@ -387,7 +388,7 @@ function Dashboard(){
 
     const navlinks = [
       { icon: FileDatabase, label: 'Forms', href: '/v2/', notifications: userforms.length },
-      { icon: LayoutDashboard, label: 'Data Visualization', href: '#'},
+      { icon: LayoutDashboard, label: 'Dashboards', href: '/v2/app/create-dashboard'},
       { icon: Crosshair, label: 'Survey Computations', href: '#' },
       { icon: BrandCodesandbox, label: 'API Integration', href: '#'},
       { icon: Tools, label: "Configure", href: "#" },
@@ -432,10 +433,6 @@ function Dashboard(){
 
         fetchdata();
     }, [user2]);
-
-    React.useEffect(()=> {
-      setHash("app/instanceid?"+randomId().split("").splice(8).join(""))
-    }, [])
 
     React.useEffect(() => {
       const fetchdata = async () => {
@@ -693,89 +690,8 @@ function Dashboard(){
 
      
       return (
-        <AppShell
-          styles={{
-            main: {
-              background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-            },
-          }}
-          navbarOffsetBreakpoint="sm"
-          asideOffsetBreakpoint="sm"
-          fixed
-          navbar={
-              <MediaQuery smallerThan="md" styles={{display: 'none'}}>
-              <Navbar sx={(theme) => ({left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"})} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
-        <Navbar.Section className={classes.section} >
-
-        <UserInfo avatar= "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" name={firstname + " " + lastname} title={utitle} phone={phone} email={email} />
-      </Navbar.Section>
-        <TextInput
-        placeholder="Search"
-        size="xs"
-        value={query2}
-        onChange={(e) => {setQuery2(e.currentTarget.value)}}
-        icon={<Search size={12} />}
-        rightSectionWidth={70}
-        styles={{input: {backgroundColor: 'white', color: 'black'}}}
-        mb="sm"
-      />
-        <Navbar.Section grow component={ScrollArea} className={classes.section}>
-        <div className={classes.mainLinks}>{mainLinks}</div>
-      </Navbar.Section>
-            </Navbar>
-              </MediaQuery>
-          }
-
-          header={
-            <Header className={classes.header} style={{ backgroundColor: "#002244"}} height={60} p="md">
-              <div className={classes.inner}>
-              <Group>
-                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                  <Burger
-                    opened={opened}
-                    onClick={() => setOpened((o) => !o)}
-                    size="sm"
-                    color={theme.colors.gray[6]}
-                    mr="xl"
-                  />
-                </MediaQuery>
-                </Group>
-                <Group>
-                <Group ml={50} spacing="lg">
-                  <Indicator color="yellow" label={3} overflowcount={10} inline size={22}>
-                    <Bell color='white' />
-                  </Indicator>
-                  <ActionIcon style={{backgroundColor: 'transparent'}} onClick={() => {toggleColorScheme()}} >
-                    {theme.colorScheme === "dark" ? <Sun color='white' /> : <Moon color='white' />}
-                  </ActionIcon>
-              </Group>
-                </Group>
-              </div>
-            </Header>
-          }
-        >
-                <Drawer onClose={() => {setOpened(false)}} opened={opened}>
-                <Navbar height={height} sx={(theme) => ({left: 0, bottom: 0, top: 0,height: height, backgroundColor: "#002244"})} p="md" hiddenBreakpoint="sm" hidden={!opened} className={classes.navbar} width={{ sm: 250}}>
-        <Navbar.Section className={classes.section} >
-        <UserInfo avatar= "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" name={firstname + " " + lastname} title={utitle} phone={phone} email={email} />
-      </Navbar.Section>
-        <TextInput
-        placeholder="Search"
-        size="xs"
-        value={query2}
-        onChange={(e) => {setQuery2(e.currentTarget.value)}}
-        icon={<Search size={12} />}
-        rightSectionWidth={70}
-        styles={{input: {backgroundColor: 'white', color: 'black'}}}
-        mb="sm"
-      />
-        <Navbar.Section grow component={ScrollArea} className={classes.section}>
-        <div className={classes.mainLinks}>{mainLinks}</div>
-      </Navbar.Section>
-            </Navbar>
-                </Drawer>
-
-            {active === 'aggregate' ? (
+        <>
+                    {active === 'aggregate' ? (
               cluster === '' ? (
                 <>
 
@@ -1014,19 +930,18 @@ function Dashboard(){
     </>
   )
             ) : null }
-          
-        </AppShell>
+        </>
       );
     }
     
     return (
-        <PageLayout>
+        <AppLayout>
         <SEO
           title="Forms | Cloud: GeoPsy Collect Cloud"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"
         />
           <Layout />
-        </PageLayout>
+        </AppLayout>
     )
 }
 
