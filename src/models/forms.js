@@ -74,7 +74,6 @@ var FormSchema = mongoose.Schema({
 var Form = module.exports = mongoose.models.forms || mongoose.model('forms', FormSchema );
 
 module.exports.createForm = function(newForm, cb) {
-    console.log(newForm);
     newForm.save(cb);
 };
 

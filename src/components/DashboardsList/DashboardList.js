@@ -3,21 +3,21 @@ import { DashboardCard } from '../DashboardCard/DashboardCard';
 import useStyles from './DashboardList.style';
 
 
-export function DashboardList({ groups, componentsCountByCategory }) {
+export function DashboardList({ groups }) {
   const { classes } = useStyles();
 
   const items = groups.map((group) => {
     const cards = group.categories.map((category) => (
       <DashboardCard
-        key={category.slug}
+        key={category._id}
         category={category}
-        count={componentsCountByCategory}
       />
     ));
 
 
     return (
-      <div key={group.name} className={classes.group}>
+      group.categories.length > 0 ? (
+        <div key={group.name} className={classes.group}>
         <div className={classes.header}>
           <Title className={classes.title} order={2}>
             {group.name}
@@ -40,6 +40,7 @@ export function DashboardList({ groups, componentsCountByCategory }) {
           {cards}
         </SimpleGrid>
       </div>
+      ) : null
     );
   });
 

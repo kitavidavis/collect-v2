@@ -4,9 +4,9 @@ import { ClipLoader, BarLoader, BeatLoader, BounceLoader, CircleLoader, Climbing
 HashLoader, MoonLoader, PacmanLoader, PropagateLoader, PuffLoader, PulseLoader, RingLoader, RiseLoader, RotateLoader, ScaleLoader, SyncLoader } from "react-spinners";
 import { useUser } from "lib/hooks";
 import { useViewportSize, useHash, randomId, useLocalStorage } from "@mantine/hooks";
-import { ActionIcon, Anchor, Button, Card, Center, Container, Group, Input, InputWrapper, Loader, LoadingOverlay, Navbar, Paper, Select, Switch, Text, Textarea, TextInput, Title } from "@mantine/core";
+import { ActionIcon, Anchor, Box, Button, Card, Center, Container, Group, Input, InputWrapper, Loader, LoadingOverlay, Navbar, Paper, Select, Switch, Text, Textarea, TextInput, Title, Tooltip } from "@mantine/core";
 import { HomePage } from "components/HomePage";
-
+import { useRouter } from "next/router";
 import { useState } from 'react';
 import {
   AppShell,
@@ -17,8 +17,24 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { GoBackHeader } from "components/DashboardHeader/DashboardHeader";
-import { AlertCircle, ArrowLeft, ChevronLeft, ChevronRight, LayoutDashboard, Plus, Refresh, Trash, X } from "tabler-icons-react";
+import { AlertCircle, ArrowLeft, ChevronLeft, ChevronRight, LayoutDashboard, Plus, Refresh, Tool, Trash, X } from "tabler-icons-react";
 import AppLayout from "components/AppLayout";
+import { SpeakerLoudIcon } from "@modulz/radix-icons";
+import { IconArrowLeft } from "@tabler/icons";
+import { showNotification } from "@mantine/notifications";
+
+function makeDashboardId(){
+  let length = 30;
+  let result = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz<';
+  let charactersLength = characters.length;
+
+  for(let i=0; i<length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength))
+  }
+
+  return result;
+}
 
 function DashboardCanvas(){
   useUser({ redirectTo: "/auth/login"});
@@ -44,7 +60,24 @@ function DashboardCanvas(){
   const [statistics, setStatistics] = useState(true);
   const [publc, setPublic] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [main, setMain] = useState(true);
   const [response, setResponse] = useState(null);
+  const [ready, setReady] = useState(false);
+  const [dashboards, setDashboards] = useState([
+    {
+      name: "Public",
+      categories: [
+
+      ]
+    },
+    {
+      name: "Private",
+      categories: [
+
+      ]
+    }
+  ]);
+  const [dashboards2, setDashboards2] = useState([]);
   const [footerlinks, setFooterLinks] = useState([
     {label: "", href: ""}
   ])
@@ -54,7 +87,7 @@ function DashboardCanvas(){
     {label: "", href: ""}
   ])
   const theme = useMantineTheme();
-
+  const router = useRouter();
   const [dashboarddata, setDashboardData] = useLocalStorage({
     key: 'create-dashboard-data',
     defaultValue: null,
@@ -62,7 +95,9 @@ function DashboardCanvas(){
 
   const createDashboard = async () => {
     setCreating(true);
-    const data = {
+
+    const body = {
+      username: user.user.username,
       form_id: form_id,
       title: title,
       description: description,
@@ -74,30 +109,110 @@ function DashboardCanvas(){
       footerLinks: footerlinks,
       charts: charts,
       statistics: statistics,
-      publc: publc
+      viewPublic: publc,
+      dashboardId: makeDashboardId()
     };
 
-    setDashboardData(data);
+    setDashboardData(body);
 
-    const body = {
-      form_id: form_id
-    }
-
-    await fetch('/api/getresponse', {
+    await fetch('/api/dashboards/createdashboard', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(body)
     }).then( async function(res){
       if(res.status === 200){
-        const data = await res.json();
-        setResponse(data.response);
+        showNotification({
+          title: "Success",
+          message: "Dashboard created ✔",
+          color: "teal"
+        });
+      } else {
+        showNotification({
+          title: "oops!!",
+          message: "Unknown error occured!",
+          color: "red"
+        });
       } 
     }).catch(function(error) {
-      console.log(error);
+      showNotification({
+        title: "oops!!",
+        message: error.message,
+        color: "red"
+      });
     });
 
-
+    setCreating(false);
+    setMain(true);
   }
+
+  React.useEffect(() => {
+    if(main){
+      const fetchDashboards = async () => {
+        if(user === null){
+          return false;
+        }
+
+        setReady(true);
+
+        const username = user? user.user.username : "";
+
+        if(username === ""){
+          return false;
+        }
+  
+        const body = {
+          username: username
+        };
+        
+        await fetch('/api/dashboards/getdashboards', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        }).then( async function(res){
+          if(res.status === 200){
+            const data = await res.json();
+            setDashboards2(data.dashboards);
+            let publicArr = [];
+            let privateArr = [];
+            for(let i=0; i<data.dashboards.length; i++){
+              let item = data.dashboards[i];
+              if(item.viewPublic){
+                publicArr.push(item);
+              } else {
+                privateArr.push(item);
+              }
+            }
+
+            dashboards[0].categories = publicArr;
+            dashboards[1].categories = privateArr;
+
+            setDashboards([...dashboards]);
+
+            setReady(false);
+          } else {
+            showNotification({
+              title: "oops!!",
+              message: "Unknown error occured!",
+              color: "red"
+            });
+
+            setReady(false);
+          } 
+        }).catch(function(error) {
+          showNotification({
+            title: "oops!!",
+            message: error.message,
+            color: "red"
+          });
+
+          setReady(false);
+        });
+      }
+
+      fetchDashboards();
+    }
+  }, [main, user]);
+
 
   const addURL = () => {
     setHeaderLinks(prevArr => ([...prevArr, {label: "", href: ""}]))
@@ -283,13 +398,65 @@ function DashboardCanvas(){
     )
   }
 
+  React.useEffect(() => {
+    if(main){
+      router.push("#/user-dashboards")
+    } else {
+      router.push("#/create-dashboards")
+    }
+  }, [main])
+
   return (
+    main ? (
       <>
-      <LoadingOverlay visible={creating} overlayBlur={2} />
+      <LoadingOverlay overlayColor="#00000" overlayOpacity={0.1} visible={ready} style={{height: height, width: width}} />
+        <Group position="left">
+        <Title style={{fontWeight: 300}} >Dashboards</Title>
+        {dashboards2.length > 0 ? (
+              <Tooltip mt={15} label="Add new dashboard">
+              <ActionIcon radius={28} onClick={() => {setMain(false)}} style={{backgroundColor: 'teal'}} >
+                <Plus color="white" />
+              </ActionIcon>
+              </Tooltip>
+        ) : null}
+        </Group>
+
+      {dashboards2.length === 0 ? (
+              <Paper mb={20} p="lg" shadow="sm" withBorder>
+              <Group mb={10} position="apart">
+                <Group position="left">
+                  <SpeakerLoudIcon color="teal" />
+                  <Text>Resources</Text>
+                </Group>
+              </Group>
+      
+              <Text>Dashboards are intuitive ways of visualizing data. They help people to discover patterns and insights which in turn aide in proper decision making.
+                <Anchor>Learn more about Collect dashboards.</Anchor>
+              </Text>
+            </Paper>
+      ) : null}
+
+      {dashboards2.length === 0 ? (
+        <Center mt={50} >
+          <Tooltip label="Create new dashboard" >
+                <Button onClick={() => {setMain(false)}} color="teal" leftIcon={<Plus />}>New Dashboard</Button>
+          </Tooltip>
+        </Center>
+      ) : <HomePage data={dashboards} />}
+
+      </>
+      ) : (
+      <>
         {step == 1 ? (
           <Container size={width - 300}>
           <Title style={{fontWeight: 300}} >Data Source</Title>
           <Paper mb={30} p="lg" mt={20}>
+          <Anchor mb={20} href="#" onClick={() => {setMain(true)}} >
+            <Center inline>
+              <IconArrowLeft size={14} />
+              <Box ml={5}>Back to Dashboards</Box>
+            </Center>
+          </Anchor>
             <InputWrapper required label="Select Form" description="Select data source for the dashboard">
               <Select value={form_id} data={newForms} onChange={(val) => {setFormID(val)}} />
             </InputWrapper>
@@ -463,6 +630,7 @@ function DashboardCanvas(){
             </>
         )}
       </>
+    )
   )
 }
 

@@ -30,7 +30,7 @@ import {
   ColorSchemeProvider,
 } from '@mantine/core';
 import { useLocalStorage, useHotkeys } from '@mantine/hooks';
-
+import { Layout } from './landing/layout/layout';
 export default function AppLayout( { children } ){
     useUser({ redirectTo: '/auth/login' });
     const user2 = useUser();
@@ -132,18 +132,8 @@ export default function AppLayout( { children } ){
         ['mod+J', () => toggleColorScheme()],
       ]);
       return (
-        <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-        <MantineProvider
-            theme={{ colorScheme, primaryColor: "blue", primaryShade: 9 }}
-            withGlobalStyles
-            withNormalizeCSS
-          >
+        <Layout>
         <AppShell
-          styles={{
-            main: {
-              background: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-            },
-          }}
           navbarOffsetBreakpoint="sm"
           asideOffsetBreakpoint="sm"
           fixed
@@ -223,7 +213,6 @@ export default function AppLayout( { children } ){
             {children}
           
         </AppShell>
-        </MantineProvider>
-      </ColorSchemeProvider>
+          </Layout>
       );
     }

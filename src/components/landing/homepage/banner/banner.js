@@ -13,6 +13,7 @@ import {
 import { useWindowScroll } from '@mantine/hooks';
 import data from './data';
 import useStyles from './banner.style';
+import Link from 'next/link';
 
 export function Banner() {
   const { classes, cx } = useStyles();
@@ -68,16 +69,18 @@ export function Banner() {
             <Button
               className={cx(classes.control, classes.controlSecondary)}
               leftIcon={<IconUserCheck size={16} />}
-              component="a"
+              component={Link}
               href="/auth/login"
+              passHref
             >
               Login
             </Button>
             <Button
               className={cx(classes.control, classes.controlSecondary)}
               rightIcon={<IconExternalLink size={16} stroke={1.5} />}
-              component="a"
+              component={Link}
               href="/auth/register"
+              passHref
             >
               Get started
             </Button>
