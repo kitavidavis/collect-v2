@@ -9,7 +9,7 @@ import {
 } from '@mantine/core';
 import { useLocalStorage, useHotkeys } from '@mantine/hooks';
 
-export function Layout({children, noHeader = false}) {
+export function Layout({children, header = false}) {
   const router = useRouter();
   const THEME_KEY = 'geopsy-collect-color-scheme';
 
@@ -29,13 +29,13 @@ export function Layout({children, noHeader = false}) {
   return (
     <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
     <MantineProvider
-        theme={{ colorScheme, primaryColor: "blue", primaryShade: 9 }}
         withGlobalStyles
         withNormalizeCSS
+        theme={{ colorScheme, primaryColor: "blue", primaryShade: 9 }}
       >
-      {router.pathname === "/" || router.pathname === "/auth/login" || router.pathname === "/auth/register" ? <Header /> : null}
-      <main style={{ paddingTop: router.pathname === "/" || router.pathname === "/auth/login" || router.pathname === "/auth/register" ? HEADER_HEIGHT : 0 }}>{children}</main>
-      {router.pathname === "/" ?  <Footer /> : null}
+      {header ? <Header /> : null}
+      <main style={{ paddingTop: header ? HEADER_HEIGHT : 0 }}>{children}</main>
+      {header ?  <Footer /> : null}
       </MantineProvider>
       </ColorSchemeProvider>
   );

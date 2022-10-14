@@ -20,7 +20,7 @@ import { HomePage } from 'components/landing/homepage/homepage';
 export default function IndexPage() {
   return (
       <ThemeProvider theme={theme}>
-      <Layout>
+      <Layout header >
         <SEO
           title="GeoPsy Collect"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"

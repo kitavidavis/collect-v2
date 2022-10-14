@@ -13,7 +13,7 @@ export default function IndexPage(){
   useUser({redirectTo: '/v2/', redirectIfFound: true});
     return (
         <ThemeProvider theme={theme}>
-        <Layout>
+        <Layout header >
         <SEO
           title="GeoPsy Collect | Register"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"

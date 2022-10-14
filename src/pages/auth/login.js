@@ -16,7 +16,7 @@ export default function IndexPage(){
   const { height, width } = useViewportSize();
     return (
         <ThemeProvider theme={theme}>
-          <Layout >
+          <Layout header >
         <SEO
           title="GeoPsy Collect | Login"
           description="An open source geospatial data collection toolkit suited for research, science, ecosystem conservation and much more"

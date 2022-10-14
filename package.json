@@ -10,6 +10,8 @@
     "postbuild": "next-sitemap"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/server": "^11.10.0",
     "@hapi/iron": "6.0.0",
     "@mantine/core": "^4.2.9",
     "@mantine/dates": "^4.2.11",

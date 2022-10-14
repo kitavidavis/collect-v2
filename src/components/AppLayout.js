@@ -132,7 +132,12 @@ export default function AppLayout( { children } ){
         ['mod+J', () => toggleColorScheme()],
       ]);
       return (
-        <Layout>
+        <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+        <MantineProvider
+            withGlobalStyles
+            withNormalizeCSS
+            theme={{ colorScheme, primaryColor: "blue", primaryShade: 9 }}
+          >
         <AppShell
           navbarOffsetBreakpoint="sm"
           asideOffsetBreakpoint="sm"
@@ -213,6 +218,7 @@ export default function AppLayout( { children } ){
             {children}
           
         </AppShell>
-          </Layout>
+        </MantineProvider>
+      </ColorSchemeProvider>
       );
     }
